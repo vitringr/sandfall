@@ -19,7 +19,7 @@ export class Sandfall {
   /* */ private readonly width = 100;
   /**/ private readonly height = 100;
 
-  private readonly percent = 30;
+  private readonly percent = 0;
   private readonly FPS: number = 30; // Temporary; -1 for full
 
   private readonly totalCells = this.width * this.height;
@@ -30,7 +30,7 @@ export class Sandfall {
   };
   private initialized = false;
 
-  constructor(private readonly canvas: HTMLCanvasElement) {}
+  constructor(private readonly canvas: HTMLCanvasElement) { }
 
   init() {
     if (this.initialized) throw "Already initialized";
