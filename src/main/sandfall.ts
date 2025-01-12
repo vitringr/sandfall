@@ -5,12 +5,25 @@ import updateFragment from "./update-fragment.glsl";
 import renderVertex from "./render-vertex.glsl";
 import renderFragment from "./render-fragment.glsl";
 
+enum Elements {
+  EMPTY = 0,
+  BLOCK = 1,
+  SAND = 2,
+  WATER = 3,
+  FIRE = 4,
+  STEAM = 5,
+}
+
 enum InputKeys {
   "NONE" = -1,
-  "Q" = 0,
-  "W" = 1,
-  "E" = 2,
-  "R" = 3,
+  "Q" = Elements.BLOCK,
+  "W" = Elements.WATER,
+  "E" = Elements.EMPTY,
+  "R" = -1,
+  "A" = -1,
+  "S" = Elements.SAND,
+  "D" = Elements.STEAM,
+  "F" = Elements.FIRE,
 }
 
 export class Sandfall {
@@ -79,6 +92,18 @@ export class Sandfall {
         case "r":
           this.input.key = InputKeys.R;
           break;
+        case "a":
+          this.input.key = InputKeys.A;
+          break;
+        case "s":
+          this.input.key = InputKeys.S;
+          break;
+        case "d":
+          this.input.key = InputKeys.D;
+          break;
+        case "f":
+          this.input.key = InputKeys.F;
+          break;
         case "x":
           window.location.reload();
           break;
@@ -93,6 +118,10 @@ export class Sandfall {
         case "w":
         case "e":
         case "r":
+        case "a":
+        case "s":
+        case "d":
+        case "f":
           this.input.key = InputKeys.NONE;
           break;
         default:

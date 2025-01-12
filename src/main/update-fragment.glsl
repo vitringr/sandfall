@@ -27,10 +27,7 @@ const int BLOCK = 1;
 const int SAND  = 2;
 const int WATER = 3;
 const int FIRE  = 4;
-
-const int EMPTY_BLOCK[16] = int[16](0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15);
-const int EMPTY_SAND[16]  = int[16](0,  1,  2,  3,  1,  3,  3,  7,  2,  3,  3, 11,  3,  7, 11, 15);
-const int EMPTY_WATER[16] = int[16](0,  2,  1,  3,  1,  3,  3, 11,  2,  3,  3,  7,  3,  7, 11, 15);
+const int STEAM = 5;
 
 // Block Pattern Transforms.
 const int INTERACTIONS[10 * 16] = int[10 * 16](
@@ -161,11 +158,6 @@ void main() {
 
     int oldPattern = encodePattern(bitRange);
     int newPattern = INTERACTIONS[getInteractionsIndex(pair) + oldPattern];
-
-    // if(getInteractionsIndex(pair) == 112) {
-    //   outData = ivec4(-1, inputData.gba);
-    //   return;
-    // }
 
     ivec4 newPatternBits = decodePattern(newPattern);
     ivec4 newBlockElements = mapFromBitRange(newPatternBits, pair);
