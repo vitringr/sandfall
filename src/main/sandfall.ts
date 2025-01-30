@@ -1,6 +1,7 @@
-import { Random, WebGL } from "../utilities/utilities";
-import { Input } from "./input";
+import { WebGL } from "../utilities/utilities";
+import { Generator } from "./generator";
 import { Config } from "./config";
+import { Input } from "./input";
 
 import updateVertex from "./update-vertex.glsl";
 import updateFragment from "./update-fragment.glsl";
@@ -36,22 +37,6 @@ export class Sandfall {
       update: WebGL.Setup.linkProgram(gl, updateVS, updateFS),
       render: WebGL.Setup.linkProgram(gl, renderVS, renderFS),
     };
-  }
-
-  private generateData() {
-    const state: number[] = [];
-
-    for (let y = 0; y < Config.halfHeight; y++) {
-      for (let x = 0; x < Config.halfWidth; x++) {
-        const r = Random.percent(Config.percent) ? Config.Elements.SAND : 0;
-        const g = Random.percent(Config.percent) ? Config.Elements.BLOCK : 0;
-        const b = Random.percent(Config.percent) ? Config.Elements.WATER : 0;
-        const a = Random.percent(Config.percent) ? Config.Elements.FIRE : 0;
-        state.push(r, g, b, a);
-      }
-    }
-
-    return state;
   }
 
   private setupUniformBlock(gl: WebGL2RenderingContext, programs: { update: WebGLProgram; render: WebGLProgram }) {
@@ -95,7 +80,7 @@ export class Sandfall {
     this.setupUniformBlock(gl, programs);
 
     const data = {
-      state: new Int8Array(this.generateData()),
+      state: new Int8Array(Generator.randomRGBA(Config.halfWidth, Config.halfHeight, Config.percent)),
       canvasVertices: new Float32Array(WebGL.Points.rectangle(0, 0, 1, 1)),
     };
 
