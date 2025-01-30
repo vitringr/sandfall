@@ -1,6 +1,6 @@
 import { Random, WebGL } from "../utilities/utilities";
 import { Input } from "./input";
-import { Elements } from "./config";
+import { Config } from "./config";
 
 import updateVertex from "./update-vertex.glsl";
 import updateFragment from "./update-fragment.glsl";
@@ -8,17 +8,6 @@ import renderVertex from "./render-vertex.glsl";
 import renderFragment from "./render-fragment.glsl";
 
 export class Sandfall {
-  private readonly width = 100;
-  private readonly height = 100;
-
-  private readonly totalCells = this.width * this.height;
-
-  private readonly halfWidth = this.width / 2;
-  private readonly halfHeight = this.height / 2;
-
-  private readonly percent = 5;
-  private readonly FPS: number = 30; // Temporary; -1 for full
-
   private initialized = false;
 
   private readonly input = new Input();
@@ -52,12 +41,12 @@ export class Sandfall {
   private generateData() {
     const state: number[] = [];
 
-    for (let y = 0; y < this.halfHeight; y++) {
-      for (let x = 0; x < this.halfWidth; x++) {
-        const r = Random.percent(this.percent) ? Elements.SAND : 0;
-        const g = Random.percent(this.percent) ? Elements.BLOCK : 0;
-        const b = Random.percent(this.percent) ? Elements.WATER : 0;
-        const a = Random.percent(this.percent) ? Elements.FIRE : 0;
+    for (let y = 0; y < Config.halfHeight; y++) {
+      for (let x = 0; x < Config.halfWidth; x++) {
+        const r = Random.percent(Config.percent) ? Config.Elements.SAND : 0;
+        const g = Random.percent(Config.percent) ? Config.Elements.BLOCK : 0;
+        const b = Random.percent(Config.percent) ? Config.Elements.WATER : 0;
+        const a = Random.percent(Config.percent) ? Config.Elements.FIRE : 0;
         state.push(r, g, b, a);
       }
     }
@@ -78,7 +67,7 @@ export class Sandfall {
     };
 
     const data = {
-      dimensions: new Float32Array([this.width, this.height, this.canvas.width, this.canvas.height]),
+      dimensions: new Float32Array([Config.width, Config.height, this.canvas.width, this.canvas.height]),
     };
 
     const dimensionsIndex = 0;
@@ -132,11 +121,11 @@ export class Sandfall {
     gl.vertexAttribPointer(locations.update.aCanvasVertices, 2, gl.FLOAT, false, 0, 0);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.input);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, this.halfWidth, this.halfHeight, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.halfWidth, Config.halfHeight, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.output);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, this.halfWidth, this.halfHeight, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.halfWidth, Config.halfHeight, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
     WebGL.Texture.applyClampAndNearest(gl);
 
     return { locations, vertexArrayObjects, textures, framebuffers };
@@ -155,7 +144,7 @@ export class Sandfall {
 
     const updateLoop = () => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.update);
-      gl.viewport(0, 0, this.halfWidth, this.halfHeight);
+      gl.viewport(0, 0, Config.halfWidth, Config.halfHeight);
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures.output, 0);
 
       gl.activeTexture(gl.TEXTURE0);
@@ -191,7 +180,7 @@ export class Sandfall {
 
       gl.uniform1i(locations.render.uOutputTextureIndex, 0);
 
-      gl.drawArrays(gl.POINTS, 0, this.totalCells);
+      gl.drawArrays(gl.POINTS, 0, Config.totalCells);
     };
 
     const mainLoop = () => {
@@ -205,11 +194,11 @@ export class Sandfall {
 
       renderLoop();
 
-      if (this.FPS === -1) requestAnimationFrame(mainLoop);
+      if (Config.FPS === -1) requestAnimationFrame(mainLoop);
     };
 
     mainLoop();
 
-    if (this.FPS !== -1) setInterval(mainLoop, 1000 / this.FPS);
+    if (Config.FPS !== -1) setInterval(mainLoop, 1000 / Config.FPS);
   }
 }
