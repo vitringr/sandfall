@@ -29,11 +29,6 @@ const int WATER = 3;
 const int FIRE  = 4;
 const int STEAM = 5;
 
-ivec4 getData(ivec2 cell) {
-  // Texel data.
-  return texelFetch(u_inputTextureIndex, cell, 0);
-}
-
 bool isAtPointer() {
   // If pointer is near these coordinates.
   return distance(u_pointerPosition, v_coordinates) < POINTER_AREA;
@@ -42,13 +37,12 @@ bool isAtPointer() {
 void main() {
   ivec2 cell = ivec2(gl_FragCoord.xy);
 
-  // Input Spawn
+  ivec4 inputData = texelFetch(u_inputTextureIndex, cell, 0);
+
   if(u_inputKey > -1 && isAtPointer()) {
     outData = ivec4(u_inputKey, 0, 0, 0);
     return;
   }
-
-  ivec4 inputData = getData(cell);
 
   outData = inputData;
 }
