@@ -1,30 +1,11 @@
-import { Random, Vector2, WebGL } from "../utilities/utilities";
+import { Random, WebGL } from "../utilities/utilities";
+import { Input } from "./input";
+import { Elements } from "./config";
 
 import updateVertex from "./update-vertex.glsl";
 import updateFragment from "./update-fragment.glsl";
 import renderVertex from "./render-vertex.glsl";
 import renderFragment from "./render-fragment.glsl";
-
-enum Elements {
-  EMPTY = 0,
-  BLOCK = 1,
-  SAND = 2,
-  WATER = 3,
-  FIRE = 4,
-  STEAM = 5,
-}
-
-enum InputKeys {
-  "NONE" = -1,
-  "Q" = Elements.BLOCK,
-  "W" = Elements.WATER,
-  "E" = Elements.EMPTY,
-  "R" = -1,
-  "A" = -1,
-  "S" = Elements.SAND,
-  "D" = Elements.STEAM,
-  "F" = Elements.FIRE,
-}
 
 export class Sandfall {
   private readonly width = 100;
@@ -35,16 +16,12 @@ export class Sandfall {
   private readonly halfWidth = this.width / 2;
   private readonly halfHeight = this.height / 2;
 
-  private readonly halfTotalCells = this.halfWidth * this.halfHeight;
-
   private readonly percent = 5;
   private readonly FPS: number = 30; // Temporary; -1 for full
 
-  private readonly input = {
-    pointer: { coordinates: Vector2.zero(), isDown: 0 },
-    key: InputKeys.NONE,
-  };
   private initialized = false;
+
+  private readonly input = new Input();
 
   constructor(private readonly canvas: HTMLCanvasElement) { }
 
@@ -55,85 +32,9 @@ export class Sandfall {
     const gl = this.canvas.getContext("webgl2");
     if (!gl) throw new Error("Failed to get WebGL2 context");
 
-    this.setupInput();
+    this.input.setup(this.canvas);
 
     this.main(gl);
-  }
-
-  private setupInput() {
-    const canvasBounds = this.canvas.getBoundingClientRect();
-
-    // Pointer events
-    this.canvas.addEventListener("pointermove", (ev: PointerEvent) => {
-      const x = ev.clientX - canvasBounds.left;
-      const y = ev.clientY - canvasBounds.top;
-      this.input.pointer.coordinates.set(x / this.canvas.width, (this.canvas.height - y) / this.canvas.height);
-    });
-
-    window.addEventListener("pointerdown", () => {
-      this.input.pointer.isDown = 1;
-    });
-    window.addEventListener("pointerup", () => {
-      this.input.pointer.isDown = 0;
-    });
-    window.addEventListener("blur", () => {
-      this.input.pointer.isDown = 0;
-    });
-
-    // Keyboard events
-    const handleKeyDown = (ev: KeyboardEvent) => {
-      switch (ev.key.toLowerCase()) {
-        case "q":
-          this.input.key = InputKeys.Q;
-          break;
-        case "w":
-          this.input.key = InputKeys.W;
-          break;
-        case "e":
-          this.input.key = InputKeys.E;
-          break;
-        case "r":
-          this.input.key = InputKeys.R;
-          break;
-        case "a":
-          this.input.key = InputKeys.A;
-          break;
-        case "s":
-          this.input.key = InputKeys.S;
-          break;
-        case "d":
-          this.input.key = InputKeys.D;
-          break;
-        case "f":
-          this.input.key = InputKeys.F;
-          break;
-        case "x":
-          window.location.reload();
-          break;
-        default:
-          break;
-      }
-    };
-
-    const handleKeyUp = (ev: KeyboardEvent) => {
-      switch (ev.key.toLowerCase()) {
-        case "q":
-        case "w":
-        case "e":
-        case "r":
-        case "a":
-        case "s":
-        case "d":
-        case "f":
-          this.input.key = InputKeys.NONE;
-          break;
-        default:
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
   }
 
   private setupPrograms(gl: WebGL2RenderingContext) {
@@ -263,14 +164,16 @@ export class Sandfall {
       gl.useProgram(programs.update);
       gl.bindVertexArray(vertexArrayObjects.update);
 
+      const inputState = this.input.get()
+
       gl.uniform1i(locations.update.uInputTextureIndex, 0);
-      gl.uniform1i(locations.update.uInputKey, this.input.key);
+      gl.uniform1i(locations.update.uInputKey, inputState.key);
       gl.uniform1i(locations.update.uPartition, partition ? 1 : 0);
-      gl.uniform1i(locations.update.uIsPointerDown, this.input.pointer.isDown);
+      gl.uniform1i(locations.update.uIsPointerDown, inputState.pointer.isDown);
       gl.uniform2f(
         locations.update.uPointerPosition,
-        this.input.pointer.coordinates.x,
-        this.input.pointer.coordinates.y,
+        inputState.pointer.coordinates.x,
+        inputState.pointer.coordinates.y,
       );
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);
