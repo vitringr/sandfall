@@ -1,5 +1,5 @@
 import { Vector2 } from "../utilities/vector2";
-import { Elements } from "./config";
+import { Config } from "./config";
 
 export class Input {
   private state: Input.InputData = {
@@ -83,8 +83,8 @@ export class Input {
     });
 
     // Keyboard events
-    window.addEventListener("keydown", this.handleKeyDown);
-    window.addEventListener("keyup", this.handleKeyUp);
+    window.addEventListener("keydown", () => this.handleKeyDown);
+    window.addEventListener("keyup", () => this.handleKeyUp);
   }
 
   get(): Readonly<Input.InputData> {
@@ -103,13 +103,13 @@ export namespace Input {
 
   export enum InputKeys {
     "NONE" = -1,
-    "Q" = Elements.BLOCK,
-    "W" = Elements.WATER,
-    "E" = Elements.EMPTY,
+    "Q" = Config.Elements.BLOCK,
+    "W" = Config.Elements.WATER,
+    "E" = Config.Elements.EMPTY,
     "R" = -1,
     "A" = -1,
-    "S" = Elements.SAND,
-    "D" = Elements.STEAM,
-    "F" = Elements.FIRE,
+    "S" = Config.Elements.SAND,
+    "D" = Config.Elements.STEAM,
+    "F" = Config.Elements.FIRE,
   }
 }
