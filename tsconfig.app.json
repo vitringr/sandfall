@@ -23,5 +23,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "public/assets"]
+  "include": ["src"]
+  //"include": ["src", "public/assets"]
 }
