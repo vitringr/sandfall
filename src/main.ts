@@ -46,7 +46,6 @@ export class Main {
     programs: { update: WebGLProgram; render: WebGLProgram },
   ) {
     const blockIndices = {
-      update: {},
       render: {
         dimensions: gl.getUniformBlockIndex(
           programs.render,
@@ -112,8 +111,6 @@ export class Main {
       },
     };
 
-    this.setupUniformBlock(gl, programs);
-
     const data = {
       state: new Int8Array(this.generator.generate()),
       canvasVertices: new Float32Array(WebGL.Points.rectangle(0, 0, 1, 1)),
@@ -125,8 +122,8 @@ export class Main {
     };
 
     const textures = {
-      input: gl.createTexture(),
-      output: gl.createTexture(),
+      first: gl.createTexture(),
+      second: gl.createTexture(),
     };
 
     const framebuffers = {
@@ -147,7 +144,7 @@ export class Main {
       0,
     );
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.input);
+    gl.bindTexture(gl.TEXTURE_2D, textures.first);
     gl.texImage2D(
       gl.TEXTURE_2D,
       0,
@@ -161,7 +158,7 @@ export class Main {
     );
     WebGL.Texture.applyClampAndNearest(gl);
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.output);
+    gl.bindTexture(gl.TEXTURE_2D, textures.second);
     gl.texImage2D(
       gl.TEXTURE_2D,
       0,
@@ -185,6 +182,8 @@ export class Main {
 
     const programs = this.setupPrograms(gl);
 
+    this.setupUniformBlock(gl, programs);
+
     const { locations, vertexArrayObjects, textures, framebuffers } =
       this.setupState(gl, programs);
 
@@ -197,12 +196,12 @@ export class Main {
         gl.FRAMEBUFFER,
         gl.COLOR_ATTACHMENT0,
         gl.TEXTURE_2D,
-        textures.output,
+        textures.second,
         0,
       );
 
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, textures.input);
+      gl.bindTexture(gl.TEXTURE_2D, textures.first);
 
       gl.useProgram(programs.update);
       gl.bindVertexArray(vertexArrayObjects.update);
@@ -228,7 +227,7 @@ export class Main {
       gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, textures.output);
+      gl.bindTexture(gl.TEXTURE_2D, textures.second);
 
       gl.useProgram(programs.render);
       gl.bindVertexArray(vertexArrayObjects.render);
@@ -244,9 +243,9 @@ export class Main {
 
       partition = !partition;
 
-      const swap = textures.input;
-      textures.input = textures.output;
-      textures.output = swap;
+      const swap = textures.first;
+      textures.first = textures.second;
+      textures.second = swap;
 
       if (Config.FPS === -1) requestAnimationFrame(mainLoop);
     };
