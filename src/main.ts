@@ -1,5 +1,7 @@
-import { Random, WebGL } from "./utilities/utilities";
+import { WebGL } from "./utilities/utilities";
 import { Config } from "./config";
+
+import { Generator } from "./generator";
 import { Input } from "./input";
 
 import updateVertex from "./shaders/update-vertex.glsl";
@@ -11,6 +13,7 @@ export class Main {
   private initialized = false;
 
   private input = new Input();
+  private generator = new Generator();
 
   constructor(private readonly canvas: HTMLCanvasElement) {}
 
@@ -19,7 +22,7 @@ export class Main {
     this.initialized = true;
 
     const gl = this.canvas.getContext("webgl2");
-    if (!gl) throw new Error("Failed to get WebGL2 context");
+    if (!gl) throw "Failed to get WebGL2 context";
 
     this.input.setup(this.canvas);
 
@@ -36,31 +39,6 @@ export class Main {
       update: WebGL.Setup.linkProgram(gl, updateVS, updateFS),
       render: WebGL.Setup.linkProgram(gl, renderVS, renderFS),
     };
-  }
-
-  private generateData() {
-    const state: number[] = [];
-
-    for (let y = 0; y < Config.height; y++) {
-      for (let x = 0; x < Config.width; x++) {
-        const r = Random.percent(Config.percent) ? Config.Elements.WATER : 0;
-        const g = 0;
-        const b = 0;
-        const a = 0;
-        state.push(r, g, b, a);
-      }
-    }
-
-    for (let y = 0; y < Config.height; y++) {
-      for (let x = 0; x < Config.width; x++) {
-        const index = (y * Config.width + x) * 4;
-        if (y === 0) state[index] = 1;
-        if (x === 0) state[index] = 1;
-        if (x === Config.width - 1) state[index] = 1;
-      }
-    }
-
-    return state;
   }
 
   private setupUniformBlock(
@@ -137,7 +115,7 @@ export class Main {
     this.setupUniformBlock(gl, programs);
 
     const data = {
-      state: new Int8Array(this.generateData()),
+      state: new Int8Array(this.generator.generate()),
       canvasVertices: new Float32Array(WebGL.Points.rectangle(0, 0, 1, 1)),
     };
 
@@ -232,7 +210,10 @@ export class Main {
       gl.uniform1i(locations.update.uInputTextureIndex, 0);
       gl.uniform1i(locations.update.uInputKey, this.input.getKey);
       gl.uniform1i(locations.update.uPartition, partition ? 1 : 0);
-      gl.uniform1i(locations.update.uIsPointerDown, this.input.getIsPointerDown ? 1 : 0);
+      gl.uniform1i(
+        locations.update.uIsPointerDown,
+        this.input.getIsPointerDown ? 1 : 0,
+      );
       gl.uniform2f(
         locations.update.uPointerPosition,
         this.input.getPointerCoordinates.x,
