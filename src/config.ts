@@ -1,17 +1,13 @@
-export class Config {
-  static readonly width: number = 100;
-  static readonly height: number = 100;
-
-  static get totalCells(): number {
-    return Config.width * Config.height;
-  }
-
-  static readonly percent: number = 0;
-
-  static readonly FPS: number = 30;
-}
-
 export namespace Config {
+  export const width: number = 100;
+  export const height: number = 100;
+
+  export const totalCells = width * height;
+
+  export const percent: number = 0;
+
+  export const FPS: number = 30;
+
   export enum Elements {
     EMPTY = 0,
     BLOCK = 1,
