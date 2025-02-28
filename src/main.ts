@@ -88,26 +88,34 @@ export class Main {
           programs.update,
           "a_canvasVertices",
         ),
+
         uInputTextureIndex: gl.getUniformLocation(
           programs.update,
           "u_inputTextureIndex",
         ),
+
         uInputKey: gl.getUniformLocation(programs.update, "u_inputKey"),
+
         uPointerPosition: gl.getUniformLocation(
           programs.update,
           "u_pointerPosition",
         ),
+
         uIsPointerDown: gl.getUniformLocation(
           programs.update,
           "u_isPointerDown",
         ),
+
         uPartition: gl.getUniformLocation(programs.update, "u_partition"),
       },
+
       render: {
         uOutputTextureIndex: gl.getUniformLocation(
           programs.render,
           "u_outputTextureIndex",
         ),
+
+        uBorderSize: gl.getUniformLocation(programs.render, "u_borderSize"),
       },
     };
 
@@ -233,6 +241,7 @@ export class Main {
       gl.bindVertexArray(vertexArrayObjects.render);
 
       gl.uniform1i(locations.render.uOutputTextureIndex, 0);
+      gl.uniform1f(locations.render.uBorderSize, Config.borderSize);
 
       gl.drawArrays(gl.POINTS, 0, Config.totalCells);
     };

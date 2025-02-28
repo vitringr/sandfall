@@ -22,29 +22,18 @@ const vec4 COLORS[6] = vec4[6](
   vec4(0.4,  0.4,  0.4,  1.0)   // 5: Steam
 );
 
-// ivec4 outputData = texelFetch(u_outputTextureIndex,
-//                               ivec2(v_coordinates * GRID_DIMENSIONS),
-//                               0);
-
-// void main() {
-//   ivec2 cellCoordinates = ivec2(v_coordinates);
-//
-//   ivec4 blockData = texelFetch(u_outputTextureIndex, cellCoordinates / 2, 0);
-//
-//   int cellIndex = (cellCoordinates.y % 2) 
-//
-// }
+int getInBlockIndex(ivec2 cell) {
+  return (cell.x & 1) + 2 * (cell.y & 1);
+}
 
 void main() {
-  ivec2 cellCoord = ivec2(v_coordinates);
-  ivec4 blockData = texelFetch(u_outputTextureIndex, cellCoord / 2, 0);
+  ivec2 cell = ivec2(v_coordinates);
+  ivec2 block = cell / 2;
 
-  // Determine which cell in the block this fragment corresponds to
-  int cellIndex = (cellCoord.y % 2) * 2 + (cellCoord.x % 2);
-  int cellState = blockData[cellIndex];
+  ivec4 blockData = texelFetch(u_outputTextureIndex, block, 0);
 
-  // if(cellState < 0) outColor = vec4(0.5, 0.0, 0.5, 1.0); // Debug
-  // else outColor = COLORS[cellState];
+  int inBlockIndex = getInBlockIndex(cell);
+  int cellState = blockData[inBlockIndex];
 
   outColor = COLORS[cellState];
 }

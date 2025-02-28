@@ -1,12 +1,14 @@
 export namespace Config {
-  export const width: number = 100;
-  export const height: number = 100;
+  export const width: number = 20;
+  export const height: number = 20;
 
   export const totalCells = width * height;
 
   export const percent: number = 0;
 
-  export const FPS: number = 30;
+  export const FPS: number = -1;
+
+  export const borderSize: number = 1;
 
   export enum Elements {
     EMPTY = 0,

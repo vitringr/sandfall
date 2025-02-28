@@ -2,6 +2,7 @@
 
 flat out vec2 v_coordinates;
 
+uniform float u_borderSize;
 layout(std140) uniform DimensionsStaticData {
   vec2 GRID_DIMENSIONS;
   vec2 CANVAS_DIMENSIONS;
@@ -18,8 +19,9 @@ void main() {
   vec2 point = (coordinates + 0.5) / GRID_DIMENSIONS;
 
   vec2 clipSpace = point * 2.0 - 1.0;
+  float scale = CANVAS_DIMENSIONS.x / GRID_DIMENSIONS.x;
   gl_Position = vec4(clipSpace, 0.0, 1.0);
-  gl_PointSize = (CANVAS_DIMENSIONS.x / GRID_DIMENSIONS.x) - 1.0;
+  gl_PointSize = scale - float(u_borderSize);
 
-  v_coordinates = coordinates + 0.5;
+  v_coordinates = coordinates;
 }
