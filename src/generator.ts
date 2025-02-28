@@ -1,4 +1,3 @@
-import { Random } from "./utilities/utilities";
 import { Config } from "./config";
 
 export class Generator {
@@ -15,16 +14,18 @@ export class Generator {
       }
     }
 
-    // Walls:
-
-    //for (let y = 0; y < Config.height; y++) {
-    //  for (let x = 0; x < Config.width; x++) {
-    //    const index = (y * Config.width + x) * 4;
-    //    if (y === 0) state[index] = 1;
-    //    if (x === 0) state[index] = 1;
-    //    if (x === Config.width - 1) state[index] = 1;
-    //  }
-    //}
+    for (let y = 0; y < Config.height; y++) {
+      for (let x = 0; x < Config.width; x++) {
+        const index = (y * Config.width + x) * 4;
+        const isWall = y === 0 || x === 0 || x === Config.width / 2 - 1;
+        if (isWall) {
+          state[index + 0] = 1;
+          state[index + 1] = 1;
+          state[index + 2] = 1;
+          state[index + 3] = 1;
+        }
+      }
+    }
 
     return state;
   }

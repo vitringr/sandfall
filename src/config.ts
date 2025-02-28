@@ -6,7 +6,7 @@ export namespace Config {
 
   export const percent: number = 0;
 
-  export const FPS: number = -1;
+  export const FPS: number = 10;
 
   export const borderSize: number = 1;
 
