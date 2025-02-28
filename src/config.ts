@@ -19,12 +19,12 @@ export namespace Config {
 
   export enum InputKeys {
     "NONE" = -1,
-    "Q" = Elements.BLOCK,
-    "W" = Elements.WATER,
-    "E" = Elements.EMPTY,
-    "R" = -1,
+    "Q" = Elements.EMPTY,
+    "W" = Elements.BLOCK,
+    "E" = Elements.SAND,
+    "R" = Elements.WATER,
     "A" = -1,
-    "S" = Elements.SAND,
+    "S" = -1,
     "D" = Elements.STEAM,
     "F" = Elements.FIRE,
   }
