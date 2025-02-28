@@ -21,5 +21,5 @@ void main() {
   gl_Position = vec4(clipSpace, 0.0, 1.0);
   gl_PointSize = (CANVAS_DIMENSIONS.x / GRID_DIMENSIONS.x) - 1.0;
 
-  v_coordinates = point;
+  v_coordinates = coordinates + 0.5;
 }

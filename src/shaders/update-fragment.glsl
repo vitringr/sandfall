@@ -15,12 +15,9 @@ uniform vec2 u_pointerPosition;
 
 const float POINTER_AREA = 0.03;
 
-// Neighbor Offsets.
 const ivec2 NORTH      = ivec2(0, 1);
 const ivec2 NORTH_EAST = ivec2(1, 1);
 const ivec2 EAST       = ivec2(1, 0);
-
-const int ELEMENTS_COUNT = 5;
 
 const int EMPTY = 0;
 const int BLOCK = 1;
@@ -28,6 +25,10 @@ const int SAND  = 2;
 const int WATER = 3;
 const int FIRE  = 4;
 const int STEAM = 5;
+
+ivec4 readTexel(ivec2 block) {
+  return texelFetch(u_inputTextureIndex, block, 0);
+}
 
 // ivec2 getBlock(ivec2 cellCoordinates) {
 //   // Coordinates of a 2x2 margolus block.
@@ -45,11 +46,6 @@ int getInBlockIndex(ivec2 cell) {
   return (partitionOffset.x & 1) + 2 * (partitionOffset.y & 1);
 }
 
-ivec4 getData(ivec2 block) {
-  // Texel data.
-  return texelFetch(u_inputTextureIndex, block, 0);
-}
-
 // ivec4 getBlockElements(ivec2 block) {
 //   // The block cell types.
 //   ivec2 cell = block * 2 - (u_partition ? 1 : 0);
@@ -62,38 +58,21 @@ ivec4 getData(ivec2 block) {
 // }
 
 bool isAtPointer() {
-  // If pointer is near these coordinates.
-  return distance(u_pointerPosition, v_coordinates) < POINTER_AREA;
+  // TODO: cleanup the / 2
+  return distance(u_pointerPosition / 2.0, v_coordinates) < POINTER_AREA;
 }
 
 void main() {
   ivec2 block = ivec2(gl_FragCoord.xy);
 
-  // Input Spawn
   if(u_inputKey > -1 && isAtPointer()) {
-    outData = ivec4(u_inputKey, 0, 0, 0);
+    outData = ivec4(u_inputKey);
     return;
   }
 
-  ivec4 inputData = getData(block);
+  ivec4 inputData = readTexel(block);
 
-  // if(uniqueElementsCount == 2) {
-  //   ivec2 pair = getUniqueElementsPair(elements);
-  //   ivec4 bitRange = mapToBitRange(elements, pair.x);
-  //
-  //   int oldPattern = encodePattern(bitRange);
-  //   int newPattern = INTERACTIONS[getInteractionsIndex(pair) + oldPattern];
-  //
-  //   ivec4 newPatternBits = decodePattern(newPattern);
-  //   ivec4 newBlockElements = mapFromBitRange(newPatternBits, pair);
-  //
-  //   int newElement = newBlockElements[getInBlockIndex(cell)];
-  //
-  //   outData = ivec4(newElement, inputData.gba);
-  //   return;
-  // }
+  // Custom logic here...
 
   outData = inputData;
 }
-
-
