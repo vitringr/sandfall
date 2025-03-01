@@ -40,27 +40,29 @@ ivec4 getState(ivec2 block) {
   return texelFetch(u_inputTextureIndex, block, 0);
 }
 
+void swap(inout int a, inout int b) {
+  int temp = a;
+  a = b;
+  b = temp;
+}
+
 ivec4 applyRules(ivec4 pastState) {
   ivec4 newState = pastState;
 
   if(pastState.r == 1) {
-    newState.r = 0;
-    newState.g = 1;
+    swap(newState.r, newState.g);
   }
 
   if(pastState.g == 1) {
-    newState.g = 0;
-    newState.b = 1;
+    swap(newState.g, newState.b);
   }
 
   if(pastState.b == 1) {
-    newState.b = 0;
-    newState.a = 1;
+    swap(newState.b, newState.a);
   }
 
   if(pastState.a == 1) {
-    newState.a = 0;
-    newState.r = 1;
+    swap(newState.a, newState.r);
   }
 
   return newState;
