@@ -8,9 +8,10 @@ out vec4 outColor;
 flat in vec2 v_coordinates;
 
 uniform isampler2D u_outputTextureIndex;
-layout(std140) uniform DimensionsStaticData {
-  vec2 GRID_DIMENSIONS;
-  vec2 CANVAS_DIMENSIONS;
+layout(std140) uniform Dimensions {
+  float CELL_RANGE;
+  float BLOCK_RANGE;
+  float CANVAS_RANGE;
 };
 
 const vec4 COLORS[6] = vec4[6](

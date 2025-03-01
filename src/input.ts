@@ -6,15 +6,15 @@ export class Input {
   private pointerCoordinates: Vector2 = Vector2.zero();
   private isPointerDown: boolean = false;
 
-  public get getKey() {
+  getKey() {
     return this.key;
   }
 
-  public get getPointerCoordinates() {
+  getPointerCoordinates() {
     return this.pointerCoordinates;
   }
 
-  public get getIsPointerDown() {
+  getIsPointerDown() {
     return this.isPointerDown;
   }
 

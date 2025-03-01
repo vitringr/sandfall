@@ -15,7 +15,7 @@ export class Main {
   private input = new Input();
   private generator = new Generator();
 
-  constructor(private readonly canvas: HTMLCanvasElement) {}
+  constructor(private readonly canvas: HTMLCanvasElement) { }
 
   setup() {
     if (this.initialized) throw "Already initialized";
@@ -47,10 +47,7 @@ export class Main {
   ) {
     const blockIndices = {
       render: {
-        dimensions: gl.getUniformBlockIndex(
-          programs.render,
-          "DimensionsStaticData",
-        ),
+        dimensions: gl.getUniformBlockIndex(programs.render, "Dimensions"),
       },
     };
 
@@ -60,10 +57,10 @@ export class Main {
 
     const data = {
       dimensions: new Float32Array([
-        Config.width,
-        Config.height,
+        Config.cellRange,
+        Config.blockRange,
         this.canvas.width,
-        this.canvas.height,
+        0
       ]),
     };
 
@@ -157,8 +154,8 @@ export class Main {
       gl.TEXTURE_2D,
       0,
       gl.RGBA8I,
-      Config.width,
-      Config.height,
+      Config.blockRange,
+      Config.blockRange,
       0,
       gl.RGBA_INTEGER,
       gl.BYTE,
@@ -171,8 +168,8 @@ export class Main {
       gl.TEXTURE_2D,
       0,
       gl.RGBA8I,
-      Config.width,
-      Config.height,
+      Config.blockRange,
+      Config.blockRange,
       0,
       gl.RGBA_INTEGER,
       gl.BYTE,
@@ -199,7 +196,7 @@ export class Main {
 
     const updateLoop = () => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.update);
-      gl.viewport(0, 0, Config.width, Config.height);
+      gl.viewport(0, 0, Config.blockRange, Config.blockRange);
       gl.framebufferTexture2D(
         gl.FRAMEBUFFER,
         gl.COLOR_ATTACHMENT0,
@@ -215,16 +212,16 @@ export class Main {
       gl.bindVertexArray(vertexArrayObjects.update);
 
       gl.uniform1i(locations.update.uInputTextureIndex, 0);
-      gl.uniform1i(locations.update.uInputKey, this.input.getKey);
+      gl.uniform1i(locations.update.uInputKey, this.input.getKey());
       gl.uniform1i(locations.update.uPartition, partition ? 1 : 0);
       gl.uniform1i(
         locations.update.uIsPointerDown,
-        this.input.getIsPointerDown ? 1 : 0,
+        this.input.getIsPointerDown() ? 1 : 0,
       );
       gl.uniform2f(
         locations.update.uPointerPosition,
-        this.input.getPointerCoordinates.x,
-        this.input.getPointerCoordinates.y,
+        this.input.getPointerCoordinates().x,
+        this.input.getPointerCoordinates().y,
       );
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);

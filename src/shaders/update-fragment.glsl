@@ -5,7 +5,7 @@ precision highp isampler2D;
 
 in vec2 v_coordinates;
 
-out ivec4 outputState;
+out ivec4 outData;
 
 uniform isampler2D u_inputTextureIndex;
 uniform int u_inputKey;
@@ -31,35 +31,51 @@ bool isNearPointer() {
   return distance(scaledPointerPosition, v_coordinates) < POINTER_AREA;
 }
 
+ivec2 getBlock() {
+  ivec2 block = ivec2(gl_FragCoord.xy);
+  return block;
+}
+
+ivec4 getState(ivec2 block) {
+  return texelFetch(u_inputTextureIndex, block, 0);
+}
+
+ivec4 applyRules(ivec4 pastState) {
+  ivec4 newState = pastState;
+
+  if(pastState.r == 1) {
+    newState.r = 0;
+    newState.g = 1;
+  }
+
+  if(pastState.g == 1) {
+    newState.g = 0;
+    newState.b = 1;
+  }
+
+  if(pastState.b == 1) {
+    newState.b = 0;
+    newState.a = 1;
+  }
+
+  if(pastState.a == 1) {
+    newState.a = 0;
+    newState.r = 1;
+  }
+
+  return newState;
+}
+
 void main() {
   if(u_inputKey > -1 && isNearPointer()) {
-    outputState = ivec4(u_inputKey);
+    outData = ivec4(u_inputKey);
     return;
   }
 
-  ivec2 block = ivec2(gl_FragCoord.xy);
+  ivec2 block = getBlock();
+  ivec4 state = getState(block);
 
-  ivec4 inputState = texelFetch(u_inputTextureIndex, block, 0);
+  ivec4 newState = applyRules(state);
 
-  // Custom logic here...
-
-  outputState = inputState;
+  outData = newState;
 }
-
-// ------------
-
-// ivec2 getBlock(ivec2 cellCoordinates) {
-//   // Coordinates of a 2x2 margolus block.
-//   return (u_partition ? cellCoordinates + 1 : cellCoordinates) / 2;
-// }
-
-// ivec4 getBlockElements(ivec2 block) {
-//   // The block cell types.
-//   ivec2 cell = block * 2 - (u_partition ? 1 : 0);
-//   return ivec4(
-//     getData(cell             ).r,   // R: bottom-left cell
-//     getData(cell + EAST      ).r,   // G: bottom-right cell
-//     getData(cell + NORTH     ).r,   // B: top-left cell
-//     getData(cell + NORTH_EAST).r    // A: top-right cell
-//   );
-// }
