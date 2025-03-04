@@ -7,12 +7,10 @@ out vec4 outColor;
 
 flat in vec2 v_coordinates;
 
+uniform float u_canvas;
+uniform float u_columns;
+uniform float u_borderSize;
 uniform isampler2D u_outputTextureIndex;
-layout(std140) uniform Dimensions {
-  float CELL_RANGE;
-  float BLOCK_RANGE;
-  float CANVAS_RANGE;
-};
 
 const vec4 COLORS[6] = vec4[6](
   vec4(0.1,  0.1,  0.1,  1.0),  // 0: Empty

@@ -41,40 +41,6 @@ export class Main {
     };
   }
 
-  private setupUniformBlock(
-    gl: WebGL2RenderingContext,
-    programs: { update: WebGLProgram; render: WebGLProgram },
-  ) {
-    const blockIndices = {
-      render: {
-        dimensions: gl.getUniformBlockIndex(programs.render, "Dimensions"),
-      },
-    };
-
-    const buffers = {
-      dimensions: gl.createBuffer(),
-    };
-
-    const data = {
-      dimensions: new Float32Array([
-        Config.cellRange,
-        Config.blockRange,
-        this.canvas.width,
-        0
-      ]),
-    };
-
-    const dimensionsIndex = 0;
-    gl.uniformBlockBinding(
-      programs.render,
-      blockIndices.render.dimensions,
-      dimensionsIndex,
-    );
-    gl.bindBuffer(gl.UNIFORM_BUFFER, buffers.dimensions);
-    gl.bufferData(gl.UNIFORM_BUFFER, data.dimensions, gl.STATIC_DRAW);
-    gl.bindBufferBase(gl.UNIFORM_BUFFER, dimensionsIndex, buffers.dimensions);
-  }
-
   private setupState(
     gl: WebGL2RenderingContext,
     programs: { update: WebGLProgram; render: WebGLProgram },
@@ -107,12 +73,14 @@ export class Main {
       },
 
       render: {
+        uCanvas: gl.getUniformLocation(programs.render, "u_canvas"),
+        uColumns: gl.getUniformLocation(programs.render, "u_columns"),
+        uBorderSize: gl.getUniformLocation(programs.render, "u_borderSize"),
+
         uOutputTextureIndex: gl.getUniformLocation(
           programs.render,
           "u_outputTextureIndex",
         ),
-
-        uBorderSize: gl.getUniformLocation(programs.render, "u_borderSize"),
       },
     };
 
@@ -154,8 +122,8 @@ export class Main {
       gl.TEXTURE_2D,
       0,
       gl.RGBA8I,
-      Config.blockRange,
-      Config.blockRange,
+      Config.columns,
+      Config.columns,
       0,
       gl.RGBA_INTEGER,
       gl.BYTE,
@@ -168,8 +136,8 @@ export class Main {
       gl.TEXTURE_2D,
       0,
       gl.RGBA8I,
-      Config.blockRange,
-      Config.blockRange,
+      Config.columns,
+      Config.columns,
       0,
       gl.RGBA_INTEGER,
       gl.BYTE,
@@ -187,8 +155,6 @@ export class Main {
 
     const programs = this.setupPrograms(gl);
 
-    this.setupUniformBlock(gl, programs);
-
     const { locations, vertexArrayObjects, textures, framebuffers } =
       this.setupState(gl, programs);
 
@@ -196,7 +162,7 @@ export class Main {
 
     const updateLoop = () => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.update);
-      gl.viewport(0, 0, Config.blockRange, Config.blockRange);
+      gl.viewport(0, 0, Config.columns, Config.columns);
       gl.framebufferTexture2D(
         gl.FRAMEBUFFER,
         gl.COLOR_ATTACHMENT0,
@@ -237,8 +203,10 @@ export class Main {
       gl.useProgram(programs.render);
       gl.bindVertexArray(vertexArrayObjects.render);
 
-      gl.uniform1i(locations.render.uOutputTextureIndex, 0);
+      gl.uniform1f(locations.render.uCanvas, this.canvas.width);
+      gl.uniform1f(locations.render.uColumns, Config.columns);
       gl.uniform1f(locations.render.uBorderSize, Config.borderSize);
+      gl.uniform1i(locations.render.uOutputTextureIndex, 0);
 
       gl.drawArrays(gl.POINTS, 0, Config.totalCells);
     };
