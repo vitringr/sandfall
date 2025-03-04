@@ -39,6 +39,12 @@ ivec4 getState(ivec2 cell) {
   return texelFetch(u_inputTextureIndex, cell, 0);
 }
 
+ivec4 applyRules(ivec4 oldState) {
+  ivec4 newState = oldState;
+
+  return newState;
+}
+
 void main() {
   if(isClicked()) {
     outData = ivec4(u_inputKey);
@@ -48,5 +54,5 @@ void main() {
   ivec2 cell = getCell();
   ivec4 state = getState(cell);
 
-  outData = state;
+  outData = applyRules(state);
 }
