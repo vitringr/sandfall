@@ -32,13 +32,8 @@ const int WATER = 3;
 const int FIRE  = 4;
 const int STEAM = 5;
 
-ivec2 getCell() {
-  return ivec2(gl_FragCoord.xy);
-}
 
-ivec2 getBlock(ivec2 cell) {
-  return (u_partition ? (cell + PARTITION_OFFSET) : cell) / 2;
-}
+
 
 int getInBlockIndex(ivec2 cell) {
   ivec2 margolusCell = u_partition ? (cell + PARTITION_OFFSET) : cell;
@@ -71,17 +66,52 @@ bool isClicked() {
   return distance(u_pointerPosition, v_coordinates) < POINTER_AREA;
 }
 
+
+
+
+int empty(ivec3 neighbors, int inBlockIndex) {
+  bool isAbove = inBlockIndex >= 2;
+  if(isAbove) return EMPTY;
+
+  if(neighbors.y == SAND)
+    return SAND;
+
+  if(neighbors.z == SAND && neighbors.x == SAND) 
+    return SAND;
+
+  return EMPTY;
+}
+
+int block() {
+  return BLOCK;
+}
+
+int sand(ivec3 neighbors, int inBlockIndex) {
+  bool isBelow = inBlockIndex < 2;
+  if(isBelow) return SAND;
+
+  if(neighbors.y == EMPTY) return EMPTY;
+
+  if(neighbors.y == SAND) {
+    if(neighbors.z == EMPTY && neighbors.x == EMPTY)
+      return EMPTY;
+  }
+
+  return SAND;
+}
+
+
+
+
 void main() {
   if(isClicked()) {
     outData = ivec4(u_inputKey);
     return;
   }
 
-  ivec2 cell = getCell();
-  ivec2 block = getBlock(cell);
+  ivec2 cell = ivec2(gl_FragCoord.xy);
 
   int inBlockIndex = getInBlockIndex(cell);
-  bool isAbove = inBlockIndex > 1;
 
   ivec4 horizontalNeighborState = getState(getHorizontalNeighbor(cell, inBlockIndex));
   ivec4 verticalNeighborState   = getState(getVerticalNeighbor(cell, inBlockIndex));
@@ -94,34 +124,18 @@ void main() {
   );
 
   ivec4 state = getState(cell);
-  int element = state.r;
-
   ivec4 newState = state;
 
-  if(element == EMPTY) {
-    if(!isAbove) {
-      if(neighbors.y == SAND) {
-        newState.r = SAND;
-      }
-      else if(neighbors.z == SAND && neighbors.x == SAND) {
-        newState.r = SAND;
-      }
-    }
-  }
+  int element = state.r;
 
-  if(element == SAND) {
-    if(isAbove) {
-      if(neighbors.y == EMPTY) {
-        newState.r = EMPTY;
-      }
+  if(element == EMPTY)
+    newState.r = empty(neighbors, inBlockIndex);
 
-      else if(neighbors.y == SAND) {
-        if(neighbors.z == EMPTY && neighbors.x == EMPTY) {
-          newState.r = EMPTY;
-        }
-      }
-    }
-  }
+  else if(element == BLOCK)
+    newState.r = block();
+
+  else if(element == SAND)
+    newState.r = sand(neighbors, inBlockIndex);
 
   outData = newState;
 }
