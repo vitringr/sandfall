@@ -7,6 +7,7 @@ in vec2 v_coordinates;
 
 out ivec4 outData;
 
+uniform int u_time;
 uniform int u_inputKey;
 uniform bool u_partition;
 uniform bool u_isPointerDown;
@@ -31,6 +32,11 @@ const int SAND  = 2;
 const int WATER = 3;
 const int FIRE  = 4;
 const int STEAM = 5;
+
+const int UPDATES_COUNT = 2;
+
+const int SOLIDS_UPDATE  = 0;
+const int LIQUIDS_UPDATE = 0;
 
 
 
@@ -69,31 +75,50 @@ bool isClicked() {
 
 
 
-int empty(ivec3 neighbors, int inBlockIndex) {
-  bool isAbove = inBlockIndex >= 2;
+bool isOpen(int element) {
+  return element == EMPTY;
+}
+
+bool isSolid(int element) {
+  return element == SAND || element == BLOCK;
+}
+
+bool isLiquid(int element) {
+  return element == WATER;
+}
+
+bool isFallingSolid(int element) {
+  return element == SAND;
+}
+
+bool isMoving(int element) {
+  return element == SAND || element == WATER || element == FIRE || element == STEAM;
+}
+
+
+
+
+int solids_empty(ivec3 neighbors, int inBlockIndex) {
+  bool isAbove = inBlockIndex > 1;
   if(isAbove) return EMPTY;
 
-  if(neighbors.y == SAND)
-    return SAND;
+  if(isFallingSolid(neighbors.y))
+    return neighbors.y;
 
-  if(neighbors.z == SAND && neighbors.x == SAND) 
-    return SAND;
+  if(isFallingSolid(neighbors.z) && isSolid(neighbors.x))
+    return neighbors.z;
 
   return EMPTY;
 }
 
-int block() {
-  return BLOCK;
-}
-
-int sand(ivec3 neighbors, int inBlockIndex) {
+int solids_sand(ivec3 neighbors, int inBlockIndex) {
   bool isBelow = inBlockIndex < 2;
   if(isBelow) return SAND;
 
-  if(neighbors.y == EMPTY) return EMPTY;
+  if(isOpen(neighbors.y)) return EMPTY;
 
-  if(neighbors.y == SAND) {
-    if(neighbors.z == EMPTY && neighbors.x == EMPTY)
+  if(isSolid(neighbors.y)) {
+    if(isOpen(neighbors.z) && !isFallingSolid(neighbors.x))
       return EMPTY;
   }
 
@@ -126,16 +151,13 @@ void main() {
   ivec4 state = getState(cell);
   ivec4 newState = state;
 
-  int element = state.r;
+  int element = newState.r;
 
   if(element == EMPTY)
-    newState.r = empty(neighbors, inBlockIndex);
-
-  else if(element == BLOCK)
-    newState.r = block();
+    newState.r = solids_empty(neighbors, inBlockIndex);
 
   else if(element == SAND)
-    newState.r = sand(neighbors, inBlockIndex);
+    newState.r = solids_sand(neighbors, inBlockIndex);
 
   outData = newState;
 }

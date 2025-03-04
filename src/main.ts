@@ -14,7 +14,7 @@ export class Main {
   private input = new Input();
   private generator = new Generator();
 
-  constructor(private readonly canvas: HTMLCanvasElement) { }
+  constructor(private readonly canvas: HTMLCanvasElement) {}
 
   setup() {
     if (this.initialized) throw "Already initialized";
@@ -69,6 +69,8 @@ export class Main {
         ),
 
         uPartition: gl.getUniformLocation(programs.update, "u_partition"),
+
+        uTime: gl.getUniformLocation(programs.update, "u_time"),
       },
 
       render: {
@@ -158,6 +160,7 @@ export class Main {
       this.setupState(gl, programs);
 
     let partition: boolean = false;
+    let time: number = 0;
 
     const updateLoop = () => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.update);
@@ -177,6 +180,7 @@ export class Main {
       gl.bindVertexArray(vertexArrayObjects.update);
 
       gl.uniform1i(locations.update.uInputTextureIndex, 0);
+      gl.uniform1i(locations.update.uTime, time);
       gl.uniform1i(locations.update.uInputKey, this.input.getKey());
       gl.uniform1i(locations.update.uPartition, partition ? 1 : 0);
       gl.uniform1i(
@@ -215,6 +219,8 @@ export class Main {
       renderLoop();
 
       partition = !partition;
+
+      time++;
 
       const swap = textures.first;
       textures.first = textures.second;
