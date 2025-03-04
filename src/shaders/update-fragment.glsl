@@ -103,6 +103,9 @@ void main() {
       if(neighbors.y == SAND) {
         newState.r = SAND;
       }
+      else if(neighbors.z == SAND && neighbors.x == SAND) {
+        newState.r = SAND;
+      }
     }
   }
 
@@ -110,6 +113,12 @@ void main() {
     if(isAbove) {
       if(neighbors.y == EMPTY) {
         newState.r = EMPTY;
+      }
+
+      else if(neighbors.y == SAND) {
+        if(neighbors.z == EMPTY && neighbors.x == EMPTY) {
+          newState.r = EMPTY;
+        }
       }
     }
   }
