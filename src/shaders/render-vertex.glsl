@@ -20,7 +20,7 @@ void main() {
   gl_Position = vec4(clipSpace, 0.0, 1.0);
 
   float scale = u_canvas / u_columns;
-  gl_PointSize = scale - float(u_borderSize);
+  gl_PointSize = scale - u_borderSize;
 
   v_coordinates = coordinates;
 }

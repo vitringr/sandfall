@@ -1,7 +1,6 @@
 import { WebGL } from "./utilities/utilities";
-import { Config } from "./config";
-
 import { Generator } from "./generator";
+import { Config } from "./config";
 import { Input } from "./input";
 
 import updateVertex from "./shaders/update-vertex.glsl";

@@ -27,12 +27,8 @@ int getInBlockIndex(ivec2 cell) {
 
 void main() {
   ivec2 cell = ivec2(v_coordinates);
-  ivec2 block = cell / 2;
 
-  ivec4 blockData = texelFetch(u_outputTextureIndex, block, 0);
+  ivec4 state = texelFetch(u_outputTextureIndex, cell, 0);
 
-  int inBlockIndex = getInBlockIndex(cell);
-  int cellState = blockData[inBlockIndex];
-
-  outColor = COLORS[cellState];
+  outColor = COLORS[state.r];
 }

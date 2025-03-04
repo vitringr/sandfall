@@ -7,13 +7,13 @@ in vec2 v_coordinates;
 
 out ivec4 outData;
 
-uniform isampler2D u_inputTextureIndex;
 uniform int u_inputKey;
 uniform bool u_partition;
 uniform bool u_isPointerDown;
 uniform vec2 u_pointerPosition;
+uniform isampler2D u_inputTextureIndex;
 
-const float POINTER_AREA = 0.01;
+const float POINTER_AREA = 0.05;
 
 const ivec2 NORTH      = ivec2(0, 1);
 const ivec2 NORTH_EAST = ivec2(1, 1);
@@ -27,45 +27,16 @@ const int FIRE  = 4;
 const int STEAM = 5;
 
 bool isNearPointer() {
-  vec2 scaledPointerPosition = u_pointerPosition / 2.0;
-  return distance(scaledPointerPosition, v_coordinates) < POINTER_AREA;
+  return distance(u_pointerPosition, v_coordinates) < POINTER_AREA;
 }
 
-ivec2 getBlock() {
-  ivec2 block = ivec2(gl_FragCoord.xy);
-  return block;
+ivec2 getCell() {
+  ivec2 cell = ivec2(gl_FragCoord.xy);
+  return cell;
 }
 
-ivec4 getState(ivec2 block) {
-  return texelFetch(u_inputTextureIndex, block, 0);
-}
-
-void swap(inout int a, inout int b) {
-  int temp = a;
-  a = b;
-  b = temp;
-}
-
-ivec4 applyRules(ivec4 pastState) {
-  ivec4 newState = pastState;
-
-  if(pastState.r == 1) {
-    swap(newState.r, newState.g);
-  }
-
-  if(pastState.g == 1) {
-    swap(newState.g, newState.b);
-  }
-
-  if(pastState.b == 1) {
-    swap(newState.b, newState.a);
-  }
-
-  if(pastState.a == 1) {
-    swap(newState.a, newState.r);
-  }
-
-  return newState;
+ivec4 getState(ivec2 cell) {
+  return texelFetch(u_inputTextureIndex, cell, 0);
 }
 
 void main() {
@@ -74,10 +45,8 @@ void main() {
     return;
   }
 
-  ivec2 block = getBlock();
-  ivec4 state = getState(block);
+  ivec2 cell = getCell();
+  ivec4 state = getState(cell);
 
-  ivec4 newState = applyRules(state);
-
-  outData = newState;
+  outData = state;
 }
