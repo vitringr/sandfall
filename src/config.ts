@@ -1,5 +1,5 @@
 export namespace Config {
-  export const columns: number = 12;
+  export const columns: number = 10;
   export const totalCells = columns * columns;
 
   export const percent: number = 20;
