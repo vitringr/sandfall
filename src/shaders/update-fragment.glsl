@@ -26,13 +26,13 @@ const int WATER = 3;
 const int FIRE  = 4;
 const int STEAM = 5;
 
-bool isNearPointer() {
+bool isClicked() {
+  if(u_inputKey < 0) return false;
   return distance(u_pointerPosition, v_coordinates) < POINTER_AREA;
 }
 
 ivec2 getCell() {
-  ivec2 cell = ivec2(gl_FragCoord.xy);
-  return cell;
+  return ivec2(gl_FragCoord.xy);
 }
 
 ivec4 getState(ivec2 cell) {
@@ -40,7 +40,7 @@ ivec4 getState(ivec2 cell) {
 }
 
 void main() {
-  if(u_inputKey > -1 && isNearPointer()) {
+  if(isClicked()) {
     outData = ivec4(u_inputKey);
     return;
   }
