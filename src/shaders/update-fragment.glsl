@@ -30,12 +30,12 @@ const int FIRE  = 4;
 const int STEAM = 5;
 
 const int DENSITY[6] = int[6](
-  -10,
-  10,
-  1,
-  0,
-  -1,
-  -1
+  /* EMPTY */ -10,
+  /* BLOCK */ 10,
+  /* SAND  */ 1,
+  /* WATER */ 0,
+  /* FIRE  */ -1,
+  /* STEAM */ -1
 );
 
 
@@ -140,69 +140,45 @@ Block applyLogic(Block originalBlock) {
 
   if(isMoving(block.bl) && canMoveInBlock(block.bl.velocity, 0)) {
     if(block.bl.velocity == EAST) {
-      if(canSwap(block.bl, block.br))
-        swap(block.bl, block.br);
+      if(canSwap(block.bl, block.br)) swap(block.bl, block.br);
+      else if(canSwap(block.bl, block.tr)) swap(block.bl, block.tr);
     }
-
-    if(block.bl.velocity == NORTH) {
-      if(canSwap(block.bl, block.tl))
-        swap(block.bl, block.tl);
-    }
-
-    if(block.bl.velocity == (NORTH + EAST)) {
-      if(canSwap(block.bl, block.tr))
-        swap(block.bl, block.tr);
+    else if(block.bl.velocity == NORTH) {
+      if(canSwap(block.bl, block.tl)) swap(block.bl, block.tl);
+      else if(canSwap(block.bl, block.tr)) swap(block.bl, block.tr);
     }
   }
 
   if(isMoving(block.br) && canMoveInBlock(block.br.velocity, 1)) {
     if(block.br.velocity == WEST) {
-      if(canSwap(block.br, block.bl))
-        swap(block.br, block.bl);
+      if(canSwap(block.br, block.bl)) swap(block.br, block.bl);
+      else if(canSwap(block.br, block.tl)) swap(block.br, block.tl);
     }
-
-    if(block.br.velocity == (NORTH + WEST)) {
-      if(canSwap(block.br, block.tl))
-        swap(block.br, block.tl);
-    }
-
-    if(block.br.velocity == NORTH) {
-      if(canSwap(block.br, block.tr))
-        swap(block.br, block.tr);
+    else if(block.br.velocity == NORTH) {
+      if(canSwap(block.br, block.tr)) swap(block.br, block.tr);
+      else if(canSwap(block.br, block.tl)) swap(block.br, block.tl);
     }
   }
 
   if(isMoving(block.tl) && canMoveInBlock(block.tl.velocity, 2)) {
     if(block.tl.velocity == SOUTH) {
-      if(canSwap(block.tl, block.bl))
-        swap(block.tl, block.bl);
+      if(canSwap(block.tl, block.bl)) swap(block.tl, block.bl);
+      else if(canSwap(block.tl, block.br)) swap(block.tl, block.br);
     }
-
-    if(block.tl.velocity == (SOUTH + EAST)) {
-      if(canSwap(block.tl, block.br))
-        swap(block.tl, block.br);
-    }
-
-    if(block.tl.velocity == EAST) {
-      if(canSwap(block.tl, block.tr))
-        swap(block.tl, block.tr);
+    else if(block.tl.velocity == EAST) {
+      if(canSwap(block.tl, block.tr)) swap(block.tl, block.tr);
+      else if(canSwap(block.tl, block.br)) swap(block.tl, block.br);
     }
   }
 
   if(isMoving(block.tr) && canMoveInBlock(block.tr.velocity, 3)) {
-    if(block.tr.velocity == (SOUTH + WEST)) {
-      if(canSwap(block.tr, block.bl))
-        swap(block.tr, block.bl);
-    }
-
     if(block.tr.velocity == SOUTH) {
-      if(canSwap(block.tr, block.br))
-        swap(block.tr, block.br);
+      if(canSwap(block.tr, block.br)) swap(block.tr, block.br);
+      else if(canSwap(block.tr, block.bl)) swap(block.tr, block.bl);
     }
-
-    if(block.tr.velocity == WEST) {
-      if(canSwap(block.tr, block.tl))
-        swap(block.tr, block.tl);
+    else if(block.tr.velocity == WEST) {
+      if(canSwap(block.tr, block.tl)) swap(block.tr, block.tl);
+      else if(canSwap(block.tr, block.bl)) swap(block.tr, block.bl);
     }
   }
 
@@ -214,7 +190,6 @@ Block applyLogic(Block originalBlock) {
 
 void main() {
   if(isClicked()) {
-    // TODO: velocity on spawn
     int type = u_inputKey;
     int gravity = type == BLOCK || type == EMPTY ? 0 : -1;
     outData = ivec4(type, 0, gravity, DENSITY[type]);
