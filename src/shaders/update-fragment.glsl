@@ -46,6 +46,13 @@ struct Block {
   Cell TR;
 };
 
+struct TypeBlock {
+  int BL;
+  int BR;
+  int TL;
+  int TR;
+};
+
 
 
 
@@ -80,6 +87,16 @@ Block getBlock(ivec2 origin) {
   return block;
 }
 
+TypeBlock getTypeBlock(Block block) {
+  TypeBlock typeBlock;
+  typeBlock.BL = block.BL.type;
+  typeBlock.BR = block.BR.type;
+  typeBlock.TL = block.TL.type;
+  typeBlock.TR = block.TR.type;
+
+  return typeBlock;
+}
+
 int getInBlockIndex(ivec2 grid) {
   ivec2 blockOrigin = getBlockOrigin(grid);
 
@@ -106,6 +123,35 @@ bool isClicked() {
 
 
 
+void swap(inout int a, inout int b) {
+  int temp = a;
+  a = b;
+  b = temp;
+}
+
+Block applyLogic(Block originalBlock) {
+  Block newBlock = originalBlock;
+  TypeBlock types = getTypeBlock(newBlock);
+
+  if(types.TL == SAND && types.BL == EMPTY) {
+    swap(types.TL, types.BL);
+  }
+
+  if(types.TR == SAND && types.BR == EMPTY) {
+    swap(types.TR, types.BR);
+  }
+
+  newBlock.BL.type = types.BL;
+  newBlock.BR.type = types.BR;
+  newBlock.TL.type = types.TL;
+  newBlock.TR.type = types.TR;
+
+  return newBlock;
+}
+
+
+
+
 void main() {
   if(isClicked()) {
     outData = ivec4(u_inputKey, 0, 0, 0);
@@ -116,18 +162,9 @@ void main() {
   ivec2 blockOrigin = getBlockOrigin(grid);
 
   Block block = getBlock(blockOrigin);
+  Block newBlock = applyLogic(block);
 
-  if(block.TL.type == SAND && block.BL.type == EMPTY) {
-    block.TL.type = EMPTY;
-    block.BL.type = SAND;
-  }
-
-  if(block.TR.type == SAND && block.BR.type == EMPTY) {
-    block.TR.type = EMPTY;
-    block.BR.type = SAND;
-  }
-
-  Cell thisCell = getCellFromBlock(grid, block);
+  Cell thisCell = getCellFromBlock(grid, newBlock);
 
   outData = ivec4(
     thisCell.type,
