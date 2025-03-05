@@ -32,30 +32,70 @@ const int STEAM = 5;
 
 
 
-int getInBlockIndex(ivec2 cell) {
-  ivec2 margolusCell = u_partition ? (cell + PARTITION_OFFSET) : cell;
-  return (margolusCell.x & 1) + 2 * (margolusCell.y & 1);
+struct Cell {
+  int type;
+  int empty1;
+  int empty2;
+  int empty3;
+};
+
+struct Block {
+  Cell BL;
+  Cell BR;
+  Cell TL;
+  Cell TR;
+};
+
+
+
+
+Cell getCell(ivec2 grid) {
+  ivec4 state = texelFetch(u_inputTextureIndex, grid, 0);
+
+  Cell cell;
+  cell.type   = state.r;
+  cell.empty1 = state.g;
+  cell.empty2 = state.b;
+  cell.empty3 = state.a;
+
+  return cell;
 }
 
-ivec2 getHorizontalNeighbor(ivec2 cell, int inBlockIndex) {
-  if((inBlockIndex & 1) == 0) return cell + EAST;
-  return cell + WEST;
+ivec2 getBlockOrigin(ivec2 grid) {
+  ivec2 buffer = ivec2(2, 2); // To always be above zero.
+
+  ivec2 offset = u_partition ? ivec2(1, 1) : ivec2(0, 0);
+  ivec2 origin = ((grid + buffer - offset) / 2) * 2 + offset;
+
+  return origin - buffer;
 }
 
-ivec2 getVerticalNeighbor(ivec2 cell, int inBlockIndex) {
-  if(inBlockIndex < 2) return cell + NORTH;
-  return cell + SOUTH;
+Block getBlock(ivec2 origin) {
+  Block block;
+  block.BL = getCell(origin);                 // index: 0
+  block.BR = getCell(origin + EAST);          // index: 1
+  block.TL = getCell(origin + NORTH);         // index: 2
+  block.TR = getCell(origin + NORTH + EAST);  // index: 3
+
+  return block;
 }
 
-ivec2 getDiagonalNeighbor(ivec2 cell, int inBlockIndex) {
-  if     (inBlockIndex == 0) return cell + NORTH + EAST;
-  else if(inBlockIndex == 1) return cell + NORTH + WEST;
-  else if(inBlockIndex == 2) return cell + SOUTH + EAST;
-  else                       return cell + SOUTH + WEST;
+int getInBlockIndex(ivec2 grid) {
+  ivec2 blockOrigin = getBlockOrigin(grid);
+
+  // remainder is: (0, 0), (1, 0), (0, 1), (1, 1)
+  ivec2 remainder = grid - blockOrigin;
+
+  return (remainder.x & 1) + 2 * (remainder.y & 1);
 }
 
-ivec4 getState(ivec2 cell) {
-  return texelFetch(u_inputTextureIndex, cell, 0);
+Cell getCellFromBlock(ivec2 grid, Block block) {
+  int inBlockIndex = getInBlockIndex(grid);
+
+  if(inBlockIndex == 0) return block.BL;
+  if(inBlockIndex == 1) return block.BR;
+  if(inBlockIndex == 2) return block.TL;
+  if(inBlockIndex == 3) return block.TR;
 }
 
 bool isClicked() {
@@ -66,89 +106,28 @@ bool isClicked() {
 
 
 
-bool isOpen(int element) {
-  return element == EMPTY;
-}
-
-bool isSolid(int element) {
-  return element == SAND || element == BLOCK;
-}
-
-bool isLiquid(int element) {
-  return element == WATER;
-}
-
-bool isFallingSolid(int element) {
-  return element == SAND;
-}
-
-bool isMoving(int element) {
-  return element == SAND || element == WATER || element == FIRE || element == STEAM;
-}
-
-
-
-
-int solids_empty(ivec3 neighbors, int inBlockIndex) {
-  bool isAbove = inBlockIndex > 1;
-  if(isAbove) return EMPTY;
-
-  if(isFallingSolid(neighbors.y))
-    return neighbors.y;
-
-  if(isFallingSolid(neighbors.z) && isSolid(neighbors.x))
-    return neighbors.z;
-
-  return EMPTY;
-}
-
-int solids_sand(ivec3 neighbors, int inBlockIndex) {
-  bool isBelow = inBlockIndex < 2;
-  if(isBelow) return SAND;
-
-  if(isOpen(neighbors.y)) return EMPTY;
-
-  if(isSolid(neighbors.y)) {
-    if(isOpen(neighbors.z) && !isFallingSolid(neighbors.x))
-      return EMPTY;
-  }
-
-  return SAND;
-}
-
-
-
-
 void main() {
   if(isClicked()) {
-    outData = ivec4(u_inputKey);
+    outData = ivec4(u_inputKey, 0, 0, 0);
     return;
   }
 
-  ivec2 cell = ivec2(gl_FragCoord.xy);
+  ivec2 grid = ivec2(gl_FragCoord.xy);
+  ivec2 blockOrigin = getBlockOrigin(grid);
+  Block block = getBlock(blockOrigin);
+  Cell thisCell = getCellFromBlock(grid, block);
 
-  int inBlockIndex = getInBlockIndex(cell);
+  outData = ivec4(0);
 
-  ivec4 horizontalNeighborState = getState(getHorizontalNeighbor(cell, inBlockIndex));
-  ivec4 verticalNeighborState   = getState(getVerticalNeighbor(cell, inBlockIndex));
-  ivec4 diagonalNeighborState   = getState(getDiagonalNeighbor(cell, inBlockIndex));
+  // ivec2 customGrid = ivec2(0, 0);
+  // ivec2 customOrigin = getBlockOrigin(customGrid);
+  // if(grid == customGrid) outData = ivec4(FIRE);
+  // if(grid == customOrigin) outData = ivec4(WATER);
 
-  ivec3 neighbors = ivec3(
-    horizontalNeighborState.r,
-    verticalNeighborState.r,
-    diagonalNeighborState.r
+  outData = ivec4(
+    thisCell.type,
+    thisCell.empty1,
+    thisCell.empty2,
+    thisCell.empty3
   );
-
-  ivec4 state = getState(cell);
-  ivec4 newState = state;
-
-  int element = newState.r;
-
-  if(element == EMPTY)
-    newState.r = solids_empty(neighbors, inBlockIndex);
-
-  else if(element == SAND)
-    newState.r = solids_sand(neighbors, inBlockIndex);
-
-  outData = newState;
 }

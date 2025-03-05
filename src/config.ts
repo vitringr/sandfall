@@ -1,10 +1,10 @@
 export namespace Config {
-  export const columns: number = 80;
+  export const columns: number = 10;
   export const totalCells = columns * columns;
 
-  export const percent: number = 20;
+  export const p = true;
 
-  export const FPS: number = -1;
+  export const FPS: number = 10;
 
   export const borderSize: number = 1;
 
