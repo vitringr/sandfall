@@ -18,13 +18,9 @@ const float POINTER_AREA = 0.05;
 const ivec2 PARTITION_OFFSET = ivec2(1, 1);
 
 const ivec2 NORTH      = ivec2( 0,  1);
-const ivec2 NORTH_EAST = ivec2( 1,  1);
 const ivec2 EAST       = ivec2( 1,  0);
-const ivec2 SOUTH_EAST = ivec2( 1, -1);
 const ivec2 SOUTH      = ivec2( 0, -1);
-const ivec2 SOUTH_WEST = ivec2(-1, -1);
 const ivec2 WEST       = ivec2(-1,  0);
-const ivec2 NORTH_WEST = ivec2(-1,  1);
 
 const int EMPTY = 0;
 const int BLOCK = 1;
@@ -32,11 +28,6 @@ const int SAND  = 2;
 const int WATER = 3;
 const int FIRE  = 4;
 const int STEAM = 5;
-
-const int UPDATES_COUNT = 2;
-
-const int SOLIDS_UPDATE  = 0;
-const int LIQUIDS_UPDATE = 0;
 
 
 
@@ -57,10 +48,10 @@ ivec2 getVerticalNeighbor(ivec2 cell, int inBlockIndex) {
 }
 
 ivec2 getDiagonalNeighbor(ivec2 cell, int inBlockIndex) {
-  if     (inBlockIndex == 0) return cell + NORTH_EAST;
-  else if(inBlockIndex == 1) return cell + NORTH_WEST;
-  else if(inBlockIndex == 2) return cell + SOUTH_EAST;
-  else                       return cell + SOUTH_WEST;
+  if     (inBlockIndex == 0) return cell + NORTH + EAST;
+  else if(inBlockIndex == 1) return cell + NORTH + WEST;
+  else if(inBlockIndex == 2) return cell + SOUTH + EAST;
+  else                       return cell + SOUTH + WEST;
 }
 
 ivec4 getState(ivec2 cell) {

@@ -1,12 +1,12 @@
 export namespace Config {
-  export const columns: number = 100;
+  export const columns: number = 80;
   export const totalCells = columns * columns;
 
   export const percent: number = 20;
 
   export const FPS: number = -1;
 
-  export const borderSize: number = 2;
+  export const borderSize: number = 1;
 
   export enum Elements {
     EMPTY = 0,
