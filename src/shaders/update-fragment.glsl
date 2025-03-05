@@ -17,10 +17,10 @@ uniform isampler2D u_inputTextureIndex;
 const float POINTER_AREA = 0.05;
 const ivec2 PARTITION_OFFSET = ivec2(1, 1);
 
-const ivec2 NORTH      = ivec2( 0,  1);
-const ivec2 EAST       = ivec2( 1,  0);
-const ivec2 SOUTH      = ivec2( 0, -1);
-const ivec2 WEST       = ivec2(-1,  0);
+const ivec2 NORTH = ivec2( 0,  1);
+const ivec2 EAST  = ivec2( 1,  0);
+const ivec2 SOUTH = ivec2( 0, -1);
+const ivec2 WEST  = ivec2(-1,  0);
 
 const int EMPTY = 0;
 const int BLOCK = 1;
@@ -62,12 +62,12 @@ Cell getCell(ivec2 grid) {
 }
 
 ivec2 getBlockOrigin(ivec2 grid) {
-  ivec2 buffer = ivec2(2, 2); // To always be above zero.
+  ivec2 keepAboveZero = ivec2(2, 2);
 
-  ivec2 offset = u_partition ? ivec2(1, 1) : ivec2(0, 0);
-  ivec2 origin = ((grid + buffer - offset) / 2) * 2 + offset;
+  ivec2 offset = u_partition ? PARTITION_OFFSET : ivec2(0, 0);
+  ivec2 origin = ((grid + keepAboveZero - offset) / 2) * 2 + offset;
 
-  return origin - buffer;
+  return origin - keepAboveZero;
 }
 
 Block getBlock(ivec2 origin) {
@@ -118,11 +118,6 @@ void main() {
   Cell thisCell = getCellFromBlock(grid, block);
 
   outData = ivec4(0);
-
-  // ivec2 customGrid = ivec2(0, 0);
-  // ivec2 customOrigin = getBlockOrigin(customGrid);
-  // if(grid == customGrid) outData = ivec4(FIRE);
-  // if(grid == customOrigin) outData = ivec4(WATER);
 
   outData = ivec4(
     thisCell.type,

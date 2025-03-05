@@ -218,9 +218,7 @@ export class Main {
       updateLoop();
       renderLoop();
 
-      if (Config.p) {
-        partition = !partition;
-      }
+      partition = !partition;
 
       time++;
 

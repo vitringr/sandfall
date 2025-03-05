@@ -2,9 +2,7 @@ export namespace Config {
   export const columns: number = 10;
   export const totalCells = columns * columns;
 
-  export const p = true;
-
-  export const FPS: number = 10;
+  export const FPS: number = 30;
 
   export const borderSize: number = 1;
 
