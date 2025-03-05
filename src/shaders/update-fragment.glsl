@@ -114,10 +114,20 @@ void main() {
 
   ivec2 grid = ivec2(gl_FragCoord.xy);
   ivec2 blockOrigin = getBlockOrigin(grid);
-  Block block = getBlock(blockOrigin);
-  Cell thisCell = getCellFromBlock(grid, block);
 
-  outData = ivec4(0);
+  Block block = getBlock(blockOrigin);
+
+  if(block.TL.type == SAND && block.BL.type == EMPTY) {
+    block.TL.type = EMPTY;
+    block.BL.type = SAND;
+  }
+
+  if(block.TR.type == SAND && block.BR.type == EMPTY) {
+    block.TR.type = EMPTY;
+    block.BR.type = SAND;
+  }
+
+  Cell thisCell = getCellFromBlock(grid, block);
 
   outData = ivec4(
     thisCell.type,
