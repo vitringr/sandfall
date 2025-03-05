@@ -6,10 +6,10 @@ export class Generator {
 
     for (let i = 0; i < Config.totalCells; i++) {
       const type = 0;
-      const g = 1;
-      const b = 0;
-      const clock = 0;
-      state.push(type, g, b, clock);
+      const xVelocity = 1;
+      const yVelocity = 0;
+      const density = 0;
+      state.push(type, xVelocity, yVelocity, density);
     }
 
     return state;

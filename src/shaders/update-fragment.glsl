@@ -29,28 +29,29 @@ const int WATER = 3;
 const int FIRE  = 4;
 const int STEAM = 5;
 
+const int DENSITY[6] = int[6](
+  -10,
+  10,
+  1,
+  0,
+  -1,
+  -1
+);
+
 
 
 
 struct Cell {
   int type;
-  int empty1;
-  int empty2;
-  int empty3;
+  ivec2 velocity;
+  int density;
 };
 
 struct Block {
-  Cell BL;
-  Cell BR;
-  Cell TL;
-  Cell TR;
-};
-
-struct TypeBlock {
-  int BL;
-  int BR;
-  int TL;
-  int TR;
+  Cell bl;
+  Cell br;
+  Cell tl;
+  Cell tr;
 };
 
 
@@ -60,10 +61,9 @@ Cell getCell(ivec2 grid) {
   ivec4 state = texelFetch(u_inputTextureIndex, grid, 0);
 
   Cell cell;
-  cell.type   = state.r;
-  cell.empty1 = state.g;
-  cell.empty2 = state.b;
-  cell.empty3 = state.a;
+  cell.type     = state.r;
+  cell.velocity = state.gb;
+  cell.density  = state.a;
 
   return cell;
 }
@@ -79,28 +79,17 @@ ivec2 getBlockOrigin(ivec2 grid) {
 
 Block getBlock(ivec2 origin) {
   Block block;
-  block.BL = getCell(origin);                 // index: 0
-  block.BR = getCell(origin + EAST);          // index: 1
-  block.TL = getCell(origin + NORTH);         // index: 2
-  block.TR = getCell(origin + NORTH + EAST);  // index: 3
+  block.bl = getCell(origin);                 // index: 0
+  block.br = getCell(origin + EAST);          // index: 1
+  block.tl = getCell(origin + NORTH);         // index: 2
+  block.tr = getCell(origin + NORTH + EAST);  // index: 3
 
   return block;
-}
-
-TypeBlock getTypeBlock(Block block) {
-  TypeBlock typeBlock;
-  typeBlock.BL = block.BL.type;
-  typeBlock.BR = block.BR.type;
-  typeBlock.TL = block.TL.type;
-  typeBlock.TR = block.TR.type;
-
-  return typeBlock;
 }
 
 int getInBlockIndex(ivec2 grid) {
   ivec2 blockOrigin = getBlockOrigin(grid);
 
-  // remainder is: (0, 0), (1, 0), (0, 1), (1, 1)
   ivec2 remainder = grid - blockOrigin;
 
   return (remainder.x & 1) + 2 * (remainder.y & 1);
@@ -109,10 +98,10 @@ int getInBlockIndex(ivec2 grid) {
 Cell getCellFromBlock(ivec2 grid, Block block) {
   int inBlockIndex = getInBlockIndex(grid);
 
-  if(inBlockIndex == 0) return block.BL;
-  if(inBlockIndex == 1) return block.BR;
-  if(inBlockIndex == 2) return block.TL;
-  if(inBlockIndex == 3) return block.TR;
+  if(inBlockIndex == 0) return block.bl;
+  if(inBlockIndex == 1) return block.br;
+  if(inBlockIndex == 2) return block.tl;
+  if(inBlockIndex == 3) return block.tr;
 }
 
 bool isClicked() {
@@ -123,30 +112,101 @@ bool isClicked() {
 
 
 
-void swap(inout int a, inout int b) {
-  int temp = a;
+void swap(inout Cell a, inout Cell b) {
+  Cell temp = a;
   a = b;
   b = temp;
 }
 
+bool isMoving(Cell cell) {
+  return cell.velocity != ivec2(0, 0);
+}
+
+bool canMoveInBlock(ivec2 velocity, int inBlockIndex) {
+  if(inBlockIndex == 0) return velocity.x >= 0 && velocity.y >= 0; // bl
+  if(inBlockIndex == 1) return velocity.x <= 0 && velocity.y >= 0; // br
+  if(inBlockIndex == 2) return velocity.x >= 0 && velocity.y <= 0; // tl
+  if(inBlockIndex == 3) return velocity.x <= 0 && velocity.y <= 0; // tr
+}
+
+bool canSwap(Cell a, Cell b) {
+  return a.density > b.density;
+}
+
+
+
 Block applyLogic(Block originalBlock) {
-  Block newBlock = originalBlock;
-  TypeBlock types = getTypeBlock(newBlock);
+  Block block = originalBlock;
 
-  if(types.TL == SAND && types.BL == EMPTY) {
-    swap(types.TL, types.BL);
+  if(isMoving(block.bl) && canMoveInBlock(block.bl.velocity, 0)) {
+    if(block.bl.velocity == EAST) {
+      if(canSwap(block.bl, block.br))
+        swap(block.bl, block.br);
+    }
+
+    if(block.bl.velocity == NORTH) {
+      if(canSwap(block.bl, block.tl))
+        swap(block.bl, block.tl);
+    }
+
+    if(block.bl.velocity == (NORTH + EAST)) {
+      if(canSwap(block.bl, block.tr))
+        swap(block.bl, block.tr);
+    }
   }
 
-  if(types.TR == SAND && types.BR == EMPTY) {
-    swap(types.TR, types.BR);
+  if(isMoving(block.br) && canMoveInBlock(block.br.velocity, 1)) {
+    if(block.br.velocity == WEST) {
+      if(canSwap(block.br, block.bl))
+        swap(block.br, block.bl);
+    }
+
+    if(block.br.velocity == (NORTH + WEST)) {
+      if(canSwap(block.br, block.tl))
+        swap(block.br, block.tl);
+    }
+
+    if(block.br.velocity == NORTH) {
+      if(canSwap(block.br, block.tr))
+        swap(block.br, block.tr);
+    }
   }
 
-  newBlock.BL.type = types.BL;
-  newBlock.BR.type = types.BR;
-  newBlock.TL.type = types.TL;
-  newBlock.TR.type = types.TR;
+  if(isMoving(block.tl) && canMoveInBlock(block.tl.velocity, 2)) {
+    if(block.tl.velocity == SOUTH) {
+      if(canSwap(block.tl, block.bl))
+        swap(block.tl, block.bl);
+    }
 
-  return newBlock;
+    if(block.tl.velocity == (SOUTH + EAST)) {
+      if(canSwap(block.tl, block.br))
+        swap(block.tl, block.br);
+    }
+
+    if(block.tl.velocity == EAST) {
+      if(canSwap(block.tl, block.tr))
+        swap(block.tl, block.tr);
+    }
+  }
+
+  if(isMoving(block.tr) && canMoveInBlock(block.tr.velocity, 3)) {
+    if(block.tr.velocity == (SOUTH + WEST)) {
+      if(canSwap(block.tr, block.bl))
+        swap(block.tr, block.bl);
+    }
+
+    if(block.tr.velocity == SOUTH) {
+      if(canSwap(block.tr, block.br))
+        swap(block.tr, block.br);
+    }
+
+    if(block.tr.velocity == WEST) {
+      if(canSwap(block.tr, block.tl))
+        swap(block.tr, block.tl);
+    }
+  }
+
+  return block;
 }
 
 
@@ -154,7 +214,10 @@ Block applyLogic(Block originalBlock) {
 
 void main() {
   if(isClicked()) {
-    outData = ivec4(u_inputKey, 0, 0, 0);
+    // TODO: velocity on spawn
+    int type = u_inputKey;
+    int gravity = type == BLOCK || type == EMPTY ? 0 : -1;
+    outData = ivec4(type, 0, gravity, DENSITY[type]);
     return;
   }
 
@@ -168,8 +231,7 @@ void main() {
 
   outData = ivec4(
     thisCell.type,
-    thisCell.empty1,
-    thisCell.empty2,
-    thisCell.empty3
+    thisCell.velocity,
+    thisCell.density
   );
 }
