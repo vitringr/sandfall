@@ -1,5 +1,7 @@
 export namespace Config {
-  export const columns: number = 100;
+  export const debug = true;
+
+  export const columns: number = 20;
   export const totalCells = columns * columns;
 
   export const walls: boolean = true;

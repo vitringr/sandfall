@@ -97,4 +97,10 @@ export class Input {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
   }
+
+  onDebug(callback: () => void) {
+    window.addEventListener("keydown", (ev: KeyboardEvent) => {
+      if (ev.key.toLowerCase() === "c") callback();
+    });
+  }
 }

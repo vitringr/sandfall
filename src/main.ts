@@ -14,7 +14,7 @@ export class Main {
   private input = new Input();
   private generator = new Generator();
 
-  constructor(private readonly canvas: HTMLCanvasElement) {}
+  constructor(private readonly canvas: HTMLCanvasElement) { }
 
   setup() {
     if (this.initialized) throw "Already initialized";
@@ -82,6 +82,8 @@ export class Main {
           programs.render,
           "u_outputTextureIndex",
         ),
+
+        uDebug: gl.getUniformLocation(programs.render, "u_debug"),
       },
     };
 
@@ -210,6 +212,7 @@ export class Main {
       gl.uniform1f(locations.render.uColumns, Config.columns);
       gl.uniform1f(locations.render.uBorderSize, Config.borderSize);
       gl.uniform1i(locations.render.uOutputTextureIndex, 0);
+      gl.uniform1i(locations.render.uDebug, Config.debug ? 1 : 0);
 
       gl.drawArrays(gl.POINTS, 0, Config.totalCells);
     };
@@ -226,11 +229,14 @@ export class Main {
       textures.first = textures.second;
       textures.second = swap;
 
-      if (Config.FPS === -1) requestAnimationFrame(mainLoop);
+      if (!Config.debug && Config.FPS === -1) requestAnimationFrame(mainLoop);
     };
 
     mainLoop();
 
-    if (Config.FPS !== -1) setInterval(mainLoop, 1000 / Config.FPS);
+    if (Config.debug) this.input.onDebug(mainLoop);
+
+    if (!Config.debug && Config.FPS !== -1)
+      setInterval(mainLoop, 1000 / Config.FPS);
   }
 }
