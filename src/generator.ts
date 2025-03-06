@@ -1,6 +1,21 @@
 import { Config } from "./config";
 
 export class Generator {
+  setWalls(state: number[]): number[] {
+    const newState = state;
+
+    for (let i = 0; i < Config.totalCells; i++) {
+      const index = i * 4;
+
+      if (i < Config.columns) newState[index] = 1;
+      if (i > Config.totalCells - Config.columns) newState[index] = 1;
+      if (i % Config.columns == 0) newState[index] = 1;
+      if (i % Config.columns == Config.columns - 1) newState[index] = 1;
+    }
+
+    return newState;
+  }
+
   generate() {
     const state: number[] = [];
 
@@ -11,6 +26,8 @@ export class Generator {
       const empty1 = 0;
       state.push(type, velocity, empty0, empty1);
     }
+
+    if (Config.walls) this.setWalls(state);
 
     return state;
   }
