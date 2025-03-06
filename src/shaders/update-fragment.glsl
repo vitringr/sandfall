@@ -287,12 +287,7 @@ void main() {
 
   Block newBlock = applyVelocity(block);
 
-  Block rotation1 = rotateBlock(newBlock);
-  Block rotation2 = rotateBlock(rotation1);
-  Block rotation3 = rotateBlock(rotation2);
-  Block rotation4 = rotateBlock(rotation3);
-
-  Cell thisCell = getCellFromBlock(grid, rotation4);
+  Cell thisCell = getCellFromBlock(grid, newBlock);
 
   outData = ivec4(
     thisCell.type,
