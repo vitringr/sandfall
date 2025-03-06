@@ -33,10 +33,10 @@ const int DENSITY[6] = int[6](
   /* STEAM */ 2
 );
 
-const int LEFT          = 1;
-const int DOWN          = 2;
-const int RIGHT         = 3;
-const int UP            = 4;
+const int LEFT  = 1;
+const int DOWN  = 2;
+const int RIGHT = 3;
+const int UP    = 4;
 
 const int SPREAD_NONE = 0;
 const int SPREAD_LOW  = 1;
@@ -135,17 +135,6 @@ void swap(inout Cell a, inout Cell b) {
   b = temp;
 }
 
-bool isMoving(Cell cell) {
-  return cell.velocity > 0;
-}
-
-bool canMoveInBlock(int velocity, int inBlockIndex) {
-  if(inBlockIndex == 0) return velocity == RIGHT || velocity == UP;   // bl
-  if(inBlockIndex == 1) return velocity == RIGHT || velocity == DOWN; // tl
-  if(inBlockIndex == 2) return velocity == LEFT  || velocity == DOWN; // tr
-  if(inBlockIndex == 3) return velocity == LEFT  || velocity == UP;   // br
-}
-
 bool canSwap(Cell a, Cell b) {
   return DENSITY[a.type] > DENSITY[b.type];
 }
@@ -211,60 +200,114 @@ Block rotateBackBlock(Block block) {
 
 
 
+// Maybe because it's biased, and it chooses to spread while falling down?
 
-// Block asd(Block block, Cell cell, int inBlockIndex) {
-//   if(!isMoving(cell)) return block;
-//   if(!canMoveInBlock(cell.velocity, inBlockIndex)) return block;
-// }
+Block applySwaps(Block block) {
+  int spread = SPREAD[block.bl.type];
 
-Block applyVelocity(Block originalBlock) {
+  if(block.bl.velocity == 0) return block;
+
+  if(block.bl.velocity == LEFT) {
+    if(spread >= 2 && canSwap(block.bl, block.tl)) {
+      swap(block.bl, block.tl);
+      return block;
+    }
+
+    if(spread >= 3 && canSwap(block.bl, block.tr)) {
+      swap(block.bl, block.tr);
+      return block;
+    }
+
+    if(spread >= 4 && canSwap(block.bl, block.br)) {
+      swap(block.bl, block.br);
+      return block;
+    }
+
+    return block;
+  }
+
+  if(block.bl.velocity == DOWN) {
+    if(spread >= 2 && canSwap(block.bl, block.br)) {
+      swap(block.bl, block.br);
+      return block;
+    }
+
+    if(spread >= 3 && canSwap(block.bl, block.tr)) {
+      swap(block.bl, block.tr);
+      return block;
+    }
+
+    if(spread >= 4 && canSwap(block.bl, block.tl)) {
+      swap(block.bl, block.tl);
+      return block;
+    }
+
+    return block;
+  }
+
+  if(block.bl.velocity == RIGHT) {
+    if(canSwap(block.bl, block.br)) {
+      swap(block.bl, block.br);
+      return block;
+    }
+
+    if(spread >= 1 && canSwap(block.bl, block.tr)) {
+      swap(block.bl, block.tr);
+      return block;
+    }
+
+    if(spread >= 2 && canSwap(block.bl, block.tl)) {
+      swap(block.bl, block.tl);
+      return block;
+    }
+
+    return block;
+  }
+
+  if(block.bl.velocity == UP) {
+    if(canSwap(block.bl, block.tl)) {
+      swap(block.bl, block.tl);
+      return block;
+    }
+
+    if(spread >= 1 && canSwap(block.bl, block.tr)) {
+      swap(block.bl, block.tr);
+      return block;
+    }
+
+    if(spread >= 2 && canSwap(block.bl, block.br)) {
+      swap(block.bl, block.br);
+      return block;
+    }
+
+    return block;
+  }
+
+  return block;
+}
+
+Block change(Block originalBlock) {
   Block block = originalBlock;
 
-  // asd(block, block.bl, 0);
+  block = applySwaps(block);
 
-  if(isMoving(block.bl) && canMoveInBlock(block.bl.velocity, 0)) {
-    if(block.bl.velocity == RIGHT) {
-      if(canSwap(block.bl, block.br)) swap(block.bl, block.br);
-      else if(canSwap(block.bl, block.tr)) swap(block.bl, block.tr);
-    }
-    else if(block.bl.velocity == UP) {
-      if(canSwap(block.bl, block.tl)) swap(block.bl, block.tl);
-      else if(canSwap(block.bl, block.tr)) swap(block.bl, block.tr);
-    }
-  }
+  block = rotateBlock(block);
+  block = applySwaps(block);
+  block = rotateBackBlock(block);
 
-  if(isMoving(block.tl) && canMoveInBlock(block.tl.velocity, 1)) {
-    if(block.tl.velocity == DOWN) {
-      if(canSwap(block.tl, block.bl)) swap(block.tl, block.bl);
-      else if(canSwap(block.tl, block.br)) swap(block.tl, block.br);
-    }
-    else if(block.tl.velocity == RIGHT) {
-      if(canSwap(block.tl, block.tr)) swap(block.tl, block.tr);
-      else if(canSwap(block.tl, block.br)) swap(block.tl, block.br);
-    }
-  }
+  block = rotateBlock(block);
+  block = rotateBlock(block);
+  block = rotateBlock(block);
+  block = applySwaps(block);
+  block = rotateBackBlock(block);
+  block = rotateBackBlock(block);
+  block = rotateBackBlock(block);
 
-  if(isMoving(block.tr) && canMoveInBlock(block.tr.velocity, 2)) {
-    if(block.tr.velocity == DOWN) {
-      if(canSwap(block.tr, block.br)) swap(block.tr, block.br);
-      else if(canSwap(block.tr, block.bl)) swap(block.tr, block.bl);
-    }
-    else if(block.tr.velocity == LEFT) {
-      if(canSwap(block.tr, block.tl)) swap(block.tr, block.tl);
-      else if(canSwap(block.tr, block.bl)) swap(block.tr, block.bl);
-    }
-  }
-
-  if(isMoving(block.br) && canMoveInBlock(block.br.velocity, 3)) {
-    if(block.br.velocity == LEFT) {
-      if(canSwap(block.br, block.bl)) swap(block.br, block.bl);
-      else if(canSwap(block.br, block.tl)) swap(block.br, block.tl);
-    }
-    else if(block.br.velocity == UP) {
-      if(canSwap(block.br, block.tr)) swap(block.br, block.tr);
-      else if(canSwap(block.br, block.tl)) swap(block.br, block.tl);
-    }
-  }
+  block = rotateBlock(block);
+  block = rotateBlock(block);
+  block = applySwaps(block);
+  block = rotateBackBlock(block);
+  block = rotateBackBlock(block);
 
   return block;
 }
@@ -275,8 +318,9 @@ Block applyVelocity(Block originalBlock) {
 void main() {
   if(isClicked()) {
     int type = u_inputKey;
-    int gravity = type == BLOCK || type == EMPTY ? 0 : DOWN;
-    outData = ivec4(type, gravity, 0, 0);
+    int velocity = DOWN;
+    if(type == EMPTY || type == BLOCK) velocity = 0;
+    outData = ivec4(type, velocity, 0, 0);
     return;
   }
 
@@ -284,11 +328,9 @@ void main() {
   ivec2 blockOrigin = getBlockOrigin(grid);
 
   Block block = getBlock(blockOrigin);
-
-  Block newBlock = applyVelocity(block);
+  Block newBlock = change(block);
 
   Cell thisCell = getCellFromBlock(grid, newBlock);
-
   outData = ivec4(
     thisCell.type,
     thisCell.velocity,

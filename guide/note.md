@@ -2,4 +2,4 @@
 
 Have different levels of spread.
 
-Continue using only cardinal velocity with them.
+Continue using only one cardinal velocity with them.
