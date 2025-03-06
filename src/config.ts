@@ -1,10 +1,10 @@
 export namespace Config {
-  export const columns: number = 40;
+  export const columns: number = 100;
   export const totalCells = columns * columns;
 
-  export const FPS: number = 30;
+  export const FPS: number = -1;
 
-  export const borderSize: number = 1;
+  export const borderSize: number = 0;
 
   export enum Elements {
     EMPTY = 0,

@@ -1,3 +1,5 @@
-# Velocity
+# Spread
 
-Cells should only have cardinal velocity for now.
+Have different levels of spread.
+
+Continue using only cardinal velocity with them.

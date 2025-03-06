@@ -14,7 +14,7 @@ uniform bool u_isPointerDown;
 uniform vec2 u_pointerPosition;
 uniform isampler2D u_inputTextureIndex;
 
-const float POINTER_AREA = 0.05;
+const float POINTER_AREA = 0.03;
 const ivec2 PARTITION_OFFSET = ivec2(1, 1);
 
 const ivec2 NORTH = ivec2( 0,  1);
@@ -30,12 +30,27 @@ const int FIRE  = 4;
 const int STEAM = 5;
 
 const int DENSITY[6] = int[6](
-  /* EMPTY */ -10,
-  /* BLOCK */ 10,
-  /* SAND  */ 1,
-  /* WATER */ 0,
-  /* FIRE  */ -1,
-  /* STEAM */ -1
+  /* EMPTY */ 0,
+  /* BLOCK */ 5,
+  /* SAND  */ 4,
+  /* WATER */ 3,
+  /* FIRE  */ 1,
+  /* STEAM */ 2
+);
+
+const int SPREAD_NONE = 0;
+const int SPREAD_LOW  = 1;
+const int SPREAD_MID  = 2;
+const int SPREAD_HIGH = 3;
+const int SPREAD_FULL = 4;
+
+const int SPREAD[6] = int[6](
+  /* EMPTY */ -1,
+  /* BLOCK */ -1,
+  /* SAND  */ SPREAD_LOW,
+  /* WATER */ SPREAD_MID,
+  /* FIRE  */ SPREAD_HIGH,
+  /* STEAM */ SPREAD_HIGH
 );
 
 
@@ -92,16 +107,16 @@ int getInBlockIndex(ivec2 grid) {
 
   ivec2 remainder = grid - blockOrigin;
 
-  return (remainder.x & 1) + 2 * (remainder.y & 1);
+  return (1 - remainder.x) * remainder.y + remainder.x * (3 - remainder.y);
 }
 
 Cell getCellFromBlock(ivec2 grid, Block block) {
   int inBlockIndex = getInBlockIndex(grid);
 
   if(inBlockIndex == 0) return block.bl;
-  if(inBlockIndex == 1) return block.br;
-  if(inBlockIndex == 2) return block.tl;
-  if(inBlockIndex == 3) return block.tr;
+  if(inBlockIndex == 1) return block.tl;
+  if(inBlockIndex == 2) return block.tr;
+  if(inBlockIndex == 3) return block.br;
 }
 
 bool isClicked() {
@@ -124,19 +139,31 @@ bool isMoving(Cell cell) {
 
 bool canMoveInBlock(ivec2 velocity, int inBlockIndex) {
   if(inBlockIndex == 0) return velocity.x >= 0 && velocity.y >= 0; // bl
-  if(inBlockIndex == 1) return velocity.x <= 0 && velocity.y >= 0; // br
-  if(inBlockIndex == 2) return velocity.x >= 0 && velocity.y <= 0; // tl
-  if(inBlockIndex == 3) return velocity.x <= 0 && velocity.y <= 0; // tr
+  if(inBlockIndex == 1) return velocity.x >= 0 && velocity.y <= 0; // tl
+  if(inBlockIndex == 2) return velocity.x <= 0 && velocity.y <= 0; // tr
+  if(inBlockIndex == 3) return velocity.x <= 0 && velocity.y >= 0; // br
 }
 
 bool canSwap(Cell a, Cell b) {
   return a.density > b.density;
 }
 
+bool hasLowSpread(Cell cell) {
+  return SPREAD[cell.type] >= SPREAD_LOW;
+}
 
 
-Block applyLogic(Block originalBlock) {
+
+
+Block asd(Block block, Cell cell, int inBlockIndex) {
+  if(!isMoving(cell)) return block;
+  if(!canMoveInBlock(cell.velocity, inBlockIndex)) return block;
+}
+
+Block applyVelocity(Block originalBlock) {
   Block block = originalBlock;
+
+  asd(block, block.bl, 0);
 
   if(isMoving(block.bl) && canMoveInBlock(block.bl.velocity, 0)) {
     if(block.bl.velocity == EAST) {
@@ -149,18 +176,7 @@ Block applyLogic(Block originalBlock) {
     }
   }
 
-  if(isMoving(block.br) && canMoveInBlock(block.br.velocity, 1)) {
-    if(block.br.velocity == WEST) {
-      if(canSwap(block.br, block.bl)) swap(block.br, block.bl);
-      else if(canSwap(block.br, block.tl)) swap(block.br, block.tl);
-    }
-    else if(block.br.velocity == NORTH) {
-      if(canSwap(block.br, block.tr)) swap(block.br, block.tr);
-      else if(canSwap(block.br, block.tl)) swap(block.br, block.tl);
-    }
-  }
-
-  if(isMoving(block.tl) && canMoveInBlock(block.tl.velocity, 2)) {
+  if(isMoving(block.tl) && canMoveInBlock(block.tl.velocity, 1)) {
     if(block.tl.velocity == SOUTH) {
       if(canSwap(block.tl, block.bl)) swap(block.tl, block.bl);
       else if(canSwap(block.tl, block.br)) swap(block.tl, block.br);
@@ -171,7 +187,7 @@ Block applyLogic(Block originalBlock) {
     }
   }
 
-  if(isMoving(block.tr) && canMoveInBlock(block.tr.velocity, 3)) {
+  if(isMoving(block.tr) && canMoveInBlock(block.tr.velocity, 2)) {
     if(block.tr.velocity == SOUTH) {
       if(canSwap(block.tr, block.br)) swap(block.tr, block.br);
       else if(canSwap(block.tr, block.bl)) swap(block.tr, block.bl);
@@ -181,6 +197,18 @@ Block applyLogic(Block originalBlock) {
       else if(canSwap(block.tr, block.bl)) swap(block.tr, block.bl);
     }
   }
+
+  if(isMoving(block.br) && canMoveInBlock(block.br.velocity, 3)) {
+    if(block.br.velocity == WEST) {
+      if(canSwap(block.br, block.bl)) swap(block.br, block.bl);
+      else if(canSwap(block.br, block.tl)) swap(block.br, block.tl);
+    }
+    else if(block.br.velocity == NORTH) {
+      if(canSwap(block.br, block.tr)) swap(block.br, block.tr);
+      else if(canSwap(block.br, block.tl)) swap(block.br, block.tl);
+    }
+  }
+
 
   return block;
 }
@@ -200,7 +228,7 @@ void main() {
   ivec2 blockOrigin = getBlockOrigin(grid);
 
   Block block = getBlock(blockOrigin);
-  Block newBlock = applyLogic(block);
+  Block newBlock = applyVelocity(block);
 
   Cell thisCell = getCellFromBlock(grid, newBlock);
 
