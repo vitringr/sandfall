@@ -17,12 +17,6 @@ uniform isampler2D u_inputTextureIndex;
 const float POINTER_AREA = 0.03;
 const ivec2 PARTITION_OFFSET = ivec2(1, 1);
 
-const int ZERO_VELOCITY = 0;
-const int LEFT          = 1;
-const int DOWN          = 2;
-const int RIGHT         = 3;
-const int UP            = 4;
-
 const int EMPTY = 0;
 const int BLOCK = 1;
 const int SAND  = 2;
@@ -38,6 +32,11 @@ const int DENSITY[6] = int[6](
   /* FIRE  */ 1,
   /* STEAM */ 2
 );
+
+const int LEFT          = 1;
+const int DOWN          = 2;
+const int RIGHT         = 3;
+const int UP            = 4;
 
 const int SPREAD_NONE = 0;
 const int SPREAD_LOW  = 1;
@@ -137,7 +136,7 @@ void swap(inout Cell a, inout Cell b) {
 }
 
 bool isMoving(Cell cell) {
-  return cell.velocity > ZERO_VELOCITY;
+  return cell.velocity > 0;
 }
 
 bool canMoveInBlock(int velocity, int inBlockIndex) {
@@ -155,6 +154,7 @@ bool canSwap(Cell a, Cell b) {
 
 
 int rotateVelocity(int velocity) {
+  if(velocity == 0) return 0;
   // left => down
   // down => right
   // right => up
@@ -164,6 +164,7 @@ int rotateVelocity(int velocity) {
 }
 
 int rotateBackVelocity(int velocity) {
+  if(velocity == 0) return 0;
   // up => right
   // right => down
   // down => left
@@ -172,41 +173,40 @@ int rotateBackVelocity(int velocity) {
   return velocity - 1;
 }
 
+Cell rotateCell(Cell cell) {
+  Cell counterclockwise = cell;
+
+  counterclockwise.velocity = rotateVelocity(cell.velocity);
+
+  return counterclockwise;
+}
+
+Cell rotateBackCell(Cell cell) {
+  Cell clockwise = cell;
+
+  clockwise.velocity = rotateBackVelocity(cell.velocity);
+
+  return clockwise;
+}
+
 Block rotateBlock(Block block) {
-  Block newBlock;
+  Block counterclockwise;
+  counterclockwise.bl = rotateCell(block.tl);
+  counterclockwise.tl = rotateCell(block.tr);
+  counterclockwise.tr = rotateCell(block.br);
+  counterclockwise.br = rotateCell(block.bl);
 
-  newBlock.bl = block.tl;
-  newBlock.bl.velocity = rotateVelocity(block.tl.velocity);
-
-  newBlock.tl = block.tr;
-  newBlock.tl.velocity = rotateVelocity(block.tr.velocity);
-
-  newBlock.tr = block.br;
-  newBlock.tr.velocity = rotateVelocity(block.br.velocity);
-
-  newBlock.br = block.bl;
-  newBlock.br.velocity = rotateVelocity(block.bl.velocity);
-
-  return newBlock;
+  return counterclockwise;
 }
 
 Block rotateBackBlock(Block block) {
-  // WIP
-  Block newBlock;
+  Block clockwise;
+  clockwise.bl = rotateBackCell(block.br);
+  clockwise.tl = rotateBackCell(block.bl);
+  clockwise.tr = rotateBackCell(block.tl);
+  clockwise.br = rotateBackCell(block.tr);
 
-  newBlock.bl = block.tl;
-  newBlock.bl.velocity = rotateVelocity(block.tl.velocity);
-
-  newBlock.tl = block.tr;
-  newBlock.tl.velocity = rotateVelocity(block.tr.velocity);
-
-  newBlock.tr = block.br;
-  newBlock.tr.velocity = rotateVelocity(block.br.velocity);
-
-  newBlock.br = block.bl;
-  newBlock.br.velocity = rotateVelocity(block.bl.velocity);
-
-  return newBlock;
+  return clockwise;
 }
 
 
@@ -266,7 +266,6 @@ Block applyVelocity(Block originalBlock) {
     }
   }
 
-
   return block;
 }
 
@@ -276,7 +275,7 @@ Block applyVelocity(Block originalBlock) {
 void main() {
   if(isClicked()) {
     int type = u_inputKey;
-    int gravity = type == BLOCK || type == EMPTY ? ZERO_VELOCITY : DOWN;
+    int gravity = type == BLOCK || type == EMPTY ? 0 : DOWN;
     outData = ivec4(type, gravity, 0, 0);
     return;
   }
@@ -285,9 +284,15 @@ void main() {
   ivec2 blockOrigin = getBlockOrigin(grid);
 
   Block block = getBlock(blockOrigin);
+
   Block newBlock = applyVelocity(block);
 
-  Cell thisCell = getCellFromBlock(grid, newBlock);
+  Block rotation1 = rotateBlock(newBlock);
+  Block rotation2 = rotateBlock(rotation1);
+  Block rotation3 = rotateBlock(rotation2);
+  Block rotation4 = rotateBlock(rotation3);
+
+  Cell thisCell = getCellFromBlock(grid, rotation4);
 
   outData = ivec4(
     thisCell.type,
