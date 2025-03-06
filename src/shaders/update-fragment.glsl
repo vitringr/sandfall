@@ -19,8 +19,8 @@ const ivec2 PARTITION_OFFSET = ivec2(1, 1);
 
 const int ZERO_VELOCITY = 0;
 const int LEFT          = 1;
-const int RIGHT         = 2;
-const int DOWN          = 3;
+const int DOWN          = 2;
+const int RIGHT         = 3;
 const int UP            = 4;
 
 const int EMPTY = 0;
@@ -154,17 +154,63 @@ bool canSwap(Cell a, Cell b) {
 
 
 
-// int rotateVelocity(int ) {
-//
-// }
+int rotateVelocity(int velocity) {
+  // left => down
+  // down => right
+  // right => up
+  // up => left
+  if(velocity >= UP) return LEFT;
+  return velocity + 1;
+}
 
-// Block rotateBlock(Block block, int rotations) {
-//   Block newBlock;
-//   newBlock.bl = block.tl;
-//   newBlock.tl = block.tr;
-//   newBlock.tr = block.br;
-//   newBlock.br = block.bl;
-// }
+int rotateBackVelocity(int velocity) {
+  // up => right
+  // right => down
+  // down => left
+  // left => up
+  if(velocity == LEFT) return UP;
+  return velocity - 1;
+}
+
+Block rotateBlock(Block block) {
+  Block newBlock;
+
+  newBlock.bl = block.tl;
+  newBlock.bl.velocity = rotateVelocity(block.tl.velocity);
+
+  newBlock.tl = block.tr;
+  newBlock.tl.velocity = rotateVelocity(block.tr.velocity);
+
+  newBlock.tr = block.br;
+  newBlock.tr.velocity = rotateVelocity(block.br.velocity);
+
+  newBlock.br = block.bl;
+  newBlock.br.velocity = rotateVelocity(block.bl.velocity);
+
+  return newBlock;
+}
+
+Block rotateBackBlock(Block block) {
+  // WIP
+  Block newBlock;
+
+  newBlock.bl = block.tl;
+  newBlock.bl.velocity = rotateVelocity(block.tl.velocity);
+
+  newBlock.tl = block.tr;
+  newBlock.tl.velocity = rotateVelocity(block.tr.velocity);
+
+  newBlock.tr = block.br;
+  newBlock.tr.velocity = rotateVelocity(block.br.velocity);
+
+  newBlock.br = block.bl;
+  newBlock.br.velocity = rotateVelocity(block.bl.velocity);
+
+  return newBlock;
+}
+
+
+
 
 // Block asd(Block block, Cell cell, int inBlockIndex) {
 //   if(!isMoving(cell)) return block;
@@ -230,7 +276,7 @@ Block applyVelocity(Block originalBlock) {
 void main() {
   if(isClicked()) {
     int type = u_inputKey;
-    int gravity = type == BLOCK || type == EMPTY ? 0 : 3;
+    int gravity = type == BLOCK || type == EMPTY ? ZERO_VELOCITY : DOWN;
     outData = ivec4(type, gravity, 0, 0);
     return;
   }
