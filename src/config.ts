@@ -1,7 +1,7 @@
 export namespace Config {
   export const debug = true;
 
-  export const columns: number = 20;
+  export const columns: number = 40;
   export const totalCells = columns * columns;
 
   export const walls: boolean = true;
@@ -19,15 +19,13 @@ export namespace Config {
     STEAM = 5,
   }
 
-  export enum InputKeys {
-    "NONE" = -1,
-    "Q" = Elements.EMPTY,
-    "W" = Elements.BLOCK,
-    "E" = Elements.SAND,
-    "R" = Elements.WATER,
-    "A" = -1,
-    "S" = -1,
-    "D" = Elements.STEAM,
-    "F" = Elements.FIRE,
+  export enum SpawnKeys {
+    NONE = -1,
+    Q = Elements.EMPTY,
+    NUM_1 = Elements.BLOCK,
+    NUM_2 = Elements.SAND,
+    NUM_3 = Elements.WATER,
+    NUM_4 = Elements.FIRE,
+    NUM_5 = Elements.STEAM,
   }
 }

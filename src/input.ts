@@ -2,12 +2,12 @@ import { Vector2 } from "./utilities/vector2";
 import { Config } from "./config";
 
 export class Input {
-  private key: Config.InputKeys = Config.InputKeys.NONE;
+  private spawnKey: Config.SpawnKeys = Config.SpawnKeys.NONE;
   private pointerCoordinates: Vector2 = Vector2.zero();
   private isPointerDown: boolean = false;
 
-  getKey() {
-    return this.key;
+  getSpawnKey() {
+    return this.spawnKey;
   }
 
   getPointerCoordinates() {
@@ -18,10 +18,9 @@ export class Input {
     return this.isPointerDown;
   }
 
-  setup(canvas: HTMLCanvasElement) {
+  private setupPointer(canvas: HTMLCanvasElement) {
     const canvasBounds = canvas.getBoundingClientRect();
 
-    // Pointer events
     canvas.addEventListener("pointermove", (ev: PointerEvent) => {
       const x = ev.clientX - canvasBounds.left;
       const y = ev.clientY - canvasBounds.top;
@@ -41,66 +40,61 @@ export class Input {
     window.addEventListener("blur", () => {
       this.isPointerDown = false;
     });
+  }
 
-    // Keyboard events
-    const handleKeyDown = (ev: KeyboardEvent) => {
+  private setupKeyboard() {
+    window.addEventListener("keydown", (ev: KeyboardEvent) => {
       switch (ev.key.toLowerCase()) {
         case "q":
-          this.key = Config.InputKeys.Q;
+          this.spawnKey = Config.SpawnKeys.Q;
           break;
-        case "w":
-          this.key = Config.InputKeys.W;
+        case "1":
+          this.spawnKey = Config.SpawnKeys.NUM_1;
           break;
-        case "e":
-          this.key = Config.InputKeys.E;
+        case "2":
+          this.spawnKey = Config.SpawnKeys.NUM_2;
+          break;
+        case "3":
+          this.spawnKey = Config.SpawnKeys.NUM_3;
+          break;
+        case "4":
+          this.spawnKey = Config.SpawnKeys.NUM_4;
+          break;
+        case "5":
+          this.spawnKey = Config.SpawnKeys.NUM_5;
           break;
         case "r":
-          this.key = Config.InputKeys.R;
-          break;
-        case "a":
-          this.key = Config.InputKeys.A;
-          break;
-        case "s":
-          this.key = Config.InputKeys.S;
-          break;
-        case "d":
-          this.key = Config.InputKeys.D;
-          break;
-        case "f":
-          this.key = Config.InputKeys.F;
-          break;
-        case "x":
           window.location.reload();
           break;
         default:
           break;
       }
-    };
+    });
 
-    const handleKeyUp = (ev: KeyboardEvent) => {
+    window.addEventListener("keyup", (ev: KeyboardEvent) => {
       switch (ev.key.toLowerCase()) {
         case "q":
-        case "w":
-        case "e":
-        case "r":
-        case "a":
-        case "s":
-        case "d":
-        case "f":
-          this.key = Config.InputKeys.NONE;
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+          this.spawnKey = Config.SpawnKeys.NONE;
           break;
         default:
           break;
       }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    });
   }
 
-  onDebug(callback: () => void) {
+  setup(canvas: HTMLCanvasElement) {
+    this.setupPointer(canvas);
+    this.setupKeyboard();
+  }
+
+  setOnDebug(callback: () => void) {
     window.addEventListener("keydown", (ev: KeyboardEvent) => {
-      if (ev.key.toLowerCase() === "c") callback();
+      if (ev.key.toLowerCase() === "d") callback();
     });
   }
 }

@@ -183,7 +183,7 @@ export class Main {
 
       gl.uniform1i(locations.update.uInputTextureIndex, 0);
       gl.uniform1i(locations.update.uTime, time);
-      gl.uniform1i(locations.update.uInputKey, this.input.getKey());
+      gl.uniform1i(locations.update.uInputKey, this.input.getSpawnKey());
       gl.uniform1i(locations.update.uPartition, partition ? 1 : 0);
       gl.uniform1i(
         locations.update.uIsPointerDown,
@@ -234,7 +234,7 @@ export class Main {
 
     mainLoop();
 
-    if (Config.debug) this.input.onDebug(mainLoop);
+    if (Config.debug) this.input.setOnDebug(mainLoop);
 
     if (!Config.debug && Config.FPS !== -1)
       setInterval(mainLoop, 1000 / Config.FPS);
