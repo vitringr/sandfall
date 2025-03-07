@@ -59,8 +59,8 @@ const int SPREAD[6] = int[6](
 struct Cell {
   int type;
   int velocity;
-  int isChanged;
-  int empty1;
+  int isMoved;
+  int empty0;
 };
 
 struct Block {
@@ -79,8 +79,8 @@ Cell getCell(ivec2 grid) {
   Cell cell;
   cell.type     = state.r;
   cell.velocity = state.g;
-  cell.isChanged   = state.b;
-  cell.empty1   = state.a;
+  cell.isMoved  = state.b;
+  cell.empty0   = state.a;
 
   return cell;
 }
@@ -148,8 +148,8 @@ void swap(inout Cell a, inout Cell b) {
   a = b;
   b = temp;
 
-  a.isChanged = 1;
-  b.isChanged = 1;
+  a.isMoved = 1;
+  b.isMoved = 1;
 }
 
 bool canSwap(Cell a, Cell b) {
@@ -219,7 +219,7 @@ Block rotateBackBlock(Block block) {
 
 
 Block applyVelocityToBL(Block originalBlock) {
-  if(originalBlock.bl.isChanged == 1) return originalBlock;
+  if(originalBlock.bl.isMoved == 1) return originalBlock;
   if(originalBlock.bl.velocity == 0) return originalBlock;
 
   Block block = originalBlock;
@@ -341,10 +341,10 @@ Block changeBlock(Block originalBlock) {
   else if(modTime == 2) block = applyVelocity(block, ivec4(0, 1, 3, 2)); // left
   else                  block = applyVelocity(block, ivec4(2, 3, 0, 1)); // right
 
-  block.bl.isChanged = 0;
-  block.tl.isChanged = 0;
-  block.tr.isChanged = 0;
-  block.br.isChanged = 0;
+  block.bl.isMoved = 0;
+  block.tl.isMoved = 0;
+  block.tr.isMoved = 0;
+  block.br.isMoved = 0;
 
   return block;
 }
@@ -372,7 +372,7 @@ void main() {
   outData = ivec4(
     thisCell.type,
     thisCell.velocity,
-    thisCell.isChanged,
-    thisCell.empty1
+    thisCell.isMoved,
+    thisCell.empty0
   );
 }

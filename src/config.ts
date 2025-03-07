@@ -1,13 +1,12 @@
 export namespace Config {
   export const debug = false;
-  export const partition = true;
 
   export const columns: number = 200;
   export const walls: boolean = true;
   export const spawnerSize: number = 0.016;
 
   export const limitFPS: boolean = true;
-  export const FPS: number = 30;
+  export const FPS: number = 60;
 
   export const borderSize: number = -0.01;
 

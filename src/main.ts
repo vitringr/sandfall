@@ -68,8 +68,6 @@ export class Main {
           "u_isPointerDown",
         ),
 
-        uPartition: gl.getUniformLocation(programs.update, "u_partition"),
-
         uTime: gl.getUniformLocation(programs.update, "u_time"),
 
         uSpawnerSize: gl.getUniformLocation(programs.update, "u_spawnerSize"),
@@ -83,7 +81,6 @@ export class Main {
           programs.render,
           "u_outputTextureIndex",
         ),
-        uPartition: gl.getUniformLocation(programs.render, "u_partition"),
         uDebug: gl.getUniformLocation(programs.render, "u_debug"),
       },
     };
@@ -162,7 +159,6 @@ export class Main {
     const { locations, vertexArrayObjects, textures, framebuffers } =
       this.setupState(gl, programs);
 
-    let partition: boolean = false;
     let time: number = 0;
 
     const updateLoop = () => {
@@ -185,7 +181,6 @@ export class Main {
       gl.uniform1i(locations.update.uInputTextureIndex, 0);
       gl.uniform1i(locations.update.uTime, time);
       gl.uniform1i(locations.update.uInputKey, this.input.getSpawnKey());
-      gl.uniform1i(locations.update.uPartition, partition ? 1 : 0);
       gl.uniform1i(
         locations.update.uIsPointerDown,
         this.input.getIsPointerDown() ? 1 : 0,
@@ -215,7 +210,6 @@ export class Main {
       gl.uniform1f(locations.render.uBorderSize, Config.borderSize);
       gl.uniform1i(locations.render.uOutputTextureIndex, 0);
       gl.uniform1i(locations.render.uDebug, Config.debug ? 1 : 0);
-      gl.uniform1i(locations.render.uPartition, partition ? 1 : 0);
 
       gl.drawArrays(gl.POINTS, 0, Config.columns ** 2);
     };
