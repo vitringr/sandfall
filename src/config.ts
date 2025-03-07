@@ -3,10 +3,11 @@ export namespace Config {
   export const partition = true;
 
   export const columns: number = 200;
-  export const totalCells = columns * columns;
   export const walls: boolean = true;
+  export const spawnerSize: number = 0.016;
 
-  export const FPS: number = -1;
+  export const limitFPS: boolean = true;
+  export const FPS: number = 30;
 
   export const borderSize: number = -0.01;
 

@@ -71,6 +71,8 @@ export class Main {
         uPartition: gl.getUniformLocation(programs.update, "u_partition"),
 
         uTime: gl.getUniformLocation(programs.update, "u_time"),
+
+        uSpawnerSize: gl.getUniformLocation(programs.update, "u_spawnerSize"),
       },
 
       render: {
@@ -188,6 +190,7 @@ export class Main {
         locations.update.uIsPointerDown,
         this.input.getIsPointerDown() ? 1 : 0,
       );
+      gl.uniform1f(locations.update.uSpawnerSize, Config.spawnerSize);
       gl.uniform2f(
         locations.update.uPointerPosition,
         this.input.getPointerCoordinates().x,
@@ -214,14 +217,12 @@ export class Main {
       gl.uniform1i(locations.render.uDebug, Config.debug ? 1 : 0);
       gl.uniform1i(locations.render.uPartition, partition ? 1 : 0);
 
-      gl.drawArrays(gl.POINTS, 0, Config.totalCells);
+      gl.drawArrays(gl.POINTS, 0, Config.columns ** 2);
     };
 
     const mainLoop = () => {
       updateLoop();
       renderLoop();
-
-      if (Config.partition) partition = !partition;
 
       time++;
 
@@ -229,14 +230,14 @@ export class Main {
       textures.first = textures.second;
       textures.second = swap;
 
-      if (!Config.debug && Config.FPS === -1) requestAnimationFrame(mainLoop);
+      if (!Config.debug && !Config.limitFPS) requestAnimationFrame(mainLoop);
     };
 
     mainLoop();
 
     if (Config.debug) this.input.setOnDebug(mainLoop);
 
-    if (!Config.debug && Config.FPS !== -1)
+    if (!Config.debug && Config.limitFPS)
       setInterval(mainLoop, 1000 / Config.FPS);
   }
 }

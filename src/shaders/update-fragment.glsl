@@ -7,14 +7,14 @@ in vec2 v_coordinates;
 
 out ivec4 outData;
 
-uniform int u_time;
-uniform int u_inputKey;
 uniform bool u_partition;
 uniform bool u_isPointerDown;
+uniform int u_time;
+uniform int u_inputKey;
+uniform float u_spawnerSize;
 uniform vec2 u_pointerPosition;
 uniform isampler2D u_inputTextureIndex;
 
-const float POINTER_AREA = 0.02;
 const ivec2 PARTITION_OFFSET = ivec2(1, 1);
 
 const int EMPTY = 0;
@@ -137,7 +137,7 @@ Cell getCellFromBlock(ivec2 grid, Block block) {
 
 bool isClicked() {
   if(u_inputKey < 0) return false;
-  return distance(u_pointerPosition, v_coordinates) < POINTER_AREA;
+  return distance(u_pointerPosition, v_coordinates) < u_spawnerSize;
 }
 
 
