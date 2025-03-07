@@ -24,6 +24,8 @@ const vec4 COLORS[6] = vec4[6](
 );
 
 const float DEBUG_BORDER_SIZE = 0.02;
+const vec4 DEBUG_RED  = vec4(0.7, 0.3, 0.0, 1.0) * 0.3;
+const vec4 DEBUG_BLUE = vec4(0.0, 0.4, 0.7, 1.0) * 0.4;
 
 int getInBlockIndex(ivec2 cell) {
   return (cell.x & 1) + 2 * (cell.y & 1);
@@ -49,11 +51,7 @@ void main() {
   outColor = COLORS[state.r];
 
   if(u_debug) {
-    if(u_partition){
-      if(isDebugBorder(vec2(1.0, 0.0))) outColor = vec4(0.5, 0.3, 0.0, 1.0);
-    }
-    else {
-      if(isDebugBorder(vec2(0.0, 1.0))) outColor = vec4(0.0, 0.3, 0.7, 1.0);
-    }
+    if(isDebugBorder(vec2(0.0, 1.0))) outColor = DEBUG_BLUE;
+    if(isDebugBorder(vec2(1.0, 0.0))) outColor = DEBUG_RED;
   }
 }
