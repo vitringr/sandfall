@@ -14,7 +14,7 @@ uniform bool u_isPointerDown;
 uniform vec2 u_pointerPosition;
 uniform isampler2D u_inputTextureIndex;
 
-const float POINTER_AREA = 0.03;
+const float POINTER_AREA = 0.02;
 const ivec2 PARTITION_OFFSET = ivec2(1, 1);
 
 const int EMPTY = 0;
@@ -291,23 +291,23 @@ Block change(Block originalBlock) {
 
   block = applySwaps(block);
 
-  block = rotateBlock(block);
-  block = applySwaps(block);
   block = rotateBackBlock(block);
+  block = applySwaps(block);
+  block = rotateBlock(block);
 
-  block = rotateBlock(block);
-  block = rotateBlock(block);
-  block = rotateBlock(block);
+  block = rotateBackBlock(block);
+  block = rotateBackBlock(block);
+  block = rotateBackBlock(block);
   block = applySwaps(block);
-  block = rotateBackBlock(block);
-  block = rotateBackBlock(block);
-  block = rotateBackBlock(block);
+  block = rotateBlock(block);
+  block = rotateBlock(block);
+  block = rotateBlock(block);
 
-  block = rotateBlock(block);
-  block = rotateBlock(block);
+  block = rotateBackBlock(block);
+  block = rotateBackBlock(block);
   block = applySwaps(block);
-  block = rotateBackBlock(block);
-  block = rotateBackBlock(block);
+  block = rotateBlock(block);
+  block = rotateBlock(block);
 
   return block;
 }
