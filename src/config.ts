@@ -1,10 +1,11 @@
 export namespace Config {
   export const debug = true;
+  export const partition = true;
 
-  export const columns: number = 40;
+  export const columns: number = 32;
   export const totalCells = columns * columns;
 
-  export const walls: boolean = true;
+  export const walls: boolean = false;
 
   export const FPS: number = -1;
 

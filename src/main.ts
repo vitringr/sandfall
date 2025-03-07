@@ -14,7 +14,7 @@ export class Main {
   private input = new Input();
   private generator = new Generator();
 
-  constructor(private readonly canvas: HTMLCanvasElement) { }
+  constructor(private readonly canvas: HTMLCanvasElement) {}
 
   setup() {
     if (this.initialized) throw "Already initialized";
@@ -77,12 +77,11 @@ export class Main {
         uCanvas: gl.getUniformLocation(programs.render, "u_canvas"),
         uColumns: gl.getUniformLocation(programs.render, "u_columns"),
         uBorderSize: gl.getUniformLocation(programs.render, "u_borderSize"),
-
         uOutputTextureIndex: gl.getUniformLocation(
           programs.render,
           "u_outputTextureIndex",
         ),
-
+        uPartition: gl.getUniformLocation(programs.render, "u_partition"),
         uDebug: gl.getUniformLocation(programs.render, "u_debug"),
       },
     };
@@ -213,6 +212,7 @@ export class Main {
       gl.uniform1f(locations.render.uBorderSize, Config.borderSize);
       gl.uniform1i(locations.render.uOutputTextureIndex, 0);
       gl.uniform1i(locations.render.uDebug, Config.debug ? 1 : 0);
+      gl.uniform1i(locations.render.uPartition, partition ? 1 : 0);
 
       gl.drawArrays(gl.POINTS, 0, Config.totalCells);
     };
@@ -221,7 +221,7 @@ export class Main {
       updateLoop();
       renderLoop();
 
-      partition = !partition;
+      if (Config.partition) partition = !partition;
 
       time++;
 
