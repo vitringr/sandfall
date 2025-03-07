@@ -15,8 +15,6 @@ uniform float u_spawnerSize;
 uniform vec2 u_pointerPosition;
 uniform isampler2D u_inputTextureIndex;
 
-const ivec2 PARTITION_OFFSET = ivec2(1, 1);
-
 const int EMPTY = 0;
 const int BLOCK = 1;
 const int SAND  = 2;
@@ -100,11 +98,8 @@ ivec2 getPartition() {
 
 ivec2 getBlockOrigin(ivec2 grid) {
   ivec2 keepAboveZero = ivec2(2, 2);
-
   ivec2 offset = getPartition();
-
   ivec2 origin = ((grid + keepAboveZero - offset) / 2) * 2 + offset;
-
   return origin - keepAboveZero;
 }
 
@@ -114,15 +109,12 @@ Block getBlock(ivec2 origin) {
   block.tl = getCell(origin + ivec2(0, 1)); // index: 1
   block.tr = getCell(origin + ivec2(1, 1)); // index: 2
   block.br = getCell(origin + ivec2(1, 0)); // index: 3
-
   return block;
 }
 
 int getInBlockIndex(ivec2 grid) {
   ivec2 blockOrigin = getBlockOrigin(grid);
-
   ivec2 remainder = grid - blockOrigin;
-
   return (1 - remainder.x) * remainder.y + remainder.x * (3 - remainder.y);
 }
 
@@ -161,37 +153,25 @@ bool canSwap(Cell a, Cell b) {
 
 int rotateVelocity(int velocity) {
   if(velocity == 0) return 0;
-  // left => down
-  // down => right
-  // right => up
-  // up => left
   if(velocity >= UP) return LEFT;
   return velocity + 1;
 }
 
 int rotateBackVelocity(int velocity) {
   if(velocity == 0) return 0;
-  // up => right
-  // right => down
-  // down => left
-  // left => up
   if(velocity == LEFT) return UP;
   return velocity - 1;
 }
 
 Cell rotateCell(Cell cell) {
   Cell counterclockwise = cell;
-
   counterclockwise.velocity = rotateVelocity(cell.velocity);
-
   return counterclockwise;
 }
 
 Cell rotateBackCell(Cell cell) {
   Cell clockwise = cell;
-
   clockwise.velocity = rotateBackVelocity(cell.velocity);
-
   return clockwise;
 }
 
@@ -201,7 +181,6 @@ Block rotateBlock(Block block) {
   counterclockwise.tl = rotateCell(block.tr);
   counterclockwise.tr = rotateCell(block.br);
   counterclockwise.br = rotateCell(block.bl);
-
   return counterclockwise;
 }
 
@@ -211,7 +190,6 @@ Block rotateBackBlock(Block block) {
   clockwise.tl = rotateBackCell(block.bl);
   clockwise.tr = rotateBackCell(block.tl);
   clockwise.br = rotateBackCell(block.tr);
-
   return clockwise;
 }
 
@@ -231,17 +209,14 @@ Block applyVelocityToBL(Block originalBlock) {
       swap(block.bl, block.tl);
       return block;
     }
-
     if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
       swap(block.bl, block.tr);
       return block;
     }
-
     if(spread >= SPREAD_FULL && canSwap(block.bl, block.br)) {
       swap(block.bl, block.br);
       return block;
     }
-
     return block;
   }
 
@@ -250,17 +225,14 @@ Block applyVelocityToBL(Block originalBlock) {
       swap(block.bl, block.br);
       return block;
     }
-
     if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
       swap(block.bl, block.tr);
       return block;
     }
-
     if(spread >= SPREAD_FULL && canSwap(block.bl, block.tl)) {
       swap(block.bl, block.tl);
       return block;
     }
-
     return block;
   }
 
@@ -269,17 +241,14 @@ Block applyVelocityToBL(Block originalBlock) {
       swap(block.bl, block.br);
       return block;
     }
-
     if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
       swap(block.bl, block.tr);
       return block;
     }
-
     if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
       swap(block.bl, block.tl);
       return block;
     }
-
     return block;
   }
 
@@ -288,17 +257,14 @@ Block applyVelocityToBL(Block originalBlock) {
       swap(block.bl, block.tl);
       return block;
     }
-
     if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
       swap(block.bl, block.tr);
       return block;
     }
-
     if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
       swap(block.bl, block.br);
       return block;
     }
-
     return block;
   }
 
@@ -321,13 +287,12 @@ Block applyVelocityToIndex(Block originalBlock, int blockIndex) {
   return block;
 }
 
-Block applyVelocity(Block originalBlock, ivec4 order) {
+Block applyVelocity(Block originalBlock, ivec4 applicationOrder) {
   Block block = originalBlock;
-  block = applyVelocityToIndex(block, order.r);
-  block = applyVelocityToIndex(block, order.g);
-  block = applyVelocityToIndex(block, order.b);
-  block = applyVelocityToIndex(block, order.a);
-
+  block = applyVelocityToIndex(block, applicationOrder.r);
+  block = applyVelocityToIndex(block, applicationOrder.g);
+  block = applyVelocityToIndex(block, applicationOrder.b);
+  block = applyVelocityToIndex(block, applicationOrder.a);
   return block;
 }
 
@@ -349,15 +314,18 @@ Block changeBlock(Block originalBlock) {
   return block;
 }
 
+ivec4 spawnCell() {
+    int type = u_inputKey;
 
+    int velocity = DOWN;
+    if(type == EMPTY || type == BLOCK) velocity = 0;
 
+    return ivec4(type, velocity, 0, 0);
+}
 
 void main() {
   if(isClicked()) {
-    int type = u_inputKey;
-    int velocity = DOWN;
-    if(type == EMPTY || type == BLOCK) velocity = 0;
-    outData = ivec4(type, velocity, 0, 0);
+    outData = spawnCell();
     return;
   }
 
@@ -365,7 +333,6 @@ void main() {
   ivec2 blockOrigin = getBlockOrigin(grid);
 
   Block block = getBlock(blockOrigin);
-
   block = changeBlock(block);
 
   Cell thisCell = getCellFromBlock(grid, block);

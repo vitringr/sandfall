@@ -13,7 +13,6 @@ export class Input {
   getPointerCoordinates() {
     return this.pointerCoordinates;
   }
-
   getIsPointerDown() {
     return this.isPointerDown;
   }
@@ -25,10 +24,7 @@ export class Input {
       const x = ev.clientX - canvasBounds.left;
       const y = ev.clientY - canvasBounds.top;
 
-      this.pointerCoordinates.set(
-        x / canvas.width,
-        (canvas.height - y) / canvas.height,
-      );
+      this.pointerCoordinates.set(x / canvas.width, (canvas.height - y) / canvas.height);
     });
 
     window.addEventListener("pointerdown", () => {
