@@ -15,7 +15,7 @@ uniform vec2 u_pointerPosition;
 uniform isampler2D u_inputTextureIndex;
 
 const float POINTER_AREA = 0.02;
-const ivec2 PARTITION_OFFSET = ivec2(1, 1);
+const ivec2 PARTITION_OFFSET = ivec2(-1, 1);
 
 const int EMPTY = 0;
 const int BLOCK = 1;
@@ -59,7 +59,7 @@ const int SPREAD[6] = int[6](
 struct Cell {
   int type;
   int velocity;
-  int empty0;
+  int isChanged;
   int empty1;
 };
 
@@ -79,7 +79,7 @@ Cell getCell(ivec2 grid) {
   Cell cell;
   cell.type     = state.r;
   cell.velocity = state.g;
-  cell.empty0   = state.b;
+  cell.isChanged   = state.b;
   cell.empty1   = state.a;
 
   return cell;
@@ -133,6 +133,9 @@ void swap(inout Cell a, inout Cell b) {
   Cell temp = a;
   a = b;
   b = temp;
+
+  a.isChanged = 1;
+  b.isChanged = 1;
 }
 
 bool canSwap(Cell a, Cell b) {
@@ -179,7 +182,7 @@ Cell rotateBackCell(Cell cell) {
 }
 
 Block rotateBlock(Block block) {
-  Block counterclockwise;
+  Block counterclockwise = block;
   counterclockwise.bl = rotateCell(block.tl);
   counterclockwise.tl = rotateCell(block.tr);
   counterclockwise.tr = rotateCell(block.br);
@@ -200,12 +203,12 @@ Block rotateBackBlock(Block block) {
 
 
 
-// Maybe because it's biased, and it chooses to spread while falling down?
 
 Block applySwaps(Block block) {
-  int spread = SPREAD[block.bl.type];
-
+  if(block.bl.isChanged == 1) return block;
   if(block.bl.velocity == 0) return block;
+
+  int spread = SPREAD[block.bl.type];
 
   if(block.bl.velocity == LEFT) {
     if(spread >= 2 && canSwap(block.bl, block.tl)) {
@@ -286,28 +289,41 @@ Block applySwaps(Block block) {
   return block;
 }
 
+Block applyBlockIndexSwaps(Block block, int blockIndex) {
+  for(int i = 0; i < blockIndex; i++) {
+    block = rotateBlock(block);
+  }
+
+  block = applySwaps(block);
+
+  for(int i = 0; i < blockIndex; i++) {
+    block = rotateBackBlock(block);
+  }
+
+  return block;
+}
+
+void applySwapsPattern(inout Block block, ivec4 pattern) {
+  block = applyBlockIndexSwaps(block, pattern.r);
+  block = applyBlockIndexSwaps(block, pattern.g);
+  block = applyBlockIndexSwaps(block, pattern.b);
+  block = applyBlockIndexSwaps(block, pattern.a);
+}
+
 Block change(Block originalBlock) {
   Block block = originalBlock;
 
-  block = applySwaps(block);
+  int modTime = u_time % 4;
 
-  block = rotateBackBlock(block);
-  block = applySwaps(block);
-  block = rotateBlock(block);
+  if(modTime == 0)      applySwapsPattern(block, ivec4(2, 0, 1, 3)); // right
+  else if(modTime == 1) applySwapsPattern(block, ivec4(1, 3, 2, 0)); // left
+  else if(modTime == 2) applySwapsPattern(block, ivec4(0, 1, 3, 2)); // left
+  else                  applySwapsPattern(block, ivec4(2, 3, 0, 1)); // right
 
-  block = rotateBackBlock(block);
-  block = rotateBackBlock(block);
-  block = rotateBackBlock(block);
-  block = applySwaps(block);
-  block = rotateBlock(block);
-  block = rotateBlock(block);
-  block = rotateBlock(block);
-
-  block = rotateBackBlock(block);
-  block = rotateBackBlock(block);
-  block = applySwaps(block);
-  block = rotateBlock(block);
-  block = rotateBlock(block);
+  block.bl.isChanged = 0;
+  block.tl.isChanged = 0;
+  block.tr.isChanged = 0;
+  block.br.isChanged = 0;
 
   return block;
 }
@@ -334,7 +350,7 @@ void main() {
   outData = ivec4(
     thisCell.type,
     thisCell.velocity,
-    thisCell.empty0,
+    thisCell.isChanged,
     thisCell.empty1
   );
 }

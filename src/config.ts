@@ -8,7 +8,7 @@ export namespace Config {
 
   export const FPS: number = -1;
 
-  export const borderSize: number = 1;
+  export const borderSize: number = 0;
 
   export enum Elements {
     EMPTY = 0,
