@@ -2,13 +2,13 @@ export namespace Config {
   export const debug = false;
   export const partition = true;
 
-  export const columns: number = 100;
+  export const columns: number = 200;
   export const totalCells = columns * columns;
   export const walls: boolean = true;
 
   export const FPS: number = -1;
 
-  export const borderSize: number = 0;
+  export const borderSize: number = -0.01;
 
   export enum Elements {
     EMPTY = 0,

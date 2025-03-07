@@ -15,7 +15,7 @@ uniform vec2 u_pointerPosition;
 uniform isampler2D u_inputTextureIndex;
 
 const float POINTER_AREA = 0.02;
-const ivec2 PARTITION_OFFSET = ivec2(-1, 1);
+const ivec2 PARTITION_OFFSET = ivec2(1, 1);
 
 const int EMPTY = 0;
 const int BLOCK = 1;
@@ -85,10 +85,24 @@ Cell getCell(ivec2 grid) {
   return cell;
 }
 
+ivec2 getPartition() {
+  int modTime = u_time % 8;
+
+  if(modTime == 0) return ivec2(0, 0);
+  if(modTime == 1) return ivec2(1, 1);
+  if(modTime == 2) return ivec2(0, 0);
+  if(modTime == 3) return ivec2(1, -1);
+  if(modTime == 4) return ivec2(0, 0);
+  if(modTime == 5) return ivec2(-1, -1);
+  if(modTime == 6) return ivec2(0, 0);
+                   return ivec2(-1, 1);
+}
+
 ivec2 getBlockOrigin(ivec2 grid) {
   ivec2 keepAboveZero = ivec2(2, 2);
 
-  ivec2 offset = u_partition ? PARTITION_OFFSET : ivec2(0, 0);
+  ivec2 offset = getPartition();
+
   ivec2 origin = ((grid + keepAboveZero - offset) / 2) * 2 + offset;
 
   return origin - keepAboveZero;
@@ -204,24 +218,26 @@ Block rotateBackBlock(Block block) {
 
 
 
-Block applySwaps(Block block) {
-  if(block.bl.isChanged == 1) return block;
-  if(block.bl.velocity == 0) return block;
+Block applyVelocityToBL(Block originalBlock) {
+  if(originalBlock.bl.isChanged == 1) return originalBlock;
+  if(originalBlock.bl.velocity == 0) return originalBlock;
+
+  Block block = originalBlock;
 
   int spread = SPREAD[block.bl.type];
 
   if(block.bl.velocity == LEFT) {
-    if(spread >= 2 && canSwap(block.bl, block.tl)) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
       swap(block.bl, block.tl);
       return block;
     }
 
-    if(spread >= 3 && canSwap(block.bl, block.tr)) {
+    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
       swap(block.bl, block.tr);
       return block;
     }
 
-    if(spread >= 4 && canSwap(block.bl, block.br)) {
+    if(spread >= SPREAD_FULL && canSwap(block.bl, block.br)) {
       swap(block.bl, block.br);
       return block;
     }
@@ -230,17 +246,17 @@ Block applySwaps(Block block) {
   }
 
   if(block.bl.velocity == DOWN) {
-    if(spread >= 2 && canSwap(block.bl, block.br)) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
       swap(block.bl, block.br);
       return block;
     }
 
-    if(spread >= 3 && canSwap(block.bl, block.tr)) {
+    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
       swap(block.bl, block.tr);
       return block;
     }
 
-    if(spread >= 4 && canSwap(block.bl, block.tl)) {
+    if(spread >= SPREAD_FULL && canSwap(block.bl, block.tl)) {
       swap(block.bl, block.tl);
       return block;
     }
@@ -254,12 +270,12 @@ Block applySwaps(Block block) {
       return block;
     }
 
-    if(spread >= 1 && canSwap(block.bl, block.tr)) {
+    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
       swap(block.bl, block.tr);
       return block;
     }
 
-    if(spread >= 2 && canSwap(block.bl, block.tl)) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
       swap(block.bl, block.tl);
       return block;
     }
@@ -273,12 +289,12 @@ Block applySwaps(Block block) {
       return block;
     }
 
-    if(spread >= 1 && canSwap(block.bl, block.tr)) {
+    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
       swap(block.bl, block.tr);
       return block;
     }
 
-    if(spread >= 2 && canSwap(block.bl, block.br)) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
       swap(block.bl, block.br);
       return block;
     }
@@ -289,12 +305,14 @@ Block applySwaps(Block block) {
   return block;
 }
 
-Block applyBlockIndexSwaps(Block block, int blockIndex) {
+Block applyVelocityToIndex(Block originalBlock, int blockIndex) {
+  Block block = originalBlock;
+
   for(int i = 0; i < blockIndex; i++) {
     block = rotateBlock(block);
   }
 
-  block = applySwaps(block);
+  block = applyVelocityToBL(block);
 
   for(int i = 0; i < blockIndex; i++) {
     block = rotateBackBlock(block);
@@ -303,22 +321,25 @@ Block applyBlockIndexSwaps(Block block, int blockIndex) {
   return block;
 }
 
-void applySwapsPattern(inout Block block, ivec4 pattern) {
-  block = applyBlockIndexSwaps(block, pattern.r);
-  block = applyBlockIndexSwaps(block, pattern.g);
-  block = applyBlockIndexSwaps(block, pattern.b);
-  block = applyBlockIndexSwaps(block, pattern.a);
+Block applyVelocity(Block originalBlock, ivec4 order) {
+  Block block = originalBlock;
+  block = applyVelocityToIndex(block, order.r);
+  block = applyVelocityToIndex(block, order.g);
+  block = applyVelocityToIndex(block, order.b);
+  block = applyVelocityToIndex(block, order.a);
+
+  return block;
 }
 
-Block change(Block originalBlock) {
+Block changeBlock(Block originalBlock) {
   Block block = originalBlock;
 
   int modTime = u_time % 4;
 
-  if(modTime == 0)      applySwapsPattern(block, ivec4(2, 0, 1, 3)); // right
-  else if(modTime == 1) applySwapsPattern(block, ivec4(1, 3, 2, 0)); // left
-  else if(modTime == 2) applySwapsPattern(block, ivec4(0, 1, 3, 2)); // left
-  else                  applySwapsPattern(block, ivec4(2, 3, 0, 1)); // right
+  if(modTime == 0)      block = applyVelocity(block, ivec4(2, 0, 1, 3)); // right
+  else if(modTime == 1) block = applyVelocity(block, ivec4(1, 3, 2, 0)); // left
+  else if(modTime == 2) block = applyVelocity(block, ivec4(0, 1, 3, 2)); // left
+  else                  block = applyVelocity(block, ivec4(2, 3, 0, 1)); // right
 
   block.bl.isChanged = 0;
   block.tl.isChanged = 0;
@@ -344,9 +365,10 @@ void main() {
   ivec2 blockOrigin = getBlockOrigin(grid);
 
   Block block = getBlock(blockOrigin);
-  Block newBlock = change(block);
 
-  Cell thisCell = getCellFromBlock(grid, newBlock);
+  block = changeBlock(block);
+
+  Cell thisCell = getCellFromBlock(grid, block);
   outData = ivec4(
     thisCell.type,
     thisCell.velocity,
