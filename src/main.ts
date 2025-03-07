@@ -14,7 +14,7 @@ export class Main {
   private input = new Input();
   private generator = new Generator();
 
-  constructor(private readonly canvas: HTMLCanvasElement) {}
+  constructor(private readonly canvas: HTMLCanvasElement) { }
 
   setup() {
     if (this.initialized) throw "Already initialized";
@@ -40,36 +40,15 @@ export class Main {
     };
   }
 
-  private setupState(
-    gl: WebGL2RenderingContext,
-    programs: { update: WebGLProgram; render: WebGLProgram },
-  ) {
+  private setupState(gl: WebGL2RenderingContext, programs: { update: WebGLProgram; render: WebGLProgram }) {
     const locations = {
       update: {
-        aCanvasVertices: gl.getAttribLocation(
-          programs.update,
-          "a_canvasVertices",
-        ),
-
-        uInputTextureIndex: gl.getUniformLocation(
-          programs.update,
-          "u_inputTextureIndex",
-        ),
-
+        aCanvasVertices: gl.getAttribLocation(programs.update, "a_canvasVertices"),
+        uInputTextureIndex: gl.getUniformLocation(programs.update, "u_inputTextureIndex"),
         uInputKey: gl.getUniformLocation(programs.update, "u_inputKey"),
-
-        uPointerPosition: gl.getUniformLocation(
-          programs.update,
-          "u_pointerPosition",
-        ),
-
-        uIsPointerDown: gl.getUniformLocation(
-          programs.update,
-          "u_isPointerDown",
-        ),
-
+        uPointerPosition: gl.getUniformLocation(programs.update, "u_pointerPosition"),
+        uIsPointerDown: gl.getUniformLocation(programs.update, "u_isPointerDown"),
         uTime: gl.getUniformLocation(programs.update, "u_time"),
-
         uSpawnerSize: gl.getUniformLocation(programs.update, "u_spawnerSize"),
       },
 
@@ -77,10 +56,7 @@ export class Main {
         uCanvas: gl.getUniformLocation(programs.render, "u_canvas"),
         uColumns: gl.getUniformLocation(programs.render, "u_columns"),
         uBorderSize: gl.getUniformLocation(programs.render, "u_borderSize"),
-        uOutputTextureIndex: gl.getUniformLocation(
-          programs.render,
-          "u_outputTextureIndex",
-        ),
+        uOutputTextureIndex: gl.getUniformLocation(programs.render, "u_outputTextureIndex"),
         uDebug: gl.getUniformLocation(programs.render, "u_debug"),
       },
     };
@@ -109,41 +85,14 @@ export class Main {
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, data.canvasVertices, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(locations.update.aCanvasVertices);
-    gl.vertexAttribPointer(
-      locations.update.aCanvasVertices,
-      2,
-      gl.FLOAT,
-      false,
-      0,
-      0,
-    );
+    gl.vertexAttribPointer(locations.update.aCanvasVertices, 2, gl.FLOAT, false, 0, 0);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.first);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA8I,
-      Config.columns,
-      Config.columns,
-      0,
-      gl.RGBA_INTEGER,
-      gl.BYTE,
-      data.state,
-    );
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.second);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA8I,
-      Config.columns,
-      Config.columns,
-      0,
-      gl.RGBA_INTEGER,
-      gl.BYTE,
-      data.state,
-    );
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
     WebGL.Texture.applyClampAndNearest(gl);
 
     return { locations, vertexArrayObjects, textures, framebuffers };
@@ -156,21 +105,14 @@ export class Main {
 
     const programs = this.setupPrograms(gl);
 
-    const { locations, vertexArrayObjects, textures, framebuffers } =
-      this.setupState(gl, programs);
+    const { locations, vertexArrayObjects, textures, framebuffers } = this.setupState(gl, programs);
 
     let time: number = 0;
 
     const updateLoop = () => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.update);
       gl.viewport(0, 0, Config.columns, Config.columns);
-      gl.framebufferTexture2D(
-        gl.FRAMEBUFFER,
-        gl.COLOR_ATTACHMENT0,
-        gl.TEXTURE_2D,
-        textures.second,
-        0,
-      );
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures.second, 0);
 
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, textures.first);
@@ -181,16 +123,10 @@ export class Main {
       gl.uniform1i(locations.update.uInputTextureIndex, 0);
       gl.uniform1i(locations.update.uTime, time);
       gl.uniform1i(locations.update.uInputKey, this.input.getSpawnKey());
-      gl.uniform1i(
-        locations.update.uIsPointerDown,
-        this.input.getIsPointerDown() ? 1 : 0,
-      );
+      gl.uniform1i(locations.update.uIsPointerDown, Number(this.input.getIsPointerDown()));
       gl.uniform1f(locations.update.uSpawnerSize, Config.spawnerSize);
-      gl.uniform2f(
-        locations.update.uPointerPosition,
-        this.input.getPointerCoordinates().x,
-        this.input.getPointerCoordinates().y,
-      );
+      const pointerCoordinates = this.input.getPointerCoordinates();
+      gl.uniform2f(locations.update.uPointerPosition, pointerCoordinates.x, pointerCoordinates.y);
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     };
@@ -231,7 +167,6 @@ export class Main {
 
     if (Config.debug) this.input.setOnDebug(mainLoop);
 
-    if (!Config.debug && Config.limitFPS)
-      setInterval(mainLoop, 1000 / Config.FPS);
+    if (!Config.debug && Config.limitFPS) setInterval(mainLoop, 1000 / Config.FPS);
   }
 }
