@@ -2,7 +2,7 @@ export namespace Config {
   export const debug = false;
 
   export const columns: number = 200;
-  export const walls: boolean = true;
+  export const walls: boolean = false;
   export const spawnerSize: number = 0.016;
 
   export const limitFPS: boolean = false;

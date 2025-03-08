@@ -12,7 +12,8 @@ uniform bool u_partition;
 uniform float u_canvas;
 uniform float u_columns;
 uniform float u_borderSize;
-uniform isampler2D u_outputTextureIndex;
+uniform isampler2D u_outputOneTexture;
+uniform isampler2D u_outputTwoTexture;
 
 const vec4 COLORS[6] = vec4[6](
   vec4(0.1,  0.1,  0.1,  1.0),  // 0: Empty
@@ -45,10 +46,12 @@ bool isDebugBorder(vec2 offset) {
 }
 
 void main() {
-  ivec2 cell = ivec2(v_coordinates);
-  ivec4 state = texelFetch(u_outputTextureIndex, cell, 0);
+  ivec2 grid = ivec2(v_coordinates);
 
-  outColor = COLORS[state.r];
+  ivec4 stateOne = texelFetch(u_outputOneTexture, grid, 0);
+  // ivec4 stateTwo = texelFetch(u_outputTwoTexture, grid, 0);
+
+  outColor = COLORS[stateOne.b];
 
   if(u_debug) {
     if(isDebugBorder(vec2(0.0, 1.0))) outColor = DEBUG_BLUE;

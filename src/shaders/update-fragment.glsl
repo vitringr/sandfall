@@ -56,15 +56,15 @@ const int SPREAD[6] = int[6](
 
 
 struct Cell {
+  int id;
+  int clock;
   int type;
+  int state;
+
   int velocity;
   int isMoved;
-  int clock;
-
   int heat;
-  int empty0;
-  int empty1;
-  int empty2;
+  int empty;
 };
 
 struct Block {
@@ -83,15 +83,15 @@ Cell getCell(ivec2 grid) {
 
   Cell cell;
 
-  cell.type     = one.r;
-  cell.velocity = one.g;
-  cell.isMoved  = one.b;
-  cell.clock    = one.a;
+  cell.id       = one.r;
+  cell.clock    = one.g;
+  cell.type     = one.b;
+  cell.state    = one.a;
 
-  cell.heat     = two.r;
-  cell.empty0   = two.g;
-  cell.empty1   = two.b;
-  cell.empty2   = two.a;
+  cell.velocity = two.r;
+  cell.isMoved  = two.g;
+  cell.heat     = two.b;
+  cell.empty    = two.a;
 
   return cell;
 }
@@ -99,14 +99,14 @@ Cell getCell(ivec2 grid) {
 ivec2 getPartition() {
   int modTime = u_time % 8;
 
-  if(modTime == 0) return ivec2(0, 0);
-  if(modTime == 1) return ivec2(1, 1);
-  if(modTime == 2) return ivec2(0, 0);
-  if(modTime == 3) return ivec2(1, -1);
-  if(modTime == 4) return ivec2(0, 0);
+  if(modTime == 0) return ivec2( 0,  0);
+  if(modTime == 1) return ivec2( 1,  1);
+  if(modTime == 2) return ivec2( 0,  0);
+  if(modTime == 3) return ivec2( 1, -1);
+  if(modTime == 4) return ivec2( 0,  0);
   if(modTime == 5) return ivec2(-1, -1);
-  if(modTime == 6) return ivec2(0, 0);
-                   return ivec2(-1, 1);
+  if(modTime == 6) return ivec2( 0,  0);
+                   return ivec2(-1,  1);
 }
 
 ivec2 getBlockOrigin(ivec2 grid) {
@@ -327,18 +327,47 @@ Block changeBlock(Block originalBlock) {
   return block;
 }
 
-ivec4 spawnCell() {
+Cell spawnCell() {
+  Cell newCell;
+
   int type = u_inputKey;
 
-  int velocity = DOWN;
-  if(type == EMPTY || type == BLOCK) velocity = 0;
+  newCell.id       = 0;
+  newCell.clock    = 0;
+  newCell.type     = type;
+  newCell.state    = 0;
 
-  return ivec4(type, velocity, 0, 0);
+  newCell.velocity = 0;
+  newCell.isMoved  = 0;
+  newCell.heat     = 0;
+  newCell.empty    = 0;
+
+  if(type == SAND || type == WATER) newCell.velocity = DOWN;
+  if(type == FIRE || type == STEAM) newCell.velocity = UP;
+
+  return newCell;
+}
+
+void writeCellFragment(Cell cell, out ivec4 outOne, out ivec4 outTwo) {
+  outOne = ivec4(
+    cell.id,
+    cell.clock,
+    cell.type,
+    cell.state
+  );
+
+  outTwo = ivec4(
+    cell.velocity,
+    cell.isMoved,
+    cell.heat,
+    cell.empty
+  );
 }
 
 void main() {
   if(isClicked()) {
-    outOne = spawnCell();
+    Cell newCell = spawnCell();
+    writeCellFragment(newCell, outOne, outTwo);
     return;
   }
 
@@ -350,20 +379,9 @@ void main() {
 
   Cell thisCell = getCellFromBlock(grid, block);
 
-  thisCell.heat++;
-  if(thisCell.heat > 10) thisCell.velocity = 0;
+  // thisCell.heat++;
+  // if(thisCell.heat > 10) thisCell.velocity = 0;
 
-  outOne = ivec4(
-    thisCell.type,
-    thisCell.velocity,
-    thisCell.isMoved,
-    thisCell.clock
-  );
-
-  outTwo = ivec4(
-    thisCell.heat,
-    thisCell.empty0,
-    thisCell.empty1,
-    thisCell.empty2
-  );
+  writeCellFragment(thisCell, outOne, outTwo);
 }
+
