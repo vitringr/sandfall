@@ -5,16 +5,19 @@ precision highp isampler2D;
 
 in vec2 v_coordinates;
 
-layout(location = 0) out ivec4 outOne;
-layout(location = 1) out ivec4 outTwo;
+layout(location = 0) out ivec4 output0;
+layout(location = 1) out ivec4 output1;
+layout(location = 2) out ivec4 output2;
+
+uniform isampler2D u_inputTexture0;
+uniform isampler2D u_inputTexture1;
+uniform isampler2D u_inputTexture2;
 
 uniform bool u_isPointerDown;
 uniform int u_time;
 uniform int u_inputKey;
 uniform float u_spawnerSize;
 uniform vec2 u_pointerPosition;
-uniform isampler2D u_inputOneTexture;
-uniform isampler2D u_inputTwoTexture;
 
 const int EMPTY    = 0;
 const int BLOCK    = 1;
@@ -65,13 +68,18 @@ const int SPREAD[7] = int[7](
 struct Cell {
   int rng;
   int clock;
-  int type;
-  int state;
+  int empty0;
+  int empty1;
 
+  int type;
+  int heat;
   int velocity;
   int isMoved;
-  int heat;
-  int empty;
+
+  int state0;
+  int state1;
+  int state2;
+  int state3;
 };
 
 struct Block {
@@ -85,20 +93,26 @@ struct Block {
 
 
 Cell getCell(ivec2 grid) {
-  ivec4 one = texelFetch(u_inputOneTexture, grid, 0);
-  ivec4 two = texelFetch(u_inputTwoTexture, grid, 0);
+  ivec4 data0 = texelFetch(u_inputTexture0, grid, 0);
+  ivec4 data1 = texelFetch(u_inputTexture1, grid, 0);
+  ivec4 data2 = texelFetch(u_inputTexture2, grid, 0);
 
   Cell cell;
 
-  cell.rng      = one.r;
-  cell.clock    = one.g;
-  cell.type     = one.b;
-  cell.state    = one.a;
+  cell.rng      = data0.r;
+  cell.clock    = data0.g;
+  cell.empty0   = data0.b;
+  cell.empty1   = data0.a;
 
-  cell.velocity = two.r;
-  cell.isMoved  = two.g;
-  cell.heat     = two.b;
-  cell.empty    = two.a;
+  cell.type     = data1.r;
+  cell.heat     = data1.g;
+  cell.velocity = data1.b;
+  cell.isMoved  = data1.a;
+
+  cell.state0   = data2.r;
+  cell.state1   = data2.g;
+  cell.state2   = data2.b;
+  cell.state3   = data2.a;
 
   return cell;
 }
@@ -106,14 +120,20 @@ Cell getCell(ivec2 grid) {
 Cell resetCell(Cell originalCell) {
   Cell cell = originalCell;
 
+  cell.rng      = originalCell.rng;
   cell.clock    = 0;
-  cell.type     = EMPTY;
-  cell.state    = 0;
+  cell.empty0   = 0;
+  cell.empty1   = 0;
 
+  cell.type     = EMPTY;
+  cell.heat     = 0;
   cell.velocity = 0;
   cell.isMoved  = 0;
-  cell.heat     = 0;
-  cell.empty    = 0;
+
+  cell.state0   = 0;
+  cell.state1   = 0;
+  cell.state2   = 0;
+  cell.state3   = 0;
 
   return cell;
 }
@@ -366,7 +386,7 @@ int getInteraction(int aType, int bType) {
 
 void sandAndWater(inout Cell sand, inout Cell water) {
   sand.type = WET_SAND;
-  sand.state = 0;
+  sand.state0 = 0;
 
   water = resetCell(water);
 }
@@ -434,19 +454,26 @@ Cell spawnCell(ivec2 grid) {
   return cell;
 }
 
-void writeCellFragment(Cell cell, out ivec4 outOne, out ivec4 outTwo) {
-  outOne = ivec4(
+void writeCellFragment(Cell cell, out ivec4 output0, out ivec4 output1, out ivec4 output2) {
+  output0 = ivec4(
     cell.rng,
     cell.clock,
-    cell.type,
-    cell.state
+    cell.empty0,
+    cell.empty1
   );
 
-  outTwo = ivec4(
-    cell.velocity,
-    cell.isMoved,
+  output1 = ivec4(
+    cell.type,
     cell.heat,
-    cell.empty
+    cell.velocity,
+    cell.isMoved
+  );
+
+  output2 = ivec4(
+    cell.state0,
+    cell.state1,
+    cell.state2,
+    cell.state3
   );
 }
 
@@ -454,7 +481,7 @@ void main() {
   ivec2 grid = ivec2(gl_FragCoord.xy);
 
   if(isClicked()) {
-    writeCellFragment(spawnCell(grid), outOne, outTwo);
+    writeCellFragment(spawnCell(grid), output0, output1, output2);
     return;
   }
 
@@ -467,6 +494,6 @@ void main() {
 
   thisCell.clock++;
 
-  writeCellFragment(thisCell, outOne, outTwo);
+  writeCellFragment(thisCell, output0, output1, output2);
 }
 

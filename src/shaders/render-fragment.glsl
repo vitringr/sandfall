@@ -7,8 +7,9 @@ out vec4 outColor;
 
 flat in vec2 v_coordinates;
 
-uniform isampler2D u_outputOneTexture;
-uniform isampler2D u_outputTwoTexture;
+uniform isampler2D u_outputTexture0;
+uniform isampler2D u_outputTexture1;
+uniform isampler2D u_outputTexture2;
 
 const int EMPTY    = 0;
 const int BLOCK    = 1;
@@ -50,33 +51,44 @@ const vec3 COLOR_ADD_SAND_WETNESS = vec3(0.0, 0.0, 0.3);
 struct Cell {
   int rng;
   int clock;
-  int type;
-  int state;
+  int empty0;
+  int empty1;
 
+  int type;
+  int heat;
   int velocity;
   int isMoved;
-  int heat;
-  int empty;
+
+  int state0;
+  int state1;
+  int state2;
+  int state3;
 };
 
 
 
 
 Cell getCell(ivec2 grid) {
-  ivec4 one = texelFetch(u_outputOneTexture, grid, 0);
-  ivec4 two = texelFetch(u_outputTwoTexture, grid, 0);
+  ivec4 data0 = texelFetch(u_outputTexture0, grid, 0);
+  ivec4 data1 = texelFetch(u_outputTexture1, grid, 0);
+  ivec4 data2 = texelFetch(u_outputTexture2, grid, 0);
 
   Cell cell;
 
-  cell.rng      = one.r;
-  cell.clock    = one.g;
-  cell.type     = one.b;
-  cell.state    = one.a;
+  cell.rng      = data0.r;
+  cell.clock    = data0.g;
+  cell.empty0   = data0.b;
+  cell.empty1   = data0.a;
 
-  cell.velocity = two.r;
-  cell.isMoved  = two.g;
-  cell.heat     = two.b;
-  cell.empty    = two.a;
+  cell.type     = data1.r;
+  cell.heat     = data1.g;
+  cell.velocity = data1.b;
+  cell.isMoved  = data1.a;
+
+  cell.state0   = data2.r;
+  cell.state1   = data2.g;
+  cell.state2   = data2.b;
+  cell.state3   = data2.a;
 
   return cell;
 }
