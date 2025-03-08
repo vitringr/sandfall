@@ -16,20 +16,22 @@ uniform vec2 u_pointerPosition;
 uniform isampler2D u_inputOneTexture;
 uniform isampler2D u_inputTwoTexture;
 
-const int EMPTY = 0;
-const int BLOCK = 1;
-const int SAND  = 2;
-const int WATER = 3;
-const int FIRE  = 4;
-const int STEAM = 5;
+const int EMPTY    = 0;
+const int BLOCK    = 1;
+const int SAND     = 2;
+const int WATER    = 3;
+const int FIRE     = 4;
+const int STEAM    = 5;
+const int WET_SAND = 6;
 
-const int DENSITY[6] = int[6](
-  /* EMPTY */ 0,
-  /* BLOCK */ 5,
-  /* SAND  */ 4,
-  /* WATER */ 3,
-  /* FIRE  */ 1,
-  /* STEAM */ 2
+const int DENSITY[7] = int[7](
+  /* EMPTY */    0,
+  /* BLOCK */    5,
+  /* SAND  */    4,
+  /* WATER */    3,
+  /* FIRE  */    1,
+  /* STEAM */    2,
+  /* WET_SAND */ 4
 );
 
 const int LEFT  = 1;
@@ -43,13 +45,14 @@ const int SPREAD_MID  = 2;
 const int SPREAD_HIGH = 3;
 const int SPREAD_FULL = 4;
 
-const int SPREAD[6] = int[6](
-  /* EMPTY */ -1,
-  /* BLOCK */ -1,
-  /* SAND  */ SPREAD_LOW,
-  /* WATER */ SPREAD_MID,
-  /* FIRE  */ SPREAD_HIGH,
-  /* STEAM */ SPREAD_HIGH
+const int SPREAD[7] = int[7](
+  /* EMPTY */    -1,
+  /* BLOCK */    -1,
+  /* SAND  */    SPREAD_LOW,
+  /* WATER */    SPREAD_MID,
+  /* FIRE  */    SPREAD_HIGH,
+  /* STEAM */    SPREAD_HIGH,
+  /* WET_SAND */ SPREAD_LOW
 );
 
 
@@ -350,8 +353,8 @@ Cell spawnCell() {
   cell.heat     = 0;
   cell.empty    = 0;
 
-  if(type == SAND || type == WATER) cell.velocity = DOWN;
-  if(type == FIRE || type == STEAM) cell.velocity = UP;
+  if(type == SAND || type == WATER || type == WET_SAND) cell.velocity = DOWN;
+  if(type == FIRE || type == STEAM)                     cell.velocity = UP;
 
   return cell;
 }

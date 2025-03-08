@@ -27,3 +27,13 @@ if(type != EMPTY && type != BLOCK) {
 I need static RNG, meaning that it's based on the grid, and it's not Cell state.
 
 Actually this sounds like some hash based on the grid coordinates.
+
+# Heat Transfer
+
+`total amount of heat in block` / 4
+
+Maybe transfer slowly, once every few frames.
+
+Add color to some elements based on heat.
+
+Create fire out of heated empty cells.

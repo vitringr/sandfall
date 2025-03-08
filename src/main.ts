@@ -169,7 +169,7 @@ export class Main {
       gl.uniform1f(locations.render.uBorderSize, Config.borderSize);
       gl.uniform1i(locations.render.uOutputOneTexture, 0);
       gl.uniform1i(locations.render.uOutputTwoTexture, 1);
-      gl.uniform1i(locations.render.uDebug, Config.debug ? 1 : 0);
+      gl.uniform1i(locations.render.uDebug, Number(Config.debug));
 
       gl.drawArrays(gl.POINTS, 0, Config.columns ** 2);
     };

@@ -17,6 +17,7 @@ export namespace Config {
     WATER = 3,
     FIRE = 4,
     STEAM = 5,
+    WET_SAND = 6,
   }
 
   export enum SpawnKeys {
@@ -27,5 +28,6 @@ export namespace Config {
     NUM_3 = Elements.WATER,
     NUM_4 = Elements.FIRE,
     NUM_5 = Elements.STEAM,
+    NUM_6 = Elements.WET_SAND,
   }
 }
