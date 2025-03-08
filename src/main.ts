@@ -44,22 +44,23 @@ export class Main {
     const locations = {
       update: {
         aCanvasVertices: gl.getAttribLocation(programs.update, "a_canvasVertices"),
-        uInputOneTexture: gl.getUniformLocation(programs.update, "u_inputOneTexture"),
-        uInputTwoTexture: gl.getUniformLocation(programs.update, "u_inputTwoTexture"),
-        uInputKey: gl.getUniformLocation(programs.update, "u_inputKey"),
-        uPointerPosition: gl.getUniformLocation(programs.update, "u_pointerPosition"),
+
         uIsPointerDown: gl.getUniformLocation(programs.update, "u_isPointerDown"),
         uTime: gl.getUniformLocation(programs.update, "u_time"),
+        uInputKey: gl.getUniformLocation(programs.update, "u_inputKey"),
         uSpawnerSize: gl.getUniformLocation(programs.update, "u_spawnerSize"),
+        uPointerPosition: gl.getUniformLocation(programs.update, "u_pointerPosition"),
+        uInputOneTexture: gl.getUniformLocation(programs.update, "u_inputOneTexture"),
+        uInputTwoTexture: gl.getUniformLocation(programs.update, "u_inputTwoTexture"),
       },
 
       render: {
+        uDebug: gl.getUniformLocation(programs.render, "u_debug"),
         uCanvas: gl.getUniformLocation(programs.render, "u_canvas"),
         uColumns: gl.getUniformLocation(programs.render, "u_columns"),
         uBorderSize: gl.getUniformLocation(programs.render, "u_borderSize"),
         uOutputOneTexture: gl.getUniformLocation(programs.render, "u_outputOneTexture"),
         uOutputTwoTexture: gl.getUniformLocation(programs.render, "u_outputTwoTexture"),
-        uDebug: gl.getUniformLocation(programs.render, "u_debug"),
       },
     };
 
@@ -77,7 +78,6 @@ export class Main {
     const textures = {
       one: gl.createTexture(),
       oneAux: gl.createTexture(),
-
       two: gl.createTexture(),
       twoAux: gl.createTexture(),
     };
