@@ -5,15 +5,16 @@ precision highp isampler2D;
 
 in vec2 v_coordinates;
 
-out ivec4 outData;
+layout(location = 0) out ivec4 outOne;
+layout(location = 1) out ivec4 outTwo;
 
-uniform bool u_partition;
 uniform bool u_isPointerDown;
 uniform int u_time;
 uniform int u_inputKey;
 uniform float u_spawnerSize;
 uniform vec2 u_pointerPosition;
-uniform isampler2D u_inputTextureIndex;
+uniform isampler2D u_inputOneTexture;
+uniform isampler2D u_inputTwoTexture;
 
 const int EMPTY = 0;
 const int BLOCK = 1;
@@ -58,7 +59,12 @@ struct Cell {
   int type;
   int velocity;
   int isMoved;
+  int clock;
+
+  int heat;
   int empty0;
+  int empty1;
+  int empty2;
 };
 
 struct Block {
@@ -72,13 +78,20 @@ struct Block {
 
 
 Cell getCell(ivec2 grid) {
-  ivec4 state = texelFetch(u_inputTextureIndex, grid, 0);
+  ivec4 one = texelFetch(u_inputOneTexture, grid, 0);
+  ivec4 two = texelFetch(u_inputTwoTexture, grid, 0);
 
   Cell cell;
-  cell.type     = state.r;
-  cell.velocity = state.g;
-  cell.isMoved  = state.b;
-  cell.empty0   = state.a;
+
+  cell.type     = one.r;
+  cell.velocity = one.g;
+  cell.isMoved  = one.b;
+  cell.clock    = one.a;
+
+  cell.heat     = two.r;
+  cell.empty0   = two.g;
+  cell.empty1   = two.b;
+  cell.empty2   = two.a;
 
   return cell;
 }
@@ -325,7 +338,7 @@ ivec4 spawnCell() {
 
 void main() {
   if(isClicked()) {
-    outData = spawnCell();
+    outOne = spawnCell();
     return;
   }
 
@@ -336,10 +349,21 @@ void main() {
   block = changeBlock(block);
 
   Cell thisCell = getCellFromBlock(grid, block);
-  outData = ivec4(
+
+  thisCell.heat++;
+  if(thisCell.heat > 10) thisCell.velocity = 0;
+
+  outOne = ivec4(
     thisCell.type,
     thisCell.velocity,
     thisCell.isMoved,
-    thisCell.empty0
+    thisCell.clock
+  );
+
+  outTwo = ivec4(
+    thisCell.heat,
+    thisCell.empty0,
+    thisCell.empty1,
+    thisCell.empty2
   );
 }

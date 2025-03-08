@@ -44,7 +44,8 @@ export class Main {
     const locations = {
       update: {
         aCanvasVertices: gl.getAttribLocation(programs.update, "a_canvasVertices"),
-        uInputTextureIndex: gl.getUniformLocation(programs.update, "u_inputTextureIndex"),
+        uInputOneTexture: gl.getUniformLocation(programs.update, "u_inputOneTexture"),
+        uInputTwoTexture: gl.getUniformLocation(programs.update, "u_inputTwoTexture"),
         uInputKey: gl.getUniformLocation(programs.update, "u_inputKey"),
         uPointerPosition: gl.getUniformLocation(programs.update, "u_pointerPosition"),
         uIsPointerDown: gl.getUniformLocation(programs.update, "u_isPointerDown"),
@@ -56,7 +57,8 @@ export class Main {
         uCanvas: gl.getUniformLocation(programs.render, "u_canvas"),
         uColumns: gl.getUniformLocation(programs.render, "u_columns"),
         uBorderSize: gl.getUniformLocation(programs.render, "u_borderSize"),
-        uOutputTextureIndex: gl.getUniformLocation(programs.render, "u_outputTextureIndex"),
+        uOutputOneTexture: gl.getUniformLocation(programs.render, "u_outputOneTexture"),
+        uOutputTwoTexture: gl.getUniformLocation(programs.render, "u_outputTwoTexture"),
         uDebug: gl.getUniformLocation(programs.render, "u_debug"),
       },
     };
@@ -72,8 +74,11 @@ export class Main {
     };
 
     const textures = {
-      first: gl.createTexture(),
-      second: gl.createTexture(),
+      one: gl.createTexture(),
+      oneAux: gl.createTexture(),
+
+      two: gl.createTexture(),
+      twoAux: gl.createTexture(),
     };
 
     const framebuffers = {
@@ -87,11 +92,19 @@ export class Main {
     gl.enableVertexAttribArray(locations.update.aCanvasVertices);
     gl.vertexAttribPointer(locations.update.aCanvasVertices, 2, gl.FLOAT, false, 0, 0);
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.first);
+    gl.bindTexture(gl.TEXTURE_2D, textures.one);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
     WebGL.Texture.applyClampAndNearest(gl);
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.second);
+    gl.bindTexture(gl.TEXTURE_2D, textures.oneAux);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
+    WebGL.Texture.applyClampAndNearest(gl);
+
+    gl.bindTexture(gl.TEXTURE_2D, textures.two);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
+    WebGL.Texture.applyClampAndNearest(gl);
+
+    gl.bindTexture(gl.TEXTURE_2D, textures.twoAux);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state);
     WebGL.Texture.applyClampAndNearest(gl);
 
@@ -112,15 +125,21 @@ export class Main {
     const updateLoop = () => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.update);
       gl.viewport(0, 0, Config.columns, Config.columns);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures.second, 0);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures.oneAux, 0);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, textures.twoAux, 0);
+      gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1])
 
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, textures.first);
+      gl.bindTexture(gl.TEXTURE_2D, textures.one);
+
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, textures.two);
 
       gl.useProgram(programs.update);
       gl.bindVertexArray(vertexArrayObjects.update);
 
-      gl.uniform1i(locations.update.uInputTextureIndex, 0);
+      gl.uniform1i(locations.update.uInputOneTexture, 0);
+      gl.uniform1i(locations.update.uInputTwoTexture, 1);
       gl.uniform1i(locations.update.uTime, time);
       gl.uniform1i(locations.update.uInputKey, this.input.getSpawnKey());
       gl.uniform1i(locations.update.uIsPointerDown, Number(this.input.getIsPointerDown()));
@@ -136,7 +155,10 @@ export class Main {
       gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, textures.second);
+      gl.bindTexture(gl.TEXTURE_2D, textures.oneAux);
+
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, textures.twoAux);
 
       gl.useProgram(programs.render);
       gl.bindVertexArray(vertexArrayObjects.render);
@@ -144,7 +166,8 @@ export class Main {
       gl.uniform1f(locations.render.uCanvas, this.canvas.width);
       gl.uniform1f(locations.render.uColumns, Config.columns);
       gl.uniform1f(locations.render.uBorderSize, Config.borderSize);
-      gl.uniform1i(locations.render.uOutputTextureIndex, 0);
+      gl.uniform1i(locations.render.uOutputOneTexture, 0);
+      gl.uniform1i(locations.render.uOutputTwoTexture, 1);
       gl.uniform1i(locations.render.uDebug, Config.debug ? 1 : 0);
 
       gl.drawArrays(gl.POINTS, 0, Config.columns ** 2);
@@ -156,9 +179,13 @@ export class Main {
 
       time++;
 
-      const swap = textures.first;
-      textures.first = textures.second;
-      textures.second = swap;
+      const swapOne = textures.one;
+      textures.one = textures.oneAux;
+      textures.oneAux = swapOne;
+
+      const swapTwo = textures.two;
+      textures.two = textures.twoAux;
+      textures.twoAux = swapTwo;
 
       if (!Config.debug && !Config.limitFPS) requestAnimationFrame(mainLoop);
     };
