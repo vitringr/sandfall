@@ -25,10 +25,9 @@ const vec3 COLORS_SAND[3] = vec3[3](
   vec3(0.54,  0.44,  0.0)
 );
 const vec3 COLORS_WATER[3] = vec3[3](
-  // vec3(0.47,  0.83,  1.0),
-  vec3(0.4,  0.8,  1.0),
   vec3(0.32,  0.76,  1.0),
-  vec3(0.29,  0.72,  1.0)
+  vec3(0.29,  0.72,  1.0),
+  vec3(0.26,  0.69,  1.0)
 );
 const vec3 COLORS_FIRE[3] = vec3[3](
   vec3(1.0,  0.9,  0.0),
