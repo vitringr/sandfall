@@ -37,3 +37,9 @@ Maybe transfer slowly, once every few frames.
 Add color to some elements based on heat.
 
 Create fire out of heated empty cells.
+
+# Water Transfer
+
+Wet sand should have a `wet` state, just like heat.
+
+When it's near other sand cells (and not only), it can share the wetness.

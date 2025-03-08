@@ -24,6 +24,10 @@ const int FIRE     = 4;
 const int STEAM    = 5;
 const int WET_SAND = 6;
 
+const int INTERACTION_NONE           = 0;
+const int INTERACTION_SAND_AND_WATER = 1;
+const int INTERACTION_WATER_AND_FIRE = 2;
+
 const int DENSITY[7] = int[7](
   /* EMPTY */    0,
   /* BLOCK */    5,
@@ -86,7 +90,7 @@ Cell getCell(ivec2 grid) {
 
   Cell cell;
 
-  cell.rng       = one.r;
+  cell.rng      = one.r;
   cell.clock    = one.g;
   cell.type     = one.b;
   cell.state    = one.a;
@@ -95,6 +99,21 @@ Cell getCell(ivec2 grid) {
   cell.isMoved  = two.g;
   cell.heat     = two.b;
   cell.empty    = two.a;
+
+  return cell;
+}
+
+Cell resetCell(Cell originalCell) {
+  Cell cell = originalCell;
+
+  cell.clock    = 0;
+  cell.type     = EMPTY;
+  cell.state    = 0;
+
+  cell.velocity = 0;
+  cell.isMoved  = 0;
+  cell.heat     = 0;
+  cell.empty    = 0;
 
   return cell;
 }
@@ -312,19 +331,83 @@ Block applyVelocity(Block originalBlock, ivec4 applicationOrder) {
   return block;
 }
 
+
+
+
+int getInteraction(int aType, int bType) {
+  if(aType == EMPTY) {
+    return INTERACTION_NONE;
+  }
+
+  else if(aType == BLOCK) {
+    return INTERACTION_NONE;
+  }
+
+  else if(aType == SAND) {
+    if(bType == WATER) return INTERACTION_SAND_AND_WATER;
+
+    return INTERACTION_NONE;
+  }
+
+  else if(aType == WATER) {
+    return INTERACTION_NONE;
+  }
+
+  else if(aType == FIRE) {
+    return INTERACTION_NONE;
+  }
+
+  else if(aType == STEAM) {
+    return INTERACTION_NONE;
+  }
+
+  return INTERACTION_NONE;
+}
+
+void sandAndWater(inout Cell sand, inout Cell water) {
+  sand.type = WET_SAND;
+  sand.state = 0;
+
+  water = resetCell(water);
+}
+
+void applyInteraction(inout Cell one, inout Cell two) {
+  int interaction = getInteraction(one.type, two.type);
+  if(interaction == INTERACTION_NONE) return;
+
+  if(interaction == INTERACTION_SAND_AND_WATER) {
+    sandAndWater(one, two);
+    return;
+  }
+}
+
+
+
+
 Block changeBlock(Block originalBlock) {
   Block block = originalBlock;
 
+  if(block.bl.type <= block.tl.type) applyInteraction(block.bl, block.tl);
+  else                               applyInteraction(block.tl, block.bl);
+
+  if(block.tl.type <= block.tr.type) applyInteraction(block.tl, block.tr);
+  else                               applyInteraction(block.tr, block.tl);
+
+  if(block.tr.type <= block.br.type) applyInteraction(block.tr, block.br);
+  else                               applyInteraction(block.br, block.tr);
+
+  if(block.br.type <= block.bl.type) applyInteraction(block.br, block.bl);
+  else                               applyInteraction(block.bl, block.br);
+
   int modTime = u_time % 4;
+  if     (modTime == 0) block = applyVelocity(block, ivec4(2, 0, 1, 3));
+  else if(modTime == 1) block = applyVelocity(block, ivec4(1, 3, 2, 0));
+  else if(modTime == 2) block = applyVelocity(block, ivec4(0, 1, 3, 2));
+  else                  block = applyVelocity(block, ivec4(2, 3, 0, 1));
 
-  if(modTime == 0)      block = applyVelocity(block, ivec4(2, 0, 1, 3)); // right
-  else if(modTime == 1) block = applyVelocity(block, ivec4(1, 3, 2, 0)); // left
-  else if(modTime == 2) block = applyVelocity(block, ivec4(0, 1, 3, 2)); // left
-  else                  block = applyVelocity(block, ivec4(2, 3, 0, 1)); // right
-
-  block.bl.isMoved = 0;
-  block.tl.isMoved = 0;
-  block.tr.isMoved = 0;
+  block.bl.isMoved =
+  block.tl.isMoved =
+  block.tr.isMoved =
   block.br.isMoved = 0;
 
   return block;
@@ -333,25 +416,17 @@ Block changeBlock(Block originalBlock) {
 
 
 
-Cell spawnCell() {
-  ivec2 grid = ivec2(gl_FragCoord.xy);
-  Cell cell = getCell(grid);
-
-  int type = u_inputKey;
-
+Cell spawnCell(ivec2 grid) {
   // TODO: this, but AFTER static rng
   // if(type != EMPTY && type != BLOCK) {
   //   if(cell.rng < 30) return cell;
   // }
+  Cell cell = getCell(grid);
 
-  cell.clock    = 0;
-  cell.type     = type;
-  cell.state    = 0;
+  int type = u_inputKey;
 
-  cell.velocity = 0;
-  cell.isMoved  = 0;
-  cell.heat     = 0;
-  cell.empty    = 0;
+  cell = resetCell(cell);
+  cell.type = type;
 
   if(type == SAND || type == WATER || type == WET_SAND) cell.velocity = DOWN;
   if(type == FIRE || type == STEAM)                     cell.velocity = UP;
@@ -376,12 +451,13 @@ void writeCellFragment(Cell cell, out ivec4 outOne, out ivec4 outTwo) {
 }
 
 void main() {
+  ivec2 grid = ivec2(gl_FragCoord.xy);
+
   if(isClicked()) {
-    writeCellFragment(spawnCell(), outOne, outTwo);
+    writeCellFragment(spawnCell(grid), outOne, outTwo);
     return;
   }
 
-  ivec2 grid = ivec2(gl_FragCoord.xy);
   ivec2 blockOrigin = getBlockOrigin(grid);
 
   Block block = getBlock(blockOrigin);
