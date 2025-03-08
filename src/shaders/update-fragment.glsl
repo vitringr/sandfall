@@ -25,20 +25,18 @@ const int SAND     = 2;
 const int WATER    = 3;
 const int FIRE     = 4;
 const int STEAM    = 5;
-const int WET_SAND = 6;
 
 const int INTERACTION_NONE           = 0;
-const int INTERACTION_SAND_AND_WATER = 1;
-const int INTERACTION_WATER_AND_FIRE = 2;
+const int INTERACTION_SAND_AND_SAND  = 1;
+const int INTERACTION_SAND_AND_WATER = 2;
 
-const int DENSITY[7] = int[7](
+const int DENSITY[6] = int[6](
   /* EMPTY */    0,
   /* BLOCK */    5,
   /* SAND  */    4,
   /* WATER */    3,
   /* FIRE  */    1,
-  /* STEAM */    2,
-  /* WET_SAND */ 4
+  /* STEAM */    2
 );
 
 const int LEFT  = 1;
@@ -52,14 +50,13 @@ const int SPREAD_MID  = 2;
 const int SPREAD_HIGH = 3;
 const int SPREAD_FULL = 4;
 
-const int SPREAD[7] = int[7](
+const int SPREAD[6] = int[6](
   /* EMPTY */    -1,
   /* BLOCK */    -1,
   /* SAND  */    SPREAD_LOW,
   /* WATER */    SPREAD_MID,
   /* FIRE  */    SPREAD_HIGH,
-  /* STEAM */    SPREAD_HIGH,
-  /* WET_SAND */ SPREAD_LOW
+  /* STEAM */    SPREAD_HIGH
 );
 
 
@@ -364,8 +361,8 @@ int getInteraction(int aType, int bType) {
   }
 
   else if(aType == SAND) {
+    if(bType == SAND) return INTERACTION_SAND_AND_SAND;
     if(bType == WATER) return INTERACTION_SAND_AND_WATER;
-
     return INTERACTION_NONE;
   }
 
@@ -385,18 +382,50 @@ int getInteraction(int aType, int bType) {
 }
 
 void sandAndWater(inout Cell sand, inout Cell water) {
-  sand.type = WET_SAND;
-  sand.state0 = 0;
+  int maxSandSoak = 10; // TODO: magic
+  if(sand.state0 >= maxSandSoak) return;
+
+  sand.state0++; // increase soak
 
   water = resetCell(water);
 }
 
+void entropy(inout int a, inout int b) {
+  if(abs(a- b) < 2) return;
+
+  int total= a+ b;
+  int aNew = 0;
+  int bNew = 0;
+
+  if(a> b) {
+    aNew = (total+ 1) / 2;
+    bNew = total- aNew;
+  }
+  else {
+    bNew = (total+ 1) / 2;
+    aNew = total- bNew;
+  }
+
+  a = aNew;
+  b = bNew;
+}
+
+void sandAndSand(inout Cell a, inout Cell b) {
+  entropy(a.state0, b.state0);
+}
+
 void applyInteraction(inout Cell one, inout Cell two) {
   int interaction = getInteraction(one.type, two.type);
+
   if(interaction == INTERACTION_NONE) return;
 
   if(interaction == INTERACTION_SAND_AND_WATER) {
     sandAndWater(one, two);
+    return;
+  }
+
+  if(interaction == INTERACTION_SAND_AND_SAND) {
+    sandAndSand(one, two);
     return;
   }
 }
@@ -448,8 +477,8 @@ Cell spawnCell(ivec2 grid) {
   cell = resetCell(cell);
   cell.type = type;
 
-  if(type == SAND || type == WATER || type == WET_SAND) cell.velocity = DOWN;
-  if(type == FIRE || type == STEAM)                     cell.velocity = UP;
+  if(type == SAND || type == WATER) cell.velocity = DOWN;
+  if(type == FIRE || type == STEAM) cell.velocity = UP;
 
   return cell;
 }
@@ -496,4 +525,3 @@ void main() {
 
   writeCellFragment(thisCell, output0, output1, output2);
 }
-

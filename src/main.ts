@@ -69,9 +69,9 @@ export class Main {
     };
 
     const data = {
-      stateOne: new Int8Array(this.generator.generate0()),
-      stateTwo: new Int8Array(this.generator.generate1()),
-      stateThree: new Int8Array(this.generator.generate2()),
+      state0: new Int8Array(this.generator.generate0()),
+      state1: new Int8Array(this.generator.generate1()),
+      state2: new Int8Array(this.generator.generate2()),
       canvasVertices: new Float32Array(WebGL.Points.rectangle(0, 0, 1, 1)),
     };
 
@@ -81,12 +81,12 @@ export class Main {
     };
 
     const textures = {
-      one: gl.createTexture(),
-      oneAux: gl.createTexture(),
-      two: gl.createTexture(),
-      twoAux: gl.createTexture(),
-      three: gl.createTexture(),
-      threeAux: gl.createTexture(),
+      main0: gl.createTexture(),
+      aux0: gl.createTexture(),
+      main1: gl.createTexture(),
+      aux1: gl.createTexture(),
+      main2: gl.createTexture(),
+      aux2: gl.createTexture(),
     };
 
     const framebuffers = {
@@ -100,28 +100,28 @@ export class Main {
     gl.enableVertexAttribArray(locations.update.aCanvasVertices);
     gl.vertexAttribPointer(locations.update.aCanvasVertices, 2, gl.FLOAT, false, 0, 0);
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.one);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.stateOne);
+    gl.bindTexture(gl.TEXTURE_2D, textures.main0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state0);
     WebGL.Texture.applyClampAndNearest(gl);
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.oneAux);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.stateOne);
+    gl.bindTexture(gl.TEXTURE_2D, textures.aux0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state0);
     WebGL.Texture.applyClampAndNearest(gl);
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.two);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.stateTwo);
+    gl.bindTexture(gl.TEXTURE_2D, textures.main1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state1);
     WebGL.Texture.applyClampAndNearest(gl);
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.twoAux);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.stateTwo);
+    gl.bindTexture(gl.TEXTURE_2D, textures.aux1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state1);
     WebGL.Texture.applyClampAndNearest(gl);
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.three);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.stateThree);
+    gl.bindTexture(gl.TEXTURE_2D, textures.main2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state2);
     WebGL.Texture.applyClampAndNearest(gl);
 
-    gl.bindTexture(gl.TEXTURE_2D, textures.threeAux);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.stateThree);
+    gl.bindTexture(gl.TEXTURE_2D, textures.aux2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state2);
     WebGL.Texture.applyClampAndNearest(gl);
 
     return { locations, vertexArrayObjects, textures, framebuffers };
@@ -141,19 +141,19 @@ export class Main {
     const updateLoop = () => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.update);
       gl.viewport(0, 0, Config.columns, Config.columns);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures.oneAux, 0);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, textures.twoAux, 0);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D, textures.threeAux, 0);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures.aux0, 0);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, textures.aux1, 0);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D, textures.aux2, 0);
       gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2]);
 
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, textures.one);
+      gl.bindTexture(gl.TEXTURE_2D, textures.main0);
 
       gl.activeTexture(gl.TEXTURE1);
-      gl.bindTexture(gl.TEXTURE_2D, textures.two);
+      gl.bindTexture(gl.TEXTURE_2D, textures.main1);
 
       gl.activeTexture(gl.TEXTURE2);
-      gl.bindTexture(gl.TEXTURE_2D, textures.three);
+      gl.bindTexture(gl.TEXTURE_2D, textures.main2);
 
       gl.useProgram(programs.update);
       gl.bindVertexArray(vertexArrayObjects.update);
@@ -176,13 +176,13 @@ export class Main {
       gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, textures.oneAux);
+      gl.bindTexture(gl.TEXTURE_2D, textures.aux0);
 
       gl.activeTexture(gl.TEXTURE1);
-      gl.bindTexture(gl.TEXTURE_2D, textures.twoAux);
+      gl.bindTexture(gl.TEXTURE_2D, textures.aux1);
 
       gl.activeTexture(gl.TEXTURE2);
-      gl.bindTexture(gl.TEXTURE_2D, textures.threeAux);
+      gl.bindTexture(gl.TEXTURE_2D, textures.aux2);
 
       gl.useProgram(programs.render);
       gl.bindVertexArray(vertexArrayObjects.render);
@@ -204,17 +204,17 @@ export class Main {
 
       time++;
 
-      const swapOne = textures.one;
-      textures.one = textures.oneAux;
-      textures.oneAux = swapOne;
+      const swap0 = textures.main0;
+      textures.main0 = textures.aux0;
+      textures.aux0 = swap0;
 
-      const swapTwo = textures.two;
-      textures.two = textures.twoAux;
-      textures.twoAux = swapTwo;
+      const swap1 = textures.main1;
+      textures.main1 = textures.aux1;
+      textures.aux1 = swap1;
 
-      const swapThree = textures.three;
-      textures.three = textures.threeAux;
-      textures.threeAux = swapThree;
+      const swap2 = textures.main2;
+      textures.main2 = textures.aux2;
+      textures.aux2 = swap2;
 
       if (!Config.debug && !Config.limitFPS) requestAnimationFrame(mainLoop);
     };

@@ -17,7 +17,6 @@ const int SAND     = 2;
 const int WATER    = 3;
 const int FIRE     = 4;
 const int STEAM    = 5;
-const int WET_SAND = 6;
 
 const vec3 COLOR_EMPTY = vec3(0.1,  0.1,  0.1);
 const vec3 COLOR_BLOCK = vec3(0.4,  0.3,  0.2);
@@ -45,6 +44,11 @@ const vec3 COLORS_STEAM[3] = vec3[3](
 
 const vec3 COLOR_ADD_SAND_WETNESS = vec3(0.0, 0.0, 0.3);
 
+const vec3 COLORS_DEBUG[3] = vec3[3](
+  vec3(0.0,  1.0,  0.0),
+  vec3(0.0,  1.0,  0.0),
+  vec3(0.0,  1.0,  0.0)
+);
 
 
 
@@ -94,26 +98,38 @@ Cell getCell(ivec2 grid) {
 }
 
 void main() {
-  Cell thisCell = getCell(ivec2(v_coordinates));
+  Cell cell = getCell(ivec2(v_coordinates));
 
-  vec3 color = vec3(0.0, 0.0, 0.0);
+  vec3 color = vec3(1.0, 0.0, 0.0);
 
-  int mod3RNG = thisCell.rng % 3;
+  int mod3RNG = cell.rng % 3;
 
-  if(thisCell.type == EMPTY) 
+  if(cell.type == EMPTY) {
     color = COLOR_EMPTY;
-  else if(thisCell.type == BLOCK) 
+  }
+
+  else if(cell.type == BLOCK)  {
     color = COLOR_BLOCK;
-  else if(thisCell.type == SAND) 
-    color = COLORS_SAND[mod3RNG];
-  else if(thisCell.type == WATER)
+  }
+
+  else if(cell.type == SAND) {
+    if(cell.state0 <= 0) color = COLORS_SAND[mod3RNG];
+    else color = COLORS_DEBUG[mod3RNG];
+  }
+
+  else if(cell.type == WATER) {
     color = COLORS_WATER[mod3RNG];
-  else if(thisCell.type == FIRE) 
+  }
+
+  else if(cell.type == FIRE)  {
     color = COLORS_FIRE[mod3RNG];
-  else if(thisCell.type == STEAM)
+  }
+
+  else if(cell.type == STEAM) {
     color = COLORS_STEAM[mod3RNG];
-  else if(thisCell.type == WET_SAND)
-    color = COLORS_SAND[mod3RNG] * 0.7 + COLOR_ADD_SAND_WETNESS;
+  }
+
+  // color = COLORS_SAND[mod3RNG] * 0.7 + COLOR_ADD_SAND_WETNESS;
 
   outColor = vec4(color, 1.0);
 }

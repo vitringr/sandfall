@@ -40,6 +40,10 @@ Create fire out of heated empty cells.
 
 # Water Transfer
 
-Wet sand should have a `wet` state, just like heat.
+Wet sand should have a `soak` state, just like heat.
 
-When it's near other sand cells (and not only), it can share the wetness.
+When it's near other sand cells (and not only), it can share the `soak`.
+
+Sand absorbs the water, increasing its `soak`.
+
+When `soak` is maximum (some number) it stops soaking more.
