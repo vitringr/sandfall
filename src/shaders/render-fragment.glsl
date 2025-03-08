@@ -21,9 +21,9 @@ const int WET_SAND = 6;
 const vec3 COLOR_EMPTY = vec3(0.1,  0.1,  0.1);
 const vec3 COLOR_BLOCK = vec3(0.4,  0.3,  0.2);
 const vec3 COLORS_SAND[3] = vec3[3](
-  vec3(0.7,  0.6,  0.0),
-  vec3(0.62,  0.52,  0.0),
-  vec3(0.54,  0.44,  0.0)
+  vec3(0.75,  0.65,  0.0),
+  vec3(0.70,  0.60,  0.0),
+  vec3(0.65,  0.55,  0.1)
 );
 const vec3 COLORS_WATER[3] = vec3[3](
   vec3(0.32,  0.76,  1.0),
@@ -39,11 +39,6 @@ const vec3 COLORS_STEAM[3] = vec3[3](
   vec3(0.4,  0.4,  0.4),
   vec3(0.5,  0.5,  0.5),
   vec3(0.3,  0.3,  0.3)
-);
-const vec3 COLORS_WET_SAND[3] = vec3[3](
-  vec3(0.0,  1.0,  0.0),
-  vec3(0.0,  1.0,  0.0),
-  vec3(0.0,  1.0,  0.0)
 );
 
 
@@ -103,7 +98,7 @@ void main() {
   else if(thisCell.type == STEAM)
     color = COLORS_STEAM[mod3RNG];
   else if(thisCell.type == WET_SAND)
-    color = COLORS_WET_SAND[mod3RNG];
+    color = COLORS_SAND[mod3RNG] * 0.7 + vec3(0.0, 0.0, 0.3);
 
   outColor = vec4(color, 1.0);
 }
