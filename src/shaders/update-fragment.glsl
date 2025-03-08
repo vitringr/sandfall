@@ -327,13 +327,20 @@ Block changeBlock(Block originalBlock) {
   return block;
 }
 
+
+
+
 Cell spawnCell() {
   ivec2 grid = ivec2(gl_FragCoord.xy);
   Cell cell = getCell(grid);
 
   int type = u_inputKey;
 
-  // cell.rng
+  // TODO: this, but AFTER static rng
+  // if(type != EMPTY && type != BLOCK) {
+  //   if(cell.rng < 30) return cell;
+  // }
+
   cell.clock    = 0;
   cell.type     = type;
   cell.state    = 0;

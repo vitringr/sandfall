@@ -22,7 +22,7 @@ export class Generator {
   generateOne() {
     const stateOne: number[] = [];
     for (let i = 0; i < totalCells; i++) {
-      const rng = Random.rangeInt(0, 3);
+      const rng = Random.rangeInt(0, 100);
       const clock = 0;
       const type = 0;
       const state = 0;

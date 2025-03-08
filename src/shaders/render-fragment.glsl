@@ -83,18 +83,20 @@ void main() {
 
   vec3 color = vec3(0.0, 0.0, 0.0);
 
+  int mod3RNG = thisCell.rng % 3;
+
   if(thisCell.type == EMPTY) 
     color = COLOR_EMPTY;
   else if(thisCell.type == BLOCK) 
     color = COLOR_BLOCK;
   else if(thisCell.type == SAND) 
-    color = COLORS_SAND[thisCell.rng];
+    color = COLORS_SAND[mod3RNG];
   else if(thisCell.type == WATER)
-    color = COLORS_WATER[thisCell.rng];
+    color = COLORS_WATER[mod3RNG];
   else if(thisCell.type == FIRE) 
-    color = COLORS_FIRE[thisCell.rng];
+    color = COLORS_FIRE[mod3RNG];
   else if(thisCell.type == STEAM)
-    color = COLORS_STEAM[thisCell.rng];
+    color = COLORS_STEAM[mod3RNG];
 
   outColor = vec4(color, 1.0);
 }

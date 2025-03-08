@@ -15,3 +15,15 @@ Thinking of ways to make different spread:
 
 
 # Spawner
+
+For this to work:
+
+```glsl
+if(type != EMPTY && type != BLOCK) {
+  if(cell.rng < 30) return cell;
+}
+```
+
+I need static RNG, meaning that it's based on the grid, and it's not Cell state.
+
+Actually this sounds like some hash based on the grid coordinates.
