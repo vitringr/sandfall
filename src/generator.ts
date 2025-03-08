@@ -3,11 +3,11 @@ import { Config } from "./config";
 const totalCells = Config.columns ** 2;
 
 export class Generator {
-  setWalls(state: number[]): number[] {
+  private setWalls(state: number[]): number[] {
     const newState = state;
 
     for (let i = 0; i < totalCells; i++) {
-      const index = i * 4;
+      const index = i * 4 + 2;
 
       if (i < Config.columns) newState[index] = 1;
       if (i > totalCells - Config.columns) newState[index] = 1;
@@ -18,19 +18,31 @@ export class Generator {
     return newState;
   }
 
-  generate() {
-    const state: number[] = [];
-
+  generateOne() {
+    const stateOne: number[] = [];
     for (let i = 0; i < totalCells; i++) {
+      const id = 0; // TODO
+      const clock = 0;
       const type = 0;
-      const velocity = 0;
-      const isMoved = 0;
-      const empty0 = 0;
-      state.push(type, velocity, isMoved, empty0);
+      const state = 0;
+      stateOne.push(id, clock, type, state);
     }
 
-    if (Config.walls) this.setWalls(state);
+    if (Config.walls) this.setWalls(stateOne);
 
-    return state;
+    return stateOne;
+  }
+
+  generateTwo() {
+    const stateTwo: number[] = [];
+    for (let i = 0; i < totalCells; i++) {
+      const velocity = 0;
+      const isMoved = 0;
+      const heat = 0;
+      const empty = 0;
+      stateTwo.push(velocity, isMoved, heat, empty);
+    }
+
+    return stateTwo;
   }
 }

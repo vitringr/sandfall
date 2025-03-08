@@ -327,6 +327,8 @@ Block changeBlock(Block originalBlock) {
   return block;
 }
 
+// TODO: Don't spawn cells, but instead CHANGE the currently
+// active empty cell below this one.
 Cell spawnCell() {
   Cell newCell;
 
