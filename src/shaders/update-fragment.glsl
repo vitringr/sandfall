@@ -56,7 +56,7 @@ const int SPREAD[6] = int[6](
 
 
 struct Cell {
-  int id;
+  int rng;
   int clock;
   int type;
   int state;
@@ -83,7 +83,7 @@ Cell getCell(ivec2 grid) {
 
   Cell cell;
 
-  cell.id       = one.r;
+  cell.rng       = one.r;
   cell.clock    = one.g;
   cell.type     = one.b;
   cell.state    = one.a;
@@ -333,7 +333,7 @@ Cell spawnCell() {
 
   int type = u_inputKey;
 
-  // cell.id
+  // cell.rng
   cell.clock    = 0;
   cell.type     = type;
   cell.state    = 0;
@@ -351,7 +351,7 @@ Cell spawnCell() {
 
 void writeCellFragment(Cell cell, out ivec4 outOne, out ivec4 outTwo) {
   outOne = ivec4(
-    cell.id,
+    cell.rng,
     cell.clock,
     cell.type,
     cell.state

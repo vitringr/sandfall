@@ -1,4 +1,5 @@
 import { Config } from "./config";
+import { Random } from "./utilities/utilities";
 
 const totalCells = Config.columns ** 2;
 
@@ -21,11 +22,11 @@ export class Generator {
   generateOne() {
     const stateOne: number[] = [];
     for (let i = 0; i < totalCells; i++) {
-      const id = 0; // TODO
+      const rng = Random.rangeInt(0, 3);
       const clock = 0;
       const type = 0;
       const state = 0;
-      stateOne.push(id, clock, type, state);
+      stateOne.push(rng, clock, type, state);
     }
 
     if (Config.walls) this.setWalls(stateOne);
