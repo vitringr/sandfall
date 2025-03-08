@@ -315,12 +315,12 @@ Block changeBlock(Block originalBlock) {
 }
 
 ivec4 spawnCell() {
-    int type = u_inputKey;
+  int type = u_inputKey;
 
-    int velocity = DOWN;
-    if(type == EMPTY || type == BLOCK) velocity = 0;
+  int velocity = DOWN;
+  if(type == EMPTY || type == BLOCK) velocity = 0;
 
-    return ivec4(type, velocity, 0, 0);
+  return ivec4(type, velocity, 0, 0);
 }
 
 void main() {

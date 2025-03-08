@@ -14,7 +14,7 @@ export class Main {
   private input = new Input();
   private generator = new Generator();
 
-  constructor(private readonly canvas: HTMLCanvasElement) { }
+  constructor(private readonly canvas: HTMLCanvasElement) {}
 
   setup() {
     if (this.initialized) throw "Already initialized";
