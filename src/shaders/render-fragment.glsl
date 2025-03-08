@@ -25,9 +25,10 @@ const vec3 COLORS_SAND[3] = vec3[3](
   vec3(0.54,  0.44,  0.0)
 );
 const vec3 COLORS_WATER[3] = vec3[3](
-  vec3(0.47,  0.83,  1.0),
-  vec3(0.32,  0.80,  1.0),
-  vec3(0.29,  0.73,  1.0)
+  // vec3(0.47,  0.83,  1.0),
+  vec3(0.4,  0.8,  1.0),
+  vec3(0.32,  0.76,  1.0),
+  vec3(0.29,  0.72,  1.0)
 );
 const vec3 COLORS_FIRE[3] = vec3[3](
   vec3(1.0,  0.9,  0.0),
@@ -40,27 +41,60 @@ const vec3 COLORS_STEAM[3] = vec3[3](
   vec3(0.3,  0.3,  0.3)
 );
 
-void main() {
-  ivec2 grid = ivec2(v_coordinates);
-  ivec4 stateOne = texelFetch(u_outputOneTexture, grid, 0);
 
-  int rng = stateOne.r;
-  int type = stateOne.b;
+
+
+struct Cell {
+  int rng;
+  int clock;
+  int type;
+  int state;
+
+  int velocity;
+  int isMoved;
+  int heat;
+  int empty;
+};
+
+
+
+
+Cell getCell(ivec2 grid) {
+  ivec4 one = texelFetch(u_outputOneTexture, grid, 0);
+  ivec4 two = texelFetch(u_outputTwoTexture, grid, 0);
+
+  Cell cell;
+
+  cell.rng      = one.r;
+  cell.clock    = one.g;
+  cell.type     = one.b;
+  cell.state    = one.a;
+
+  cell.velocity = two.r;
+  cell.isMoved  = two.g;
+  cell.heat     = two.b;
+  cell.empty    = two.a;
+
+  return cell;
+}
+
+void main() {
+  Cell thisCell = getCell(ivec2(v_coordinates));
 
   vec3 color = vec3(0.0, 0.0, 0.0);
 
-  if(type == EMPTY) 
+  if(thisCell.type == EMPTY) 
     color = COLOR_EMPTY;
-  else if(type == BLOCK) 
+  else if(thisCell.type == BLOCK) 
     color = COLOR_BLOCK;
-  else if(type == SAND) 
-    color = COLORS_SAND[rng];
-  else if(type == WATER)
-    color = COLORS_WATER[rng];
-  else if(type == FIRE) 
-    color = COLORS_FIRE[rng];
-  else if(type == STEAM)
-    color = COLORS_STEAM[rng];
+  else if(thisCell.type == SAND) 
+    color = COLORS_SAND[thisCell.rng];
+  else if(thisCell.type == WATER)
+    color = COLORS_WATER[thisCell.rng];
+  else if(thisCell.type == FIRE) 
+    color = COLORS_FIRE[thisCell.rng];
+  else if(thisCell.type == STEAM)
+    color = COLORS_STEAM[thisCell.rng];
 
   outColor = vec4(color, 1.0);
 }

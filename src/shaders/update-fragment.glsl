@@ -379,8 +379,7 @@ void main() {
 
   Cell thisCell = getCellFromBlock(grid, block);
 
-  // thisCell.heat++;
-  // if(thisCell.heat > 10) thisCell.velocity = 0;
+  thisCell.clock++;
 
   writeCellFragment(thisCell, outOne, outTwo);
 }
