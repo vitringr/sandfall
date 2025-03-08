@@ -327,27 +327,26 @@ Block changeBlock(Block originalBlock) {
   return block;
 }
 
-// TODO: Don't spawn cells, but instead CHANGE the currently
-// active empty cell below this one.
 Cell spawnCell() {
-  Cell newCell;
+  ivec2 grid = ivec2(gl_FragCoord.xy);
+  Cell cell = getCell(grid);
 
   int type = u_inputKey;
 
-  newCell.id       = 0;
-  newCell.clock    = 0;
-  newCell.type     = type;
-  newCell.state    = 0;
+  // cell.id
+  cell.clock    = 0;
+  cell.type     = type;
+  cell.state    = 0;
 
-  newCell.velocity = 0;
-  newCell.isMoved  = 0;
-  newCell.heat     = 0;
-  newCell.empty    = 0;
+  cell.velocity = 0;
+  cell.isMoved  = 0;
+  cell.heat     = 0;
+  cell.empty    = 0;
 
-  if(type == SAND || type == WATER) newCell.velocity = DOWN;
-  if(type == FIRE || type == STEAM) newCell.velocity = UP;
+  if(type == SAND || type == WATER) cell.velocity = DOWN;
+  if(type == FIRE || type == STEAM) cell.velocity = UP;
 
-  return newCell;
+  return cell;
 }
 
 void writeCellFragment(Cell cell, out ivec4 outOne, out ivec4 outTwo) {
@@ -368,8 +367,7 @@ void writeCellFragment(Cell cell, out ivec4 outOne, out ivec4 outTwo) {
 
 void main() {
   if(isClicked()) {
-    Cell newCell = spawnCell();
-    writeCellFragment(newCell, outOne, outTwo);
+    writeCellFragment(spawnCell(), outOne, outTwo);
     return;
   }
 
