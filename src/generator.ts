@@ -33,7 +33,6 @@ export class Generator {
       const g = 0;
       const b = 0;
       const a = 0;
-
       state.push(r, g, b, a);
     }
 

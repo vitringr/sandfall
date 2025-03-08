@@ -1,14 +1,17 @@
 export namespace Config {
   export const debug = false;
 
-  export const columns: number = 100
+  export const columns: number = 100;
   export const walls: boolean = true;
-  export const spawnerSize: number = 0.015;
+  export const spawnerSize: number = 0.014;
 
   export const limitFPS: boolean = false;
   export const FPS: number = 60;
 
   export const borderSize: number = -0.02;
+
+  export const maxSoakedCells: number = 2;
+  export const soakPerAbsorb: number = 10;
 
   export enum Elements {
     EMPTY = 0,

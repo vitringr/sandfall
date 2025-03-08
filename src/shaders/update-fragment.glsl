@@ -16,29 +16,32 @@ uniform isampler2D u_inputTexture2;
 uniform bool u_isPointerDown;
 uniform int u_time;
 uniform int u_inputKey;
+uniform int u_maxSoakedCells;
+uniform int u_soakPerAbsorb;
 uniform float u_spawnerSize;
 uniform vec2 u_pointerPosition;
 
-const int EMPTY    = 0;
-const int BLOCK    = 1;
-const int SAND     = 2;
-const int WATER    = 3;
-const int FIRE     = 4;
-const int STEAM    = 5;
+
+
+
+const int EMPTY = 0;
+const int BLOCK = 1;
+const int SAND  = 2;
+const int WATER = 3;
+const int FIRE  = 4;
+const int STEAM = 5;
 
 const int INTERACTION_NONE           = 0;
 const int INTERACTION_SAND_AND_SAND  = 1;
 const int INTERACTION_SAND_AND_WATER = 2;
 
-const int MAX_SOAK_ABSORB = 4;
-
 const int DENSITY[6] = int[6](
-  /* EMPTY */    0,
-  /* BLOCK */    5,
-  /* SAND  */    4,
-  /* WATER */    3,
-  /* FIRE  */    1,
-  /* STEAM */    2
+  0, // Empty
+  5, // Block
+  4, // Sand
+  3, // Water
+  1, // Fire
+  2  // Steam
 );
 
 const int LEFT  = 1;
@@ -53,12 +56,12 @@ const int SPREAD_HIGH = 3;
 const int SPREAD_FULL = 4;
 
 const int SPREAD[6] = int[6](
-  /* EMPTY */    -1,
-  /* BLOCK */    -1,
-  /* SAND  */    SPREAD_LOW,
-  /* WATER */    SPREAD_MID,
-  /* FIRE  */    SPREAD_HIGH,
-  /* STEAM */    SPREAD_HIGH
+  -1,          // Empty
+  -1,          // Block
+  SPREAD_LOW,  // Sand
+  SPREAD_MID,  // Water
+  SPREAD_HIGH, // Fire
+  SPREAD_HIGH  // Steam
 );
 
 
@@ -190,19 +193,19 @@ bool isClicked() {
 
 
 void entropy(inout int a, inout int b) {
-  if(abs(a- b) < 2) return;
+  if(abs(a - b) < 2) return;
 
-  int total= a+ b;
+  int total= a + b;
   int aNew = 0;
   int bNew = 0;
 
   if(a> b) {
-    aNew = (total+ 1) / 2;
-    bNew = total- aNew;
+    aNew = (total + 1) / 2;
+    bNew = total - aNew;
   }
   else {
-    bNew = (total+ 1) / 2;
-    aNew = total- bNew;
+    bNew = (total + 1) / 2;
+    aNew = total - bNew;
   }
 
   a = aNew;
@@ -231,7 +234,7 @@ int rotateVelocity(int velocity) {
   return velocity + 1;
 }
 
-int rotateBackVelocity(int velocity) {
+int reverseRotateVelocity(int velocity) {
   if(velocity == 0) return 0;
   if(velocity == LEFT) return UP;
   return velocity - 1;
@@ -243,9 +246,9 @@ Cell rotateCell(Cell cell) {
   return counterclockwise;
 }
 
-Cell rotateBackCell(Cell cell) {
+Cell reverseRotateCell(Cell cell) {
   Cell clockwise = cell;
-  clockwise.velocity = rotateBackVelocity(cell.velocity);
+  clockwise.velocity = reverseRotateVelocity(cell.velocity);
   return clockwise;
 }
 
@@ -258,12 +261,12 @@ Block rotateBlock(Block block) {
   return counterclockwise;
 }
 
-Block rotateBackBlock(Block block) {
+Block reverseRotateBlock(Block block) {
   Block clockwise;
-  clockwise.bl = rotateBackCell(block.br);
-  clockwise.tl = rotateBackCell(block.bl);
-  clockwise.tr = rotateBackCell(block.tl);
-  clockwise.br = rotateBackCell(block.tr);
+  clockwise.bl = reverseRotateCell(block.br);
+  clockwise.tl = reverseRotateCell(block.bl);
+  clockwise.tr = reverseRotateCell(block.tl);
+  clockwise.br = reverseRotateCell(block.tr);
   return clockwise;
 }
 
@@ -355,7 +358,7 @@ Block applyVelocityToIndex(Block originalBlock, int blockIndex) {
   block = applyVelocityToBL(block);
 
   for(int i = 0; i < blockIndex; i++) {
-    block = rotateBackBlock(block);
+    block = reverseRotateBlock(block);
   }
 
   return block;
@@ -404,10 +407,13 @@ int getInteraction(int aType, int bType) {
 }
 
 void sandAndWater(inout Cell sand, inout Cell water) {
-  int soakPerWaterCell = 10;
-  if(sand.state0 >= MAX_SOAK_ABSORB * soakPerWaterCell) return;
+  // The higher the integer, the more it
+  // equalizes with others due to entropy.
+  // (3,  0) => (2,  1)
+  // (30, 0) => (15, 15)
+  if(sand.state0 >= u_soakPerAbsorb * u_maxSoakedCells) return;
 
-  sand.state0 += soakPerWaterCell;
+  sand.state0 += u_soakPerAbsorb;
   water = resetCell(water);
 }
 
@@ -448,6 +454,12 @@ Block changeBlock(Block originalBlock) {
 
   if(block.br.type <= block.bl.type) applyInteraction(block.br, block.bl);
   else                               applyInteraction(block.bl, block.br);
+
+  if(block.bl.type <= block.tr.type) applyInteraction(block.bl, block.tr);
+  else                               applyInteraction(block.tr, block.bl);
+
+  if(block.tl.type <= block.br.type) applyInteraction(block.tl, block.br);
+  else                               applyInteraction(block.br, block.tl);
 
   int modTime = u_time % 4;
   if     (modTime == 0) block = applyVelocity(block, ivec4(2, 0, 1, 3));

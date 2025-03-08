@@ -11,6 +11,9 @@ uniform isampler2D u_outputTexture0;
 uniform isampler2D u_outputTexture1;
 uniform isampler2D u_outputTexture2;
 
+uniform int u_maxSoakedCells;
+uniform int u_soakPerAbsorb;
+
 const int EMPTY    = 0;
 const int BLOCK    = 1;
 const int SAND     = 2;
@@ -18,6 +21,7 @@ const int WATER    = 3;
 const int FIRE     = 4;
 const int STEAM    = 5;
 
+const vec3 COLOR_DEBUG = vec3(1.0,  0.0,  1.0);
 const vec3 COLOR_EMPTY = vec3(0.1,  0.1,  0.1);
 const vec3 COLOR_BLOCK = vec3(0.4,  0.3,  0.2);
 
@@ -27,9 +31,9 @@ const vec3 COLORS_SAND[3] = vec3[3](
   vec3(0.65,  0.55,  0.1)
 );
 const vec3 COLORS_WET_SAND[3] = vec3[3](
-  vec3(0.33,  0.28,  0.28),
-  vec3(0.30,  0.25,  0.25),
-  vec3(0.27,  0.22,  0.22)
+  vec3(0.32,  0.27,  0.27),
+  vec3(0.29,  0.24,  0.24),
+  vec3(0.26,  0.21,  0.21)
 );
 const vec3 COLORS_WATER[3] = vec3[3](
   vec3(0.32,  0.76,  1.0),
@@ -47,11 +51,6 @@ const vec3 COLORS_STEAM[3] = vec3[3](
   vec3(0.3,  0.3,  0.3)
 );
 
-const vec3 COLORS_DEBUG[3] = vec3[3](
-  vec3(1.0, 0.0, 1.0),
-  vec3(1.0, 0.0, 1.0),
-  vec3(1.0, 0.0, 1.0)
-);
 
 
 
@@ -120,13 +119,13 @@ void main() {
     if(cell.state0 <= 0) {
       color = COLORS_SAND[mod3RNG];
     }
-    // else color = COLORS_SAND[mod3RNG] * 0.7 + COLOR_ADD_SAND_WETNESS;
-    // else color = COLORS_SAND[mod3RNG] / (float(cell.state0) / 2.0);
     else {
+      float maxSoakStep = 1.0 / float(u_maxSoakedCells * u_soakPerAbsorb);
+
       color = mix(
         COLORS_SAND[mod3RNG],
         COLORS_WET_SAND[mod3RNG],
-        0.2 + 0.8 * (1.0/40.0) * float(cell.state0)
+        0.2 + 0.8 * (maxSoakStep * float(cell.state0))
       );
     }
   }

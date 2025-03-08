@@ -47,24 +47,29 @@ export class Main {
       update: {
         aCanvasVertices: gl.getAttribLocation(programs.update, "a_canvasVertices"),
 
-        uIsPointerDown: gl.getUniformLocation(programs.update, "u_isPointerDown"),
-        uTime: gl.getUniformLocation(programs.update, "u_time"),
-        uInputKey: gl.getUniformLocation(programs.update, "u_inputKey"),
-        uSpawnerSize: gl.getUniformLocation(programs.update, "u_spawnerSize"),
-        uPointerPosition: gl.getUniformLocation(programs.update, "u_pointerPosition"),
         uInputTexture0: gl.getUniformLocation(programs.update, "u_inputTexture0"),
         uInputTexture1: gl.getUniformLocation(programs.update, "u_inputTexture1"),
         uInputTexture2: gl.getUniformLocation(programs.update, "u_inputTexture2"),
+
+        uIsPointerDown: gl.getUniformLocation(programs.update, "u_isPointerDown"),
+        uTime: gl.getUniformLocation(programs.update, "u_time"),
+        uInputKey: gl.getUniformLocation(programs.update, "u_inputKey"),
+        uMaxSoakedCells: gl.getUniformLocation(programs.update, "u_maxSoakedCells"),
+        uSoakPerAbsorb: gl.getUniformLocation(programs.update, "u_soakPerAbsorb"),
+        uSpawnerSize: gl.getUniformLocation(programs.update, "u_spawnerSize"),
+        uPointerPosition: gl.getUniformLocation(programs.update, "u_pointerPosition"),
       },
 
       render: {
-        uDebug: gl.getUniformLocation(programs.render, "u_debug"),
-        uCanvas: gl.getUniformLocation(programs.render, "u_canvas"),
-        uColumns: gl.getUniformLocation(programs.render, "u_columns"),
-        uBorderSize: gl.getUniformLocation(programs.render, "u_borderSize"),
         uOutputTexture0: gl.getUniformLocation(programs.render, "u_outputTexture0"),
         uOutputTexture1: gl.getUniformLocation(programs.render, "u_outputTexture1"),
         uOutputTexture2: gl.getUniformLocation(programs.render, "u_outputTexture2"),
+
+        uMaxSoakedCells: gl.getUniformLocation(programs.render, "u_maxSoakedCells"),
+        uSoakPerAbsorb: gl.getUniformLocation(programs.render, "u_soakPerAbsorb"),
+        uCanvas: gl.getUniformLocation(programs.render, "u_canvas"),
+        uColumns: gl.getUniformLocation(programs.render, "u_columns"),
+        uBorderSize: gl.getUniformLocation(programs.render, "u_borderSize"),
       },
     };
 
@@ -161,9 +166,11 @@ export class Main {
       gl.uniform1i(locations.update.uInputTexture0, 0);
       gl.uniform1i(locations.update.uInputTexture1, 1);
       gl.uniform1i(locations.update.uInputTexture2, 2);
+      gl.uniform1i(locations.update.uIsPointerDown, Number(this.input.getIsPointerDown()));
       gl.uniform1i(locations.update.uTime, time);
       gl.uniform1i(locations.update.uInputKey, this.input.getSpawnKey());
-      gl.uniform1i(locations.update.uIsPointerDown, Number(this.input.getIsPointerDown()));
+      gl.uniform1i(locations.update.uMaxSoakedCells, Config.maxSoakedCells);
+      gl.uniform1i(locations.update.uSoakPerAbsorb, Config.soakPerAbsorb);
       gl.uniform1f(locations.update.uSpawnerSize, Config.spawnerSize);
       const pointerCoordinates = this.input.getPointerCoordinates();
       gl.uniform2f(locations.update.uPointerPosition, pointerCoordinates.x, pointerCoordinates.y);
@@ -187,13 +194,14 @@ export class Main {
       gl.useProgram(programs.render);
       gl.bindVertexArray(vertexArrayObjects.render);
 
-      gl.uniform1f(locations.render.uCanvas, this.canvas.width);
-      gl.uniform1f(locations.render.uColumns, Config.columns);
-      gl.uniform1f(locations.render.uBorderSize, Config.borderSize);
       gl.uniform1i(locations.render.uOutputTexture0, 0);
       gl.uniform1i(locations.render.uOutputTexture1, 1);
       gl.uniform1i(locations.render.uOutputTexture2, 2);
-      gl.uniform1i(locations.render.uDebug, Number(Config.debug));
+      gl.uniform1i(locations.render.uMaxSoakedCells, Config.maxSoakedCells);
+      gl.uniform1i(locations.render.uSoakPerAbsorb, Config.soakPerAbsorb);
+      gl.uniform1f(locations.render.uCanvas, this.canvas.width);
+      gl.uniform1f(locations.render.uColumns, Config.columns);
+      gl.uniform1f(locations.render.uBorderSize, Config.borderSize);
 
       gl.drawArrays(gl.POINTS, 0, Config.columns ** 2);
     };
