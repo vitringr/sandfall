@@ -30,6 +30,8 @@ const int INTERACTION_NONE           = 0;
 const int INTERACTION_SAND_AND_SAND  = 1;
 const int INTERACTION_SAND_AND_WATER = 2;
 
+const int MAX_SOAK_ABSORB = 4;
+
 const int DENSITY[6] = int[6](
   /* EMPTY */    0,
   /* BLOCK */    5,
@@ -186,6 +188,26 @@ bool isClicked() {
 
 
 
+
+void entropy(inout int a, inout int b) {
+  if(abs(a- b) < 2) return;
+
+  int total= a+ b;
+  int aNew = 0;
+  int bNew = 0;
+
+  if(a> b) {
+    aNew = (total+ 1) / 2;
+    bNew = total- aNew;
+  }
+  else {
+    bNew = (total+ 1) / 2;
+    aNew = total- bNew;
+  }
+
+  a = aNew;
+  b = bNew;
+}
 
 void swap(inout Cell a, inout Cell b) {
   Cell temp = a;
@@ -382,32 +404,11 @@ int getInteraction(int aType, int bType) {
 }
 
 void sandAndWater(inout Cell sand, inout Cell water) {
-  int maxSandSoak = 10; // TODO: magic
-  if(sand.state0 >= maxSandSoak) return;
+  int soakPerWaterCell = 10;
+  if(sand.state0 >= MAX_SOAK_ABSORB * soakPerWaterCell) return;
 
-  sand.state0++; // increase soak
-
+  sand.state0 += soakPerWaterCell;
   water = resetCell(water);
-}
-
-void entropy(inout int a, inout int b) {
-  if(abs(a- b) < 2) return;
-
-  int total= a+ b;
-  int aNew = 0;
-  int bNew = 0;
-
-  if(a> b) {
-    aNew = (total+ 1) / 2;
-    bNew = total- aNew;
-  }
-  else {
-    bNew = (total+ 1) / 2;
-    aNew = total- bNew;
-  }
-
-  a = aNew;
-  b = bNew;
 }
 
 void sandAndSand(inout Cell a, inout Cell b) {

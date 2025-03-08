@@ -26,6 +26,11 @@ const vec3 COLORS_SAND[3] = vec3[3](
   vec3(0.70,  0.60,  0.0),
   vec3(0.65,  0.55,  0.1)
 );
+const vec3 COLORS_WET_SAND[3] = vec3[3](
+  vec3(0.33,  0.28,  0.28),
+  vec3(0.30,  0.25,  0.25),
+  vec3(0.27,  0.22,  0.22)
+);
 const vec3 COLORS_WATER[3] = vec3[3](
   vec3(0.32,  0.76,  1.0),
   vec3(0.29,  0.72,  1.0),
@@ -42,13 +47,12 @@ const vec3 COLORS_STEAM[3] = vec3[3](
   vec3(0.3,  0.3,  0.3)
 );
 
-const vec3 COLOR_ADD_SAND_WETNESS = vec3(0.0, 0.0, 0.3);
-
 const vec3 COLORS_DEBUG[3] = vec3[3](
-  vec3(0.0,  1.0,  0.0),
-  vec3(0.0,  1.0,  0.0),
-  vec3(0.0,  1.0,  0.0)
+  vec3(1.0, 0.0, 1.0),
+  vec3(1.0, 0.0, 1.0),
+  vec3(1.0, 0.0, 1.0)
 );
+
 
 
 
@@ -68,9 +72,6 @@ struct Cell {
   int state2;
   int state3;
 };
-
-
-
 
 Cell getCell(ivec2 grid) {
   ivec4 data0 = texelFetch(u_outputTexture0, grid, 0);
@@ -97,10 +98,13 @@ Cell getCell(ivec2 grid) {
   return cell;
 }
 
+
+
+
 void main() {
   Cell cell = getCell(ivec2(v_coordinates));
 
-  vec3 color = vec3(1.0, 0.0, 0.0);
+  vec3 color = vec3(0.0, 0.0, 0.0);
 
   int mod3RNG = cell.rng % 3;
 
@@ -113,8 +117,18 @@ void main() {
   }
 
   else if(cell.type == SAND) {
-    if(cell.state0 <= 0) color = COLORS_SAND[mod3RNG];
-    else color = COLORS_DEBUG[mod3RNG];
+    if(cell.state0 <= 0) {
+      color = COLORS_SAND[mod3RNG];
+    }
+    // else color = COLORS_SAND[mod3RNG] * 0.7 + COLOR_ADD_SAND_WETNESS;
+    // else color = COLORS_SAND[mod3RNG] / (float(cell.state0) / 2.0);
+    else {
+      color = mix(
+        COLORS_SAND[mod3RNG],
+        COLORS_WET_SAND[mod3RNG],
+        0.2 + 0.8 * (1.0/40.0) * float(cell.state0)
+      );
+    }
   }
 
   else if(cell.type == WATER) {
@@ -128,8 +142,6 @@ void main() {
   else if(cell.type == STEAM) {
     color = COLORS_STEAM[mod3RNG];
   }
-
-  // color = COLORS_SAND[mod3RNG] * 0.7 + COLOR_ADD_SAND_WETNESS;
 
   outColor = vec4(color, 1.0);
 }
