@@ -34,6 +34,7 @@ const int STEAM = 5;
 const int INTERACTION_NONE           = 0;
 const int INTERACTION_SAND_AND_SAND  = 1;
 const int INTERACTION_SAND_AND_WATER = 2;
+const int INTERACTION_WATER_AND_WATER = 3;
 
 const int DENSITY[6] = int[6](
   0, // Empty
@@ -74,7 +75,7 @@ struct Cell {
   int empty1;
 
   int type;
-  int heat;
+  int temperature;
   int velocity;
   int isMoved;
 
@@ -107,7 +108,7 @@ Cell getCell(ivec2 grid) {
   cell.empty1   = data0.a;
 
   cell.type     = data1.r;
-  cell.heat     = data1.g;
+  cell.temperature     = data1.g;
   cell.velocity = data1.b;
   cell.isMoved  = data1.a;
 
@@ -122,20 +123,20 @@ Cell getCell(ivec2 grid) {
 Cell resetCell(Cell originalCell) {
   Cell cell = originalCell;
 
-  cell.rng      = originalCell.rng;
-  cell.clock    = 0;
-  cell.empty0   = 0;
-  cell.empty1   = 0;
+  cell.rng         = originalCell.rng;
+  cell.clock       = 0;
+  cell.empty0      = 0;
+  cell.empty1      = 0;
 
-  cell.type     = EMPTY;
-  cell.heat     = 0;
-  cell.velocity = 0;
-  cell.isMoved  = 0;
+  cell.type        = EMPTY;
+  cell.temperature = 0;
+  cell.velocity    = 0;
+  cell.isMoved     = 0;
 
-  cell.state0   = 0;
-  cell.state1   = 0;
-  cell.state2   = 0;
-  cell.state3   = 0;
+  cell.state0      = 0;
+  cell.state1      = 0;
+  cell.state2      = 0;
+  cell.state3      = 0;
 
   return cell;
 }
@@ -195,7 +196,7 @@ bool isClicked() {
 void entropy(inout int a, inout int b) {
   if(abs(a - b) < 2) return;
 
-  int total= a + b;
+  int total = a + b;
   int aNew = 0;
   int bNew = 0;
 
@@ -375,31 +376,31 @@ Block applyVelocity(Block originalBlock, ivec4 applicationOrder) {
 
 
 
-
 int getInteraction(int aType, int bType) {
   if(aType == EMPTY) {
     return INTERACTION_NONE;
   }
 
-  else if(aType == BLOCK) {
+  if(aType == BLOCK) {
     return INTERACTION_NONE;
   }
 
-  else if(aType == SAND) {
+  if(aType == SAND) {
     if(bType == SAND) return INTERACTION_SAND_AND_SAND;
     if(bType == WATER) return INTERACTION_SAND_AND_WATER;
     return INTERACTION_NONE;
   }
 
-  else if(aType == WATER) {
+  if(aType == WATER) {
+    if(bType == WATER) return INTERACTION_WATER_AND_WATER;
     return INTERACTION_NONE;
   }
 
-  else if(aType == FIRE) {
+  if(aType == FIRE) {
     return INTERACTION_NONE;
   }
 
-  else if(aType == STEAM) {
+  if(aType == STEAM) {
     return INTERACTION_NONE;
   }
 
@@ -407,18 +408,23 @@ int getInteraction(int aType, int bType) {
 }
 
 void sandAndWater(inout Cell sand, inout Cell water) {
-  // The higher the integer, the more it
-  // equalizes with others due to entropy.
-  // (3,  0) => (2,  1)
-  // (30, 0) => (15, 15)
-  if(sand.state0 >= u_soakPerAbsorb * u_maxSoakedCells) return;
+  entropy(sand.temperature, water.temperature);
 
-  sand.state0 += u_soakPerAbsorb;
-  water = resetCell(water);
+  if(sand.state0 < u_soakPerAbsorb * u_maxSoakedCells) {
+    sand.state0 += u_soakPerAbsorb;
+    water = resetCell(water);
+    return;
+  }
 }
 
 void sandAndSand(inout Cell a, inout Cell b) {
+  entropy(a.temperature, b.temperature);
+
   entropy(a.state0, b.state0);
+}
+
+void waterAndWater(inout Cell a, inout Cell b) {
+  entropy(a.temperature, b.temperature);
 }
 
 void applyInteraction(inout Cell one, inout Cell two) {
@@ -433,6 +439,11 @@ void applyInteraction(inout Cell one, inout Cell two) {
 
   if(interaction == INTERACTION_SAND_AND_SAND) {
     sandAndSand(one, two);
+    return;
+  }
+
+  if(interaction == INTERACTION_WATER_AND_WATER) {
+    waterAndWater(one, two);
     return;
   }
 }
@@ -493,6 +504,8 @@ Cell spawnCell(ivec2 grid) {
   if(type == SAND || type == WATER) cell.velocity = DOWN;
   if(type == FIRE || type == STEAM) cell.velocity = UP;
 
+  if(type == SAND) cell.temperature = 100;
+
   return cell;
 }
 
@@ -506,7 +519,7 @@ void writeCellFragment(Cell cell, out ivec4 output0, out ivec4 output1, out ivec
 
   output1 = ivec4(
     cell.type,
-    cell.heat,
+    cell.temperature,
     cell.velocity,
     cell.isMoved
   );

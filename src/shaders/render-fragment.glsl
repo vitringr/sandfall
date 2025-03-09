@@ -62,7 +62,7 @@ struct Cell {
   int empty1;
 
   int type;
-  int heat;
+  int temperature;
   int velocity;
   int isMoved;
 
@@ -79,50 +79,44 @@ Cell getCell(ivec2 grid) {
 
   Cell cell;
 
-  cell.rng      = data0.r;
-  cell.clock    = data0.g;
-  cell.empty0   = data0.b;
-  cell.empty1   = data0.a;
+  cell.rng         = data0.r;
+  cell.clock       = data0.g;
+  cell.empty0      = data0.b;
+  cell.empty1      = data0.a;
 
-  cell.type     = data1.r;
-  cell.heat     = data1.g;
-  cell.velocity = data1.b;
-  cell.isMoved  = data1.a;
+  cell.type        = data1.r;
+  cell.temperature = data1.g;
+  cell.velocity    = data1.b;
+  cell.isMoved     = data1.a;
 
-  cell.state0   = data2.r;
-  cell.state1   = data2.g;
-  cell.state2   = data2.b;
-  cell.state3   = data2.a;
+  cell.state0      = data2.r;
+  cell.state1      = data2.g;
+  cell.state2      = data2.b;
+  cell.state3      = data2.a;
 
   return cell;
 }
 
 
-
-
-void main() {
-  Cell cell = getCell(ivec2(v_coordinates));
-
-  vec3 color = vec3(0.0, 0.0, 0.0);
-
+vec3 applyElementColor(vec3 color, Cell cell) {
   int mod3RNG = cell.rng % 3;
 
   if(cell.type == EMPTY) {
-    color = COLOR_EMPTY;
+    return COLOR_EMPTY;
   }
 
-  else if(cell.type == BLOCK)  {
-    color = COLOR_BLOCK;
+  if(cell.type == BLOCK)  {
+    return COLOR_BLOCK;
   }
 
-  else if(cell.type == SAND) {
+  if(cell.type == SAND) {
     if(cell.state0 <= 0) {
-      color = COLORS_SAND[mod3RNG];
+      return COLORS_SAND[mod3RNG];
     }
     else {
       float maxSoakStep = 1.0 / float(u_maxSoakedCells * u_soakPerAbsorb);
 
-      color = mix(
+      return mix(
         COLORS_SAND[mod3RNG],
         COLORS_WET_SAND[mod3RNG],
         0.2 + 0.8 * (maxSoakStep * float(cell.state0))
@@ -130,17 +124,37 @@ void main() {
     }
   }
 
-  else if(cell.type == WATER) {
-    color = COLORS_WATER[mod3RNG];
+  if(cell.type == WATER) {
+    return COLORS_WATER[mod3RNG];
   }
 
-  else if(cell.type == FIRE)  {
-    color = COLORS_FIRE[mod3RNG];
+  if(cell.type == FIRE)  {
+    return COLORS_FIRE[mod3RNG];
   }
 
-  else if(cell.type == STEAM) {
-    color = COLORS_STEAM[mod3RNG];
+  if(cell.type == STEAM) {
+    return COLORS_STEAM[mod3RNG];
   }
+}
+
+vec3 applyTemperatureColor(vec3 color, Cell cell) {
+  if(cell.temperature <= 50) return color;
+
+  float temperature = float(cell.temperature);
+  float over50 = temperature - 50.0;
+
+  float step = min((1.0 / 50.0) * over50, 50.0);
+
+  return mix(color, vec3(1.0, 0.0, 0.0), 1.0 * step);
+}
+
+void main() {
+  Cell cell = getCell(ivec2(v_coordinates));
+
+  vec3 color = vec3(0.0, 0.0, 0.0);
+
+  color = applyElementColor(color, cell);
+  color = applyTemperatureColor(color, cell);
 
   outColor = vec4(color, 1.0);
 }
