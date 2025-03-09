@@ -31,10 +31,13 @@ const int WATER = 3;
 const int FIRE  = 4;
 const int STEAM = 5;
 
-const int INTERACTION_NONE           = 0;
-const int INTERACTION_SAND_AND_SAND  = 1;
-const int INTERACTION_SAND_AND_WATER = 2;
-const int INTERACTION_WATER_AND_WATER = 3;
+const int INTERACTION_NONE            = 0;
+const int INTERACTION_BLOCK_AND_BLOCK = 1;
+const int INTERACTION_BLOCK_AND_SAND  = 2;
+const int INTERACTION_BLOCK_AND_WATER = 3;
+const int INTERACTION_SAND_AND_SAND   = 4;
+const int INTERACTION_SAND_AND_WATER  = 5;
+const int INTERACTION_WATER_AND_WATER = 6;
 
 const int DENSITY[6] = int[6](
   0, // Empty
@@ -382,6 +385,9 @@ int getInteraction(int aType, int bType) {
   }
 
   if(aType == BLOCK) {
+    if(bType == BLOCK) return INTERACTION_BLOCK_AND_BLOCK;
+    if(bType == SAND) return INTERACTION_BLOCK_AND_SAND;
+    if(bType == WATER) return INTERACTION_BLOCK_AND_WATER;
     return INTERACTION_NONE;
   }
 
@@ -405,6 +411,18 @@ int getInteraction(int aType, int bType) {
   }
 
   return INTERACTION_NONE;
+}
+
+void blockAndBlock(inout Cell a, inout Cell b) {
+  entropy(a.temperature, b.temperature);
+}
+
+void blockAndSand(inout Cell block, inout Cell sand) {
+  entropy(block.temperature, sand.temperature);
+}
+
+void blockAndWater(inout Cell block, inout Cell water) {
+  entropy(block.temperature, water.temperature);
 }
 
 void sandAndWater(inout Cell sand, inout Cell water) {
@@ -431,6 +449,21 @@ void applyInteraction(inout Cell one, inout Cell two) {
   int interaction = getInteraction(one.type, two.type);
 
   if(interaction == INTERACTION_NONE) return;
+
+  if(interaction == INTERACTION_BLOCK_AND_BLOCK) {
+    blockAndBlock(one, two);
+    return;
+  }
+
+  if(interaction == INTERACTION_BLOCK_AND_SAND) {
+    blockAndSand(one, two);
+    return;
+  }
+
+  if(interaction == INTERACTION_BLOCK_AND_WATER) {
+    blockAndWater(one, two);
+    return;
+  }
 
   if(interaction == INTERACTION_SAND_AND_WATER) {
     sandAndWater(one, two);

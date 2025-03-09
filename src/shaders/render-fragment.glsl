@@ -24,7 +24,6 @@ const int STEAM    = 5;
 const vec3 COLOR_DEBUG = vec3(1.0,  0.0,  1.0);
 const vec3 COLOR_EMPTY = vec3(0.1,  0.1,  0.1);
 const vec3 COLOR_BLOCK = vec3(0.4,  0.3,  0.2);
-
 const vec3 COLORS_SAND[3] = vec3[3](
   vec3(0.75,  0.65,  0.0),
   vec3(0.70,  0.60,  0.0),
@@ -51,6 +50,24 @@ const vec3 COLORS_STEAM[3] = vec3[3](
   vec3(0.3,  0.3,  0.3)
 );
 
+const int HEAT_COLOR_FROM[4] = int[4](
+  -1, // Empty
+  50, // Block
+  90, // Sand
+  -1  // Water
+);
+const int HEAT_COLOR_STEPS[4] = int[4](
+  -1,  // Empty
+  50, // Block
+  10,  // Sand
+  -1   // Water
+);
+const float HEAT_COLOR_FACTOR[4] = float[4](
+  -1.0, // Empty
+  0.6,  // Block
+  0.2, // Sand
+  -1.0  // Water
+);
 
 
 
@@ -138,20 +155,25 @@ vec3 applyElementColor(vec3 color, Cell cell) {
 }
 
 vec3 applyTemperatureColor(vec3 color, Cell cell) {
-  if(cell.temperature <= 50) return color;
+  int beginPoint = HEAT_COLOR_FROM[cell.type];
 
-  float temperature = float(cell.temperature);
-  float over50 = temperature - 50.0;
+  if(beginPoint < 0) return color;
+  if(cell.temperature <= beginPoint) return color;
 
-  float step = min((1.0 / 50.0) * over50, 50.0);
+  float maxSteps = float(HEAT_COLOR_STEPS[cell.type]);
+  float factor = HEAT_COLOR_FACTOR[cell.type];
 
-  return mix(color, vec3(1.0, 0.0, 0.0), 1.0 * step);
+  float over = float(cell.temperature - beginPoint);
+
+  float step = factor * (1.0 / maxSteps) * over;
+
+  return mix(color, vec3(1.0, 0.0, 0.0), min(step, factor));
 }
 
 void main() {
   Cell cell = getCell(ivec2(v_coordinates));
 
-  vec3 color = vec3(0.0, 0.0, 0.0);
+  vec3 color = COLOR_DEBUG;
 
   color = applyElementColor(color, cell);
   color = applyTemperatureColor(color, cell);
