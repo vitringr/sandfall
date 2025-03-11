@@ -48,6 +48,15 @@ const int DENSITY[6] = int[6](
   2  // Steam
 );
 
+const int MAX_TEMPERATURE_TRANSFER[6] = int[6](
+  0,  // Empty
+  2, // Block
+  4, // Sand
+  4, // Water
+  0,  // Fire
+  0   // Steam
+);
+
 const int LEFT  = 1;
 const int DOWN  = 2;
 const int RIGHT = 3;
@@ -196,14 +205,14 @@ bool isClicked() {
 
 
 
-void entropy(inout int a, inout int b) {
+void balanceValues(inout int a, inout int b) {
   if(abs(a - b) < 2) return;
 
   int total = a + b;
   int aNew = 0;
   int bNew = 0;
 
-  if(a> b) {
+  if(a > b) {
     aNew = (total + 1) / 2;
     bNew = total - aNew;
   }
@@ -216,7 +225,30 @@ void entropy(inout int a, inout int b) {
   b = bNew;
 }
 
-void swap(inout Cell a, inout Cell b) {
+void diffuseTemperature(inout Cell a, inout Cell b) {
+  if (abs(a.temperature - b.temperature) < 2) return;
+
+  int rateLimit = min(
+    MAX_TEMPERATURE_TRANSFER[a.type],
+    MAX_TEMPERATURE_TRANSFER[b.type]
+  );
+
+  if (a.temperature > b.temperature) {
+    int diff = a.temperature - b.temperature;
+    int idealTransfer = diff / 2;
+    int transfer = min(idealTransfer, rateLimit);
+    a.temperature -= transfer;
+    b.temperature += transfer;
+  } else {
+    int diff = b.temperature - a.temperature;
+    int idealTransfer = diff / 2;
+    int transfer = min(idealTransfer, rateLimit);
+    b.temperature -= transfer;
+    a.temperature += transfer;
+  }
+}
+
+void swapCells(inout Cell a, inout Cell b) {
   Cell temp = a;
   a = b;
   b = temp;
@@ -287,15 +319,15 @@ Block applyVelocityToBL(Block originalBlock) {
 
   if(block.bl.velocity == LEFT) {
     if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
-      swap(block.bl, block.tl);
+      swapCells(block.bl, block.tl);
       return block;
     }
     if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
-      swap(block.bl, block.tr);
+      swapCells(block.bl, block.tr);
       return block;
     }
     if(spread >= SPREAD_FULL && canSwap(block.bl, block.br)) {
-      swap(block.bl, block.br);
+      swapCells(block.bl, block.br);
       return block;
     }
     return block;
@@ -303,15 +335,15 @@ Block applyVelocityToBL(Block originalBlock) {
 
   if(block.bl.velocity == DOWN) {
     if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
-      swap(block.bl, block.br);
+      swapCells(block.bl, block.br);
       return block;
     }
     if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
-      swap(block.bl, block.tr);
+      swapCells(block.bl, block.tr);
       return block;
     }
     if(spread >= SPREAD_FULL && canSwap(block.bl, block.tl)) {
-      swap(block.bl, block.tl);
+      swapCells(block.bl, block.tl);
       return block;
     }
     return block;
@@ -319,15 +351,15 @@ Block applyVelocityToBL(Block originalBlock) {
 
   if(block.bl.velocity == RIGHT) {
     if(canSwap(block.bl, block.br)) {
-      swap(block.bl, block.br);
+      swapCells(block.bl, block.br);
       return block;
     }
     if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
-      swap(block.bl, block.tr);
+      swapCells(block.bl, block.tr);
       return block;
     }
     if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
-      swap(block.bl, block.tl);
+      swapCells(block.bl, block.tl);
       return block;
     }
     return block;
@@ -335,15 +367,15 @@ Block applyVelocityToBL(Block originalBlock) {
 
   if(block.bl.velocity == UP) {
     if(canSwap(block.bl, block.tl)) {
-      swap(block.bl, block.tl);
+      swapCells(block.bl, block.tl);
       return block;
     }
     if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
-      swap(block.bl, block.tr);
+      swapCells(block.bl, block.tr);
       return block;
     }
     if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
-      swap(block.bl, block.br);
+      swapCells(block.bl, block.br);
       return block;
     }
     return block;
@@ -368,7 +400,7 @@ Block applyVelocityToIndex(Block originalBlock, int blockIndex) {
   return block;
 }
 
-Block applyVelocity(Block originalBlock, ivec4 applicationOrder) {
+Block applyVelocity(inout Block originalBlock, ivec4 applicationOrder) {
   Block block = originalBlock;
   block = applyVelocityToIndex(block, applicationOrder.r);
   block = applyVelocityToIndex(block, applicationOrder.g);
@@ -413,37 +445,24 @@ int getInteraction(int aType, int bType) {
   return INTERACTION_NONE;
 }
 
-void blockAndBlock(inout Cell a, inout Cell b) {
-  entropy(a.temperature, b.temperature);
-}
-
-void blockAndSand(inout Cell block, inout Cell sand) {
-  entropy(block.temperature, sand.temperature);
-}
-
-void blockAndWater(inout Cell block, inout Cell water) {
-  entropy(block.temperature, water.temperature);
-}
-
+void blockAndBlock(inout Cell a, inout Cell b) { }
+void blockAndSand(inout Cell block, inout Cell sand) { }
+void blockAndWater(inout Cell block, inout Cell water) { }
 void sandAndWater(inout Cell sand, inout Cell water) {
-  entropy(sand.temperature, water.temperature);
-
   if(sand.state0 < u_soakPerAbsorb * u_maxSoakedCells) {
+    balanceValues(sand.temperature, water.temperature);
+
     sand.state0 += u_soakPerAbsorb;
+
     water = resetCell(water);
+
     return;
   }
 }
-
 void sandAndSand(inout Cell a, inout Cell b) {
-  entropy(a.temperature, b.temperature);
-
-  entropy(a.state0, b.state0);
+  balanceValues(a.state0, b.state0);
 }
-
-void waterAndWater(inout Cell a, inout Cell b) {
-  entropy(a.temperature, b.temperature);
-}
+void waterAndWater(inout Cell a, inout Cell b) { }
 
 void applyInteraction(inout Cell one, inout Cell two) {
   int interaction = getInteraction(one.type, two.type);
@@ -482,6 +501,16 @@ void applyInteraction(inout Cell one, inout Cell two) {
 }
 
 
+void kek(inout Block block, ivec4 applicationOrder) {
+  for(int i = 0; i < 4; i++) {
+    if     (applicationOrder[i] == 0) diffuseTemperature(block.bl, block.tl);
+    else if(applicationOrder[i] == 1) diffuseTemperature(block.tl, block.tr);
+    else if(applicationOrder[i] == 2) diffuseTemperature(block.tr, block.br);
+    else                              diffuseTemperature(block.br, block.bl);
+  }
+diffuseTemperature(block.br, block.tr);
+diffuseTemperature(block.bl, block.tl);
+}
 
 
 Block changeBlock(Block originalBlock) {
@@ -506,10 +535,16 @@ Block changeBlock(Block originalBlock) {
   else                               applyInteraction(block.br, block.tl);
 
   int modTime = u_time % 4;
+
   if     (modTime == 0) block = applyVelocity(block, ivec4(2, 0, 1, 3));
   else if(modTime == 1) block = applyVelocity(block, ivec4(1, 3, 2, 0));
   else if(modTime == 2) block = applyVelocity(block, ivec4(0, 1, 3, 2));
   else                  block = applyVelocity(block, ivec4(2, 3, 0, 1));
+
+  if     (modTime == 0) kek(block, ivec4(2, 0, 1, 3));
+  else if(modTime == 1) kek(block, ivec4(1, 3, 2, 0));
+  else if(modTime == 2) kek(block, ivec4(0, 1, 3, 2));
+  else                  kek(block, ivec4(2, 3, 0, 1));
 
   block.bl.isMoved =
   block.tl.isMoved =
@@ -537,7 +572,7 @@ Cell spawnCell(ivec2 grid) {
   if(type == SAND || type == WATER) cell.velocity = DOWN;
   if(type == FIRE || type == STEAM) cell.velocity = UP;
 
-  if(type == SAND) cell.temperature = 100;
+  if(type == SAND) cell.temperature = 200;
 
   return cell;
 }

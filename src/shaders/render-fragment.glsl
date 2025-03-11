@@ -64,8 +64,10 @@ const int HEAT_COLOR_STEPS[4] = int[4](
 );
 const float HEAT_COLOR_FACTOR[4] = float[4](
   -1.0, // Empty
-  0.6,  // Block
-  0.2, // Sand
+  // 0.6,  // Block
+  1.0,  // Block
+  1.0, // Sand
+  // 0.2, // Sand
   -1.0  // Water
 );
 
