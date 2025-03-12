@@ -4,7 +4,7 @@ export namespace Config {
   export const columns: number = 100;
   export const walls: boolean = true;
   //export const spawnerSize: number = 0.014;
-  export const spawnerSize: number = 0.05;
+  export const spawnerSize: number = 0.02;
 
   export const limitFPS: boolean = false;
   export const FPS: number = 60;

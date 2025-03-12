@@ -6,7 +6,7 @@ precision highp isampler2D;
 
 
 
-// INPUT
+// DATA
 
 in vec2 v_coordinates;
 
@@ -74,8 +74,8 @@ const int DENSITY[6] = int[6](
 const int MAX_TEMPERATURE_TRANSFER[6] = int[6](
   0,  // Empty
   10, // Block
-  10, // Sand
-  10, // Water
+  50, // Sand
+  50, // Water
   0,  // Fire
   0   // Steam
 );
@@ -192,15 +192,10 @@ Cell getCellFromBlock(ivec2 grid, Block block) {
   if(inBlockIndex == 3) return block.br;
 }
 
-bool isClicked() {
-  if(u_inputKey < 0) return false;
-  return distance(u_pointerPosition, v_coordinates) < u_spawnerSize;
-}
 
 
 
-
-// 
+// MISC
 
 void resetCell(inout Cell cell) {
   // cell.rng;
@@ -239,49 +234,10 @@ void balanceValues(inout int a, inout int b) {
   b = bNew;
 }
 
-void diffuseTemperature(inout Cell a, inout Cell b) {
-  if (abs(a.temperature - b.temperature) < 2) return;
-
-  int rateLimit = min(
-    MAX_TEMPERATURE_TRANSFER[a.type],
-    MAX_TEMPERATURE_TRANSFER[b.type]
-  );
-
-  if (a.temperature > b.temperature) {
-    int diff = a.temperature - b.temperature;
-    int idealTransfer = diff / 2;
-    int transfer = min(idealTransfer, rateLimit);
-    a.temperature -= transfer;
-    b.temperature += transfer;
-  } else {
-    int diff = b.temperature - a.temperature;
-    int idealTransfer = diff / 2;
-    int transfer = min(idealTransfer, rateLimit);
-    b.temperature -= transfer;
-    a.temperature += transfer;
-  }
-}
-
-void swapCells(inout Cell a, inout Cell b) {
-  Cell temp = a;
-  a = b;
-  b = temp;
-
-  a.isMoved = 1;
-  b.isMoved = 1;
-}
 
 
 
-
-//
-
-bool canSwap(Cell a, Cell b) {
-  return DENSITY[a.type] > DENSITY[b.type];
-}
-
-
-
+// ROTATION
 
 int rotateVelocity(int velocity) {
   if(velocity == 0) return 0;
@@ -295,137 +251,36 @@ int reverseRotateVelocity(int velocity) {
   return velocity - 1;
 }
 
-Cell rotateCell(Cell cell) {
-  Cell counterclockwise = cell;
-  counterclockwise.velocity = rotateVelocity(cell.velocity);
-  return counterclockwise;
+void rotateBlock(inout Block block) {
+  Block originalBlock = block;
+
+  block.bl = originalBlock.tl;
+  block.bl.velocity = rotateVelocity(block.bl.velocity);
+
+  block.tl = originalBlock.tr;
+  block.tl.velocity = rotateVelocity(block.tl.velocity);
+
+  block.tr = originalBlock.br;
+  block.tr.velocity = rotateVelocity(block.tr.velocity);
+
+  block.br = originalBlock.bl;
+  block.br.velocity = rotateVelocity(block.br.velocity);
 }
 
-Cell reverseRotateCell(Cell cell) {
-  Cell clockwise = cell;
-  clockwise.velocity = reverseRotateVelocity(cell.velocity);
-  return clockwise;
-}
+void reverseRotateBlock(inout Block block) {
+  Block originalBlock = block;
 
-Block rotateBlock(Block block) {
-  Block counterclockwise = block;
-  counterclockwise.bl = rotateCell(block.tl);
-  counterclockwise.tl = rotateCell(block.tr);
-  counterclockwise.tr = rotateCell(block.br);
-  counterclockwise.br = rotateCell(block.bl);
-  return counterclockwise;
-}
+  block.bl = originalBlock.br;
+  block.bl.velocity = reverseRotateVelocity(block.bl.velocity);
 
-Block reverseRotateBlock(Block block) {
-  Block clockwise;
-  clockwise.bl = reverseRotateCell(block.br);
-  clockwise.tl = reverseRotateCell(block.bl);
-  clockwise.tr = reverseRotateCell(block.tl);
-  clockwise.br = reverseRotateCell(block.tr);
-  return clockwise;
-}
+  block.tl = originalBlock.bl;
+  block.tl.velocity = reverseRotateVelocity(block.tl.velocity);
 
+  block.tr = originalBlock.tl;
+  block.tr.velocity = reverseRotateVelocity(block.tr.velocity);
 
-
-
-// VELOCITY
-
-Block applyVelocityToBL(Block originalBlock) {
-  if(originalBlock.bl.isMoved == 1) return originalBlock;
-  if(originalBlock.bl.velocity == 0) return originalBlock;
-
-  Block block = originalBlock;
-
-  int spread = SPREAD[block.bl.type];
-
-  if(block.bl.velocity == LEFT) {
-    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
-      swapCells(block.bl, block.tl);
-      return block;
-    }
-    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
-      swapCells(block.bl, block.tr);
-      return block;
-    }
-    if(spread >= SPREAD_FULL && canSwap(block.bl, block.br)) {
-      swapCells(block.bl, block.br);
-      return block;
-    }
-    return block;
-  }
-
-  if(block.bl.velocity == DOWN) {
-    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
-      swapCells(block.bl, block.br);
-      return block;
-    }
-    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
-      swapCells(block.bl, block.tr);
-      return block;
-    }
-    if(spread >= SPREAD_FULL && canSwap(block.bl, block.tl)) {
-      swapCells(block.bl, block.tl);
-      return block;
-    }
-    return block;
-  }
-
-  if(block.bl.velocity == RIGHT) {
-    if(canSwap(block.bl, block.br)) {
-      swapCells(block.bl, block.br);
-      return block;
-    }
-    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
-      swapCells(block.bl, block.tr);
-      return block;
-    }
-    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
-      swapCells(block.bl, block.tl);
-      return block;
-    }
-    return block;
-  }
-
-  if(block.bl.velocity == UP) {
-    if(canSwap(block.bl, block.tl)) {
-      swapCells(block.bl, block.tl);
-      return block;
-    }
-    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
-      swapCells(block.bl, block.tr);
-      return block;
-    }
-    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
-      swapCells(block.bl, block.br);
-      return block;
-    }
-    return block;
-  }
-
-  return block;
-}
-
-Block applyVelocityToIndex(Block originalBlock, int blockIndex) {
-  Block block = originalBlock;
-
-  for(int i = 0; i < blockIndex; i++) {
-    block = rotateBlock(block);
-  }
-
-  block = applyVelocityToBL(block);
-
-  for(int i = 0; i < blockIndex; i++) {
-    block = reverseRotateBlock(block);
-  }
-
-  return block;
-}
-
-void applyVelocity(inout Block block, ivec4 applicationOrder) {
-  block = applyVelocityToIndex(block, applicationOrder.r);
-  block = applyVelocityToIndex(block, applicationOrder.g);
-  block = applyVelocityToIndex(block, applicationOrder.b);
-  block = applyVelocityToIndex(block, applicationOrder.a);
+  block.br = originalBlock.tr;
+  block.br.velocity = reverseRotateVelocity(block.br.velocity);
 }
 
 
@@ -528,21 +383,163 @@ void applyInteraction(inout Cell one, inout Cell two) {
 }
 
 
-void applyTemperatureDiffusion(inout Block block, ivec4 applicationOrder) {
+
+
+// SWAPS
+
+bool canSwap(Cell a, Cell b) {
+  return DENSITY[a.type] > DENSITY[b.type];
+}
+
+void swapCells(inout Cell a, inout Cell b) {
+  Cell temp = a;
+  a = b;
+  b = temp;
+
+  a.isMoved = 1;
+  b.isMoved = 1;
+}
+
+void applySwapsToBL(inout Block block) {
+  if(block.bl.isMoved == 1) return;
+  if(block.bl.velocity == 0) return;
+
+  int spread = SPREAD[block.bl.type];
+
+  // TODO: should those be if or else-if?
+
+  if(block.bl.velocity == LEFT) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
+      swapCells(block.bl, block.tl);
+      return;
+    }
+    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
+      swapCells(block.bl, block.tr);
+      return;
+    }
+    if(spread >= SPREAD_FULL && canSwap(block.bl, block.br)) {
+      swapCells(block.bl, block.br);
+      return;
+    }
+    return;
+  }
+
+  if(block.bl.velocity == DOWN) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
+      swapCells(block.bl, block.br);
+      return;
+    }
+    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
+      swapCells(block.bl, block.tr);
+      return;
+    }
+    if(spread >= SPREAD_FULL && canSwap(block.bl, block.tl)) {
+      swapCells(block.bl, block.tl);
+      return;
+    }
+    return;
+  }
+
+  if(block.bl.velocity == RIGHT) {
+    if(canSwap(block.bl, block.br)) {
+      swapCells(block.bl, block.br);
+      return;
+    }
+    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
+      swapCells(block.bl, block.tr);
+      return;
+    }
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
+      swapCells(block.bl, block.tl);
+      return;
+    }
+    return;
+  }
+
+  if(block.bl.velocity == UP) {
+    if(canSwap(block.bl, block.tl)) {
+      swapCells(block.bl, block.tl);
+      return;
+    }
+    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
+      swapCells(block.bl, block.tr);
+      return;
+    }
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
+      swapCells(block.bl, block.br);
+      return;
+    }
+    return;
+  }
+
+  return;
+}
+
+void applySwapsToIndex(inout Block block, int blockIndex) {
+  for(int i = 0; i < blockIndex; i++) {
+    rotateBlock(block);
+  }
+
+  applySwapsToBL(block);
+
+  for(int i = 0; i < blockIndex; i++) {
+    reverseRotateBlock(block);
+  }
+}
+
+void applyBlockSwaps(inout Block block, ivec4 applicationOrder) {
+  applySwapsToIndex(block, applicationOrder.r);
+  applySwapsToIndex(block, applicationOrder.g);
+  applySwapsToIndex(block, applicationOrder.b);
+  applySwapsToIndex(block, applicationOrder.a);
+}
+
+
+
+
+// TEMPERATURE
+
+void diffuseTemperature(inout Cell a, inout Cell b) {
+  if (abs(a.temperature - b.temperature) < 2) return;
+
+  int rateLimit = min(
+    MAX_TEMPERATURE_TRANSFER[a.type],
+    MAX_TEMPERATURE_TRANSFER[b.type]
+  );
+
+  if (a.temperature > b.temperature) {
+    int diff = a.temperature - b.temperature;
+    int idealTransfer = diff / 2;
+    int transfer = min(idealTransfer, rateLimit);
+    a.temperature -= transfer;
+    b.temperature += transfer;
+  } else {
+    int diff = b.temperature - a.temperature;
+    int idealTransfer = diff / 2;
+    int transfer = min(idealTransfer, rateLimit);
+    b.temperature -= transfer;
+    a.temperature += transfer;
+  }
+}
+
+void applyBlockTemperatureDiffusion(inout Block block, ivec4 applicationOrder) {
   for(int i = 0; i < 4; i++) {
     if     (applicationOrder[i] == 0) diffuseTemperature(block.bl, block.tl);
     else if(applicationOrder[i] == 1) diffuseTemperature(block.tl, block.tr);
     else if(applicationOrder[i] == 2) diffuseTemperature(block.tr, block.br);
     else                              diffuseTemperature(block.br, block.bl);
   }
+
   diffuseTemperature(block.br, block.tl);
   diffuseTemperature(block.bl, block.tr);
 }
 
 
-Block changeBlock(Block originalBlock) {
-  Block block = originalBlock;
 
+
+// LOGIC
+
+void changeBlock(inout Block block) {
   if(block.bl.type <= block.tl.type) applyInteraction(block.bl, block.tl);
   else                               applyInteraction(block.tl, block.bl);
 
@@ -563,32 +560,35 @@ Block changeBlock(Block originalBlock) {
 
   int modTime = u_time % 4;
 
-  if     (modTime == 0) applyVelocity(block, ivec4(2, 0, 1, 3));
-  else if(modTime == 1) applyVelocity(block, ivec4(1, 3, 2, 0));
-  else if(modTime == 2) applyVelocity(block, ivec4(0, 1, 3, 2));
-  else                  applyVelocity(block, ivec4(2, 3, 0, 1));
+  if     (modTime == 0) applyBlockSwaps(block, ivec4(2, 0, 1, 3));
+  else if(modTime == 1) applyBlockSwaps(block, ivec4(1, 3, 2, 0));
+  else if(modTime == 2) applyBlockSwaps(block, ivec4(0, 1, 3, 2));
+  else                  applyBlockSwaps(block, ivec4(2, 3, 0, 1));
 
-  if     (modTime == 0) applyTemperatureDiffusion(block, ivec4(2, 0, 1, 3));
-  else if(modTime == 1) applyTemperatureDiffusion(block, ivec4(1, 3, 2, 0));
-  else if(modTime == 2) applyTemperatureDiffusion(block, ivec4(0, 1, 3, 2));
-  else                  applyTemperatureDiffusion(block, ivec4(2, 3, 0, 1));
+  if     (modTime == 0) applyBlockTemperatureDiffusion(block, ivec4(2, 0, 1, 3));
+  else if(modTime == 1) applyBlockTemperatureDiffusion(block, ivec4(1, 3, 2, 0));
+  else if(modTime == 2) applyBlockTemperatureDiffusion(block, ivec4(0, 1, 3, 2));
+  else                  applyBlockTemperatureDiffusion(block, ivec4(2, 3, 0, 1));
 
-  block.bl.isMoved =
-  block.tl.isMoved =
-  block.tr.isMoved =
-  block.br.isMoved = 0;
-
-  return block;
+  block.bl.isMoved = block.tl.isMoved = block.tr.isMoved = block.br.isMoved = 0;
 }
 
 
 
+
+// INPUT
+
+bool isClicked() {
+  if(u_inputKey < 0) return false;
+  return distance(u_pointerPosition, v_coordinates) < u_spawnerSize;
+}
 
 Cell spawnCell(ivec2 grid) {
   // TODO: this, but AFTER static rng
   // if(type != EMPTY && type != BLOCK) {
   //   if(cell.rng < 30) return cell;
   // }
+
   Cell cell = getCell(grid);
 
   int type = u_inputKey;
@@ -603,10 +603,14 @@ Cell spawnCell(ivec2 grid) {
 
   if(type == SAND) cell.temperature = 0;
   // TEST
-  if(u_inputKey == 4) cell.temperature = 1000;
+  if(u_inputKey == 4) cell.temperature = 2000;
 
   return cell;
 }
+
+
+
+// OUTPUT
 
 void writeCellFragment(Cell cell, out ivec4 output0, out ivec4 output1, out ivec4 output2) {
   output0 = ivec4(
@@ -642,7 +646,8 @@ void main() {
   ivec2 blockOrigin = getBlockOrigin(grid);
 
   Block block = getBlock(blockOrigin);
-  block = changeBlock(block);
+
+  changeBlock(block);
 
   Cell thisCell = getCellFromBlock(grid, block);
 

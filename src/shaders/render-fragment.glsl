@@ -57,10 +57,10 @@ const int TEMPERATURE_COLOR_FROM[4] = int[4](
    0, // Sand
   -1  // Water
 );
-const int TEMPERATURE_COLOR_STEPS[4] = int[4](
+const int TEMPERATURE_COLOR_TO[4] = int[4](
   -1,   // Empty
-  1000, // Block
-  1000, // Sand
+  2000, // Block
+  2000, // Sand
   -1    // Water
 );
 const float TEMPERATURE_COLOR_FACTOR[4] = float[4](
@@ -163,7 +163,7 @@ vec3 applyTemperatureColor(vec3 color, Cell cell) {
   if(beginPoint < 0) return color;
   if(cell.temperature <= beginPoint) return color;
 
-  float maxSteps = float(TEMPERATURE_COLOR_STEPS[cell.type]);
+  float maxSteps = float(TEMPERATURE_COLOR_TO[cell.type]);
   float factor = TEMPERATURE_COLOR_FACTOR[cell.type];
 
   float over = float(cell.temperature - beginPoint);
