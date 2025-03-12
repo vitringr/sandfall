@@ -14,12 +14,12 @@ uniform isampler2D u_outputTexture2;
 uniform int u_maxSoakedCells;
 uniform int u_soakPerAbsorb;
 
-const int EMPTY    = 0;
-const int BLOCK    = 1;
-const int SAND     = 2;
-const int WATER    = 3;
-const int FIRE     = 4;
-const int STEAM    = 5;
+const int EMPTY = 0;
+const int BLOCK = 1;
+const int SAND  = 2;
+const int WATER = 3;
+const int FIRE  = 4;
+const int STEAM = 5;
 
 const vec3 COLOR_DEBUG = vec3(1.0,  0.0,  1.0);
 const vec3 COLOR_EMPTY = vec3(0.1,  0.1,  0.1);
@@ -58,10 +58,10 @@ const int TEMPERATURE_COLOR_FROM[4] = int[4](
   -1  // Water
 );
 const int TEMPERATURE_COLOR_STEPS[4] = int[4](
-  -1, // Empty
+  -1,   // Empty
   1000, // Block
   1000, // Sand
-  -1  // Water
+  -1    // Water
 );
 const float TEMPERATURE_COLOR_FACTOR[4] = float[4](
   -1.0, // Empty

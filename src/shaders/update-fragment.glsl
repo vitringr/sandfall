@@ -3,6 +3,11 @@ precision highp int;
 precision highp float;
 precision highp isampler2D;
 
+
+
+
+// INPUT
+
 in vec2 v_coordinates;
 
 layout(location = 0) out ivec4 output0;
@@ -24,12 +29,25 @@ uniform vec2 u_pointerPosition;
 
 
 
+// ENUM
+
 const int EMPTY = 0;
 const int BLOCK = 1;
 const int SAND  = 2;
 const int WATER = 3;
 const int FIRE  = 4;
 const int STEAM = 5;
+
+const int LEFT  = 1;
+const int DOWN  = 2;
+const int RIGHT = 3;
+const int UP    = 4;
+
+const int SPREAD_NONE = 0;
+const int SPREAD_LOW  = 1;
+const int SPREAD_MID  = 2;
+const int SPREAD_HIGH = 3;
+const int SPREAD_FULL = 4;
 
 const int INTERACTION_NONE            = 0;
 const int INTERACTION_BLOCK_AND_BLOCK = 1;
@@ -38,6 +56,11 @@ const int INTERACTION_BLOCK_AND_WATER = 3;
 const int INTERACTION_SAND_AND_SAND   = 4;
 const int INTERACTION_SAND_AND_WATER  = 5;
 const int INTERACTION_WATER_AND_WATER = 6;
+
+
+
+
+// CONFIG
 
 const int DENSITY[6] = int[6](
   0, // Empty
@@ -57,17 +80,6 @@ const int MAX_TEMPERATURE_TRANSFER[6] = int[6](
   0   // Steam
 );
 
-const int LEFT  = 1;
-const int DOWN  = 2;
-const int RIGHT = 3;
-const int UP    = 4;
-
-const int SPREAD_NONE = 0;
-const int SPREAD_LOW  = 1;
-const int SPREAD_MID  = 2;
-const int SPREAD_HIGH = 3;
-const int SPREAD_FULL = 4;
-
 const int SPREAD[6] = int[6](
   -1,          // Empty
   -1,          // Block
@@ -79,6 +91,8 @@ const int SPREAD[6] = int[6](
 
 
 
+
+// STRUCTURE
 
 struct Cell {
   int rng;
@@ -107,6 +121,8 @@ struct Block {
 
 
 
+// FETCH
+
 Cell getCell(ivec2 grid) {
   ivec4 data0 = texelFetch(u_inputTexture0, grid, 0);
   ivec4 data1 = texelFetch(u_inputTexture1, grid, 0);
@@ -128,27 +144,6 @@ Cell getCell(ivec2 grid) {
   cell.state1      = data2.g;
   cell.state2      = data2.b;
   cell.state3      = data2.a;
-
-  return cell;
-}
-
-Cell resetCell(Cell originalCell) {
-  Cell cell = originalCell;
-
-  cell.rng         = originalCell.rng;
-  cell.clock       = 0;
-  cell.empty0      = 0;
-  cell.empty1      = 0;
-
-  cell.type        = EMPTY;
-  cell.temperature = 0;
-  cell.velocity    = 0;
-  cell.isMoved     = 0;
-
-  cell.state0      = 0;
-  cell.state1      = 0;
-  cell.state2      = 0;
-  cell.state3      = 0;
 
   return cell;
 }
@@ -205,6 +200,25 @@ bool isClicked() {
 
 
 
+// 
+
+void resetCell(inout Cell cell) {
+  // cell.rng;
+  cell.clock       = 0;
+  cell.empty0      = 0;
+  cell.empty1      = 0;
+
+  cell.type        = EMPTY;
+  cell.temperature = 0;
+  cell.velocity    = 0;
+  cell.isMoved     = 0;
+
+  cell.state0      = 0;
+  cell.state1      = 0;
+  cell.state2      = 0;
+  cell.state3      = 0;
+}
+
 void balanceValues(inout int a, inout int b) {
   if(abs(a - b) < 2) return;
 
@@ -257,6 +271,11 @@ void swapCells(inout Cell a, inout Cell b) {
   b.isMoved = 1;
 }
 
+
+
+
+//
+
 bool canSwap(Cell a, Cell b) {
   return DENSITY[a.type] > DENSITY[b.type];
 }
@@ -308,6 +327,8 @@ Block reverseRotateBlock(Block block) {
 
 
 
+
+// VELOCITY
 
 Block applyVelocityToBL(Block originalBlock) {
   if(originalBlock.bl.isMoved == 1) return originalBlock;
@@ -401,13 +422,16 @@ Block applyVelocityToIndex(Block originalBlock, int blockIndex) {
 }
 
 void applyVelocity(inout Block block, ivec4 applicationOrder) {
-  applyVelocityToIndex(block, applicationOrder.r);
-  applyVelocityToIndex(block, applicationOrder.g);
-  applyVelocityToIndex(block, applicationOrder.b);
-  applyVelocityToIndex(block, applicationOrder.a);
+  block = applyVelocityToIndex(block, applicationOrder.r);
+  block = applyVelocityToIndex(block, applicationOrder.g);
+  block = applyVelocityToIndex(block, applicationOrder.b);
+  block = applyVelocityToIndex(block, applicationOrder.a);
 }
 
 
+
+
+// INTERACTION
 
 int getInteraction(int aType, int bType) {
   if(aType == EMPTY) {
@@ -444,22 +468,27 @@ int getInteraction(int aType, int bType) {
 }
 
 void blockAndBlock(inout Cell a, inout Cell b) { }
+
 void blockAndSand(inout Cell block, inout Cell sand) { }
+
 void blockAndWater(inout Cell block, inout Cell water) { }
+
 void sandAndWater(inout Cell sand, inout Cell water) {
   if(sand.state0 < u_soakPerAbsorb * u_maxSoakedCells) {
     balanceValues(sand.temperature, water.temperature);
 
     sand.state0 += u_soakPerAbsorb;
 
-    water = resetCell(water);
+    resetCell(water);
 
     return;
   }
 }
+
 void sandAndSand(inout Cell a, inout Cell b) {
   balanceValues(a.state0, b.state0);
 }
+
 void waterAndWater(inout Cell a, inout Cell b) { }
 
 void applyInteraction(inout Cell one, inout Cell two) {
@@ -566,7 +595,7 @@ Cell spawnCell(ivec2 grid) {
   // TEST
   if(u_inputKey == 4) type = SAND;
 
-  cell = resetCell(cell);
+  resetCell(cell);
   cell.type = type;
 
   if(type == SAND || type == WATER) cell.velocity = DOWN;
