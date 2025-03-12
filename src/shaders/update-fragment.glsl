@@ -50,9 +50,9 @@ const int DENSITY[6] = int[6](
 
 const int MAX_TEMPERATURE_TRANSFER[6] = int[6](
   0,  // Empty
-  2, // Block
-  4, // Sand
-  4, // Water
+  10, // Block
+  10, // Sand
+  10, // Water
   0,  // Fire
   0   // Steam
 );
@@ -114,20 +114,20 @@ Cell getCell(ivec2 grid) {
 
   Cell cell;
 
-  cell.rng      = data0.r;
-  cell.clock    = data0.g;
-  cell.empty0   = data0.b;
-  cell.empty1   = data0.a;
+  cell.rng         = data0.r;
+  cell.clock       = data0.g;
+  cell.empty0      = data0.b;
+  cell.empty1      = data0.a;
 
-  cell.type     = data1.r;
-  cell.temperature     = data1.g;
-  cell.velocity = data1.b;
-  cell.isMoved  = data1.a;
+  cell.type        = data1.r;
+  cell.temperature = data1.g;
+  cell.velocity    = data1.b;
+  cell.isMoved     = data1.a;
 
-  cell.state0   = data2.r;
-  cell.state1   = data2.g;
-  cell.state2   = data2.b;
-  cell.state3   = data2.a;
+  cell.state0      = data2.r;
+  cell.state1      = data2.g;
+  cell.state2      = data2.b;
+  cell.state3      = data2.a;
 
   return cell;
 }
@@ -400,13 +400,11 @@ Block applyVelocityToIndex(Block originalBlock, int blockIndex) {
   return block;
 }
 
-Block applyVelocity(inout Block originalBlock, ivec4 applicationOrder) {
-  Block block = originalBlock;
-  block = applyVelocityToIndex(block, applicationOrder.r);
-  block = applyVelocityToIndex(block, applicationOrder.g);
-  block = applyVelocityToIndex(block, applicationOrder.b);
-  block = applyVelocityToIndex(block, applicationOrder.a);
-  return block;
+void applyVelocity(inout Block block, ivec4 applicationOrder) {
+  applyVelocityToIndex(block, applicationOrder.r);
+  applyVelocityToIndex(block, applicationOrder.g);
+  applyVelocityToIndex(block, applicationOrder.b);
+  applyVelocityToIndex(block, applicationOrder.a);
 }
 
 
@@ -501,15 +499,15 @@ void applyInteraction(inout Cell one, inout Cell two) {
 }
 
 
-void kek(inout Block block, ivec4 applicationOrder) {
+void applyTemperatureDiffusion(inout Block block, ivec4 applicationOrder) {
   for(int i = 0; i < 4; i++) {
     if     (applicationOrder[i] == 0) diffuseTemperature(block.bl, block.tl);
     else if(applicationOrder[i] == 1) diffuseTemperature(block.tl, block.tr);
     else if(applicationOrder[i] == 2) diffuseTemperature(block.tr, block.br);
     else                              diffuseTemperature(block.br, block.bl);
   }
-diffuseTemperature(block.br, block.tr);
-diffuseTemperature(block.bl, block.tl);
+  diffuseTemperature(block.br, block.tl);
+  diffuseTemperature(block.bl, block.tr);
 }
 
 
@@ -536,15 +534,15 @@ Block changeBlock(Block originalBlock) {
 
   int modTime = u_time % 4;
 
-  if     (modTime == 0) block = applyVelocity(block, ivec4(2, 0, 1, 3));
-  else if(modTime == 1) block = applyVelocity(block, ivec4(1, 3, 2, 0));
-  else if(modTime == 2) block = applyVelocity(block, ivec4(0, 1, 3, 2));
-  else                  block = applyVelocity(block, ivec4(2, 3, 0, 1));
+  if     (modTime == 0) applyVelocity(block, ivec4(2, 0, 1, 3));
+  else if(modTime == 1) applyVelocity(block, ivec4(1, 3, 2, 0));
+  else if(modTime == 2) applyVelocity(block, ivec4(0, 1, 3, 2));
+  else                  applyVelocity(block, ivec4(2, 3, 0, 1));
 
-  if     (modTime == 0) kek(block, ivec4(2, 0, 1, 3));
-  else if(modTime == 1) kek(block, ivec4(1, 3, 2, 0));
-  else if(modTime == 2) kek(block, ivec4(0, 1, 3, 2));
-  else                  kek(block, ivec4(2, 3, 0, 1));
+  if     (modTime == 0) applyTemperatureDiffusion(block, ivec4(2, 0, 1, 3));
+  else if(modTime == 1) applyTemperatureDiffusion(block, ivec4(1, 3, 2, 0));
+  else if(modTime == 2) applyTemperatureDiffusion(block, ivec4(0, 1, 3, 2));
+  else                  applyTemperatureDiffusion(block, ivec4(2, 3, 0, 1));
 
   block.bl.isMoved =
   block.tl.isMoved =
@@ -565,6 +563,8 @@ Cell spawnCell(ivec2 grid) {
   Cell cell = getCell(grid);
 
   int type = u_inputKey;
+  // TEST
+  if(u_inputKey == 4) type = SAND;
 
   cell = resetCell(cell);
   cell.type = type;
@@ -572,7 +572,9 @@ Cell spawnCell(ivec2 grid) {
   if(type == SAND || type == WATER) cell.velocity = DOWN;
   if(type == FIRE || type == STEAM) cell.velocity = UP;
 
-  if(type == SAND) cell.temperature = 200;
+  if(type == SAND) cell.temperature = 0;
+  // TEST
+  if(u_inputKey == 4) cell.temperature = 1000;
 
   return cell;
 }

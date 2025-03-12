@@ -74,9 +74,9 @@ export class Main {
     };
 
     const data = {
-      state0: new Int8Array(this.generator.generate0()),
-      state1: new Int8Array(this.generator.generate1()),
-      state2: new Int8Array(this.generator.generate2()),
+      state0: new Int16Array(this.generator.generate0()),
+      state1: new Int16Array(this.generator.generate1()),
+      state2: new Int16Array(this.generator.generate2()),
       canvasVertices: new Float32Array(WebGL.Points.rectangle(0, 0, 1, 1)),
     };
 
@@ -106,27 +106,27 @@ export class Main {
     gl.vertexAttribPointer(locations.update.aCanvasVertices, 2, gl.FLOAT, false, 0, 0);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.main0);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state0);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.aux0);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state0);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.main1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state1);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.aux1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state1);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.main2);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state2);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.aux2);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.BYTE, data.state2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state2);
     WebGL.Texture.applyClampAndNearest(gl);
 
     return { locations, vertexArrayObjects, textures, framebuffers };
