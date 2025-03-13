@@ -2,25 +2,19 @@
 
 Experiment with separate function for every cell? Idk.
 
-# Slow Entropy
-
-Right now the entropy is instant 1:1
-
-Make it incremental.
-
 # Generator
 
-Should probably be uint
+Experiment with unsigned numbers.
+
+I don't seem to need any negative values anyways.
 
 # Temperature
-
-Heat should start from 0 (for now absolute zero), with 30 default.
 
 If water heat is high increase the spread.
 
 If low reduce the spread?
 
-## Air Transfer
+## Air Shield Transfer
 
 If you want to make air transfer, you can add state to the Empty cells.
 
@@ -65,13 +59,3 @@ if(type != EMPTY && type != BLOCK) {
 I need static RNG, meaning that it's based on the grid, and it's not Cell state.
 
 Actually this sounds like some hash based on the grid coordinates.
-
-# Heat Transfer
-
-`total amount of heat in block` / 4
-
-Maybe transfer slowly, once every few frames.
-
-Add color to some elements based on heat.
-
-Create fire out of heated empty cells.

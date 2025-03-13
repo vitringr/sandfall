@@ -3,10 +3,23 @@ import { Generator } from "./generator";
 import { Config } from "./config";
 import { Input } from "./input";
 
-import updateVertex from "./shaders/update-vertex.glsl";
-import updateFragment from "./shaders/update-fragment.glsl";
-import renderVertex from "./shaders/render-vertex.glsl";
-import renderFragment from "./shaders/render-fragment.glsl";
+import updateVertex from "./shaders/update/vertex.glsl";
+import updateFragmentConfig from "./shaders/update/fragment/config.glsl";
+import updateFragmentData from "./shaders/update/fragment/data.glsl";
+import updateFragmentEnums from "./shaders/update/fragment/enums.glsl";
+import updateFragmentFetch from "./shaders/update/fragment/fetch.glsl";
+import updateFragmentInput from "./shaders/update/fragment/input.glsl";
+import updateFragmentInteraction from "./shaders/update/fragment/interaction.glsl";
+import updateFragmentLogic from "./shaders/update/fragment/logic.glsl";
+import updateFragmentMain from "./shaders/update/fragment/main.glsl";
+import updateFragmentMisc from "./shaders/update/fragment/misc.glsl";
+import updateFragmentOutput from "./shaders/update/fragment/output.glsl";
+import updateFragmentRotation from "./shaders/update/fragment/rotation.glsl";
+import updateFragmentStructure from "./shaders/update/fragment/structure.glsl";
+import updateFragmentSwaps from "./shaders/update/fragment/swaps.glsl";
+import updateFragmentTemperature from "./shaders/update/fragment/temperature.glsl";
+import renderVertex from "./shaders/render/vertex.glsl";
+import renderFragment from "./shaders/render/fragment.glsl";
 
 export class Main {
   private initialized = false;
@@ -31,8 +44,24 @@ export class Main {
   }
 
   private setupPrograms(gl: WebGL2RenderingContext) {
+    const combinedUpdateFragment =
+      updateFragmentMain +
+      updateFragmentData +
+      updateFragmentEnums +
+      updateFragmentConfig +
+      updateFragmentStructure +
+      updateFragmentFetch +
+      updateFragmentMisc +
+      updateFragmentRotation +
+      updateFragmentInteraction +
+      updateFragmentSwaps +
+      updateFragmentTemperature +
+      updateFragmentLogic +
+      updateFragmentInput +
+      updateFragmentOutput;
+
     const updateVS = WebGL.Setup.compileShader(gl, "vertex", updateVertex);
-    const updateFS = WebGL.Setup.compileShader(gl, "fragment", updateFragment);
+    const updateFS = WebGL.Setup.compileShader(gl, "fragment", combinedUpdateFragment);
     const renderVS = WebGL.Setup.compileShader(gl, "vertex", renderVertex);
     const renderFS = WebGL.Setup.compileShader(gl, "fragment", renderFragment);
 
