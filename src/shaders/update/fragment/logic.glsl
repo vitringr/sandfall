@@ -17,17 +17,17 @@ void changeBlock(inout Block block) {
   if(block.tl.type <= block.br.type) applyInteraction(block.tl, block.br);
   else                               applyInteraction(block.br, block.tl);
 
-  int modTime = u_time % 4;
+  uint modTime = u_time % 4u;
 
-  if     (modTime == 0) applyBlockSwaps(block, ivec4(2, 0, 1, 3));
-  else if(modTime == 1) applyBlockSwaps(block, ivec4(1, 3, 2, 0));
-  else if(modTime == 2) applyBlockSwaps(block, ivec4(0, 1, 3, 2));
-  else                  applyBlockSwaps(block, ivec4(2, 3, 0, 1));
+  if     (modTime == 0u) applyBlockSwaps(block, ivec4(2, 0, 1, 3));
+  else if(modTime == 1u) applyBlockSwaps(block, ivec4(1, 3, 2, 0));
+  else if(modTime == 2u) applyBlockSwaps(block, ivec4(0, 1, 3, 2));
+  else                   applyBlockSwaps(block, ivec4(2, 3, 0, 1));
 
-  if     (modTime == 0) applyBlockTemperatureDiffusion(block, ivec4(2, 0, 1, 3));
-  else if(modTime == 1) applyBlockTemperatureDiffusion(block, ivec4(1, 3, 2, 0));
-  else if(modTime == 2) applyBlockTemperatureDiffusion(block, ivec4(0, 1, 3, 2));
-  else                  applyBlockTemperatureDiffusion(block, ivec4(2, 3, 0, 1));
+  if     (modTime == 0u) applyBlockTemperatureDiffusion(block, ivec4(2, 0, 1, 3));
+  else if(modTime == 1u) applyBlockTemperatureDiffusion(block, ivec4(1, 3, 2, 0));
+  else if(modTime == 2u) applyBlockTemperatureDiffusion(block, ivec4(0, 1, 3, 2));
+  else                   applyBlockTemperatureDiffusion(block, ivec4(2, 3, 0, 1));
 
-  block.bl.isMoved = block.tl.isMoved = block.tr.isMoved = block.br.isMoved = 0;
+  block.bl.isMoved = block.tl.isMoved = block.tr.isMoved = block.br.isMoved = 0u;
 }

@@ -41,9 +41,6 @@ export class Input {
   private setupKeyboard() {
     window.addEventListener("keydown", (ev: KeyboardEvent) => {
       switch (ev.key.toLowerCase()) {
-        case "q":
-          this.spawnKey = Config.SpawnKeys.Q;
-          break;
         case "1":
           this.spawnKey = Config.SpawnKeys.NUM_1;
           break;

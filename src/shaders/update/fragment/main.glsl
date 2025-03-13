@@ -1,7 +1,9 @@
 #version 300 es
 precision highp int;
 precision highp float;
-precision highp isampler2D;
+precision mediump usampler2D;
+
+const uint UINT16_MAX = 65535u;
 
 /*
 

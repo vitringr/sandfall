@@ -1,27 +1,28 @@
 #version 300 es
 precision highp int;
 precision highp float;
-precision highp isampler2D;
+precision mediump usampler2D;
 
 out vec4 outColor;
 
 flat in vec2 v_coordinates;
 
-uniform isampler2D u_outputTexture0;
-uniform isampler2D u_outputTexture1;
-uniform isampler2D u_outputTexture2;
+uniform usampler2D u_outputTexture0;
+uniform usampler2D u_outputTexture1;
+uniform usampler2D u_outputTexture2;
 
-uniform int u_maxSoakedCells;
-uniform int u_soakPerAbsorb;
+uniform uint u_maxSoakedCells;
+uniform uint u_soakPerAbsorb;
 
-const int EMPTY = 0;
-const int BLOCK = 1;
-const int SAND  = 2;
-const int WATER = 3;
-const int FIRE  = 4;
-const int STEAM = 5;
+const uint DEBUG = 0u;
+const uint EMPTY = 1u;
+const uint BLOCK = 2u;
+const uint SAND  = 3u;
+const uint WATER = 4u;
+const uint FIRE  = 5u;
+const uint STEAM = 6u;
 
-const vec3 COLOR_DEBUG = vec3(1.0,  0.0,  1.0);
+const vec3 COLOR_DEBUG = vec3(0.6,  0.0,  0.6);
 const vec3 COLOR_EMPTY = vec3(0.1,  0.1,  0.1);
 const vec3 COLOR_BLOCK = vec3(0.4,  0.3,  0.2);
 const vec3 COLORS_SAND[3] = vec3[3](
@@ -51,19 +52,22 @@ const vec3 COLORS_STEAM[3] = vec3[3](
 );
 
 const vec3 TEMPERATURE_COLOR = vec3(1.0, 0.0, 0.0);
-const int TEMPERATURE_COLOR_FROM[4] = int[4](
-  -1, // Empty
-   0, // Block
-   0, // Sand
-  -1  // Water
+const uint TEMPERATURE_COLOR_FROM[5] = uint[5](
+   0u, // DEBUG
+   0u, // Empty
+   0u, // Block
+   0u, // Sand
+   0u  // Water
 );
-const int TEMPERATURE_COLOR_TO[4] = int[4](
-  -1,   // Empty
-  2000, // Block
-  2000, // Sand
-  -1    // Water
+const uint TEMPERATURE_COLOR_TO[5] = uint[5](
+   0u,    // DEBUG
+   0u,    // Empty
+   2000u, // Block
+   2000u, // Sand
+   0u     // Water
 );
-const float TEMPERATURE_COLOR_FACTOR[4] = float[4](
+const float TEMPERATURE_COLOR_FACTOR[5] = float[5](
+  -1.0, // DEBUG
   -1.0, // Empty
   // 0.6,  // Block
   1.0,  // Block
@@ -76,26 +80,26 @@ const float TEMPERATURE_COLOR_FACTOR[4] = float[4](
 
 
 struct Cell {
-  int rng;
-  int clock;
-  int empty0;
-  int empty1;
+  uint rng;
+  uint clock;
+  uint empty0;
+  uint empty1;
 
-  int type;
-  int temperature;
-  int velocity;
-  int isMoved;
+  uint type;
+  uint temperature;
+  uint velocity;
+  uint isMoved;
 
-  int state0;
-  int state1;
-  int state2;
-  int state3;
+  uint state0;
+  uint state1;
+  uint state2;
+  uint state3;
 };
 
 Cell getCell(ivec2 grid) {
-  ivec4 data0 = texelFetch(u_outputTexture0, grid, 0);
-  ivec4 data1 = texelFetch(u_outputTexture1, grid, 0);
-  ivec4 data2 = texelFetch(u_outputTexture2, grid, 0);
+  uvec4 data0 = uvec4(texelFetch(u_outputTexture0, grid, 0));
+  uvec4 data1 = uvec4(texelFetch(u_outputTexture1, grid, 0));
+  uvec4 data2 = uvec4(texelFetch(u_outputTexture2, grid, 0));
 
   Cell cell;
 
@@ -117,9 +121,12 @@ Cell getCell(ivec2 grid) {
   return cell;
 }
 
-
 vec3 applyElementColor(vec3 color, Cell cell) {
-  int mod3RNG = cell.rng % 3;
+  uint mod3RNG = cell.rng % 3u;
+
+  if(cell.type == DEBUG) {
+    return COLOR_DEBUG;
+  }
 
   if(cell.type == EMPTY) {
     return COLOR_EMPTY;
@@ -130,7 +137,7 @@ vec3 applyElementColor(vec3 color, Cell cell) {
   }
 
   if(cell.type == SAND) {
-    if(cell.state0 <= 0) {
+    if(cell.state0 <= 0u) {
       return COLORS_SAND[mod3RNG];
     }
     else {
@@ -158,9 +165,9 @@ vec3 applyElementColor(vec3 color, Cell cell) {
 }
 
 vec3 applyTemperatureColor(vec3 color, Cell cell) {
-  int beginPoint = TEMPERATURE_COLOR_FROM[cell.type];
+  uint beginPoint = TEMPERATURE_COLOR_FROM[cell.type];
 
-  if(beginPoint < 0) return color;
+  if(beginPoint <= 0u) return color;
   if(cell.temperature <= beginPoint) return color;
 
   float maxSteps = float(TEMPERATURE_COLOR_TO[cell.type]);

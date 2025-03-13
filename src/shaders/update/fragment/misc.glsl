@@ -1,34 +1,34 @@
-
 void resetCell(inout Cell cell) {
   // cell.rng;
-  cell.clock       = 0;
-  cell.empty0      = 0;
-  cell.empty1      = 0;
+  cell.clock       = 0u;
+  cell.empty0      = 0u;
+  cell.empty1      = 0u;
 
   cell.type        = EMPTY;
-  cell.temperature = 0;
-  cell.velocity    = 0;
-  cell.isMoved     = 0;
+  cell.temperature = 0u;
+  cell.velocity    = 0u;
+  cell.isMoved     = 0u;
 
-  cell.state0      = 0;
-  cell.state1      = 0;
-  cell.state2      = 0;
-  cell.state3      = 0;
+  cell.state0      = 0u;
+  cell.state1      = 0u;
+  cell.state2      = 0u;
+  cell.state3      = 0u;
 }
 
-void balanceValues(inout int a, inout int b) {
-  if(abs(a - b) < 2) return;
+void balanceValues(inout uint a, inout uint b) {
+  uint diff = (a > b) ? (a - b) : (b - a);
+  if(diff < 2u) return;
 
-  int total = a + b;
-  int aNew = 0;
-  int bNew = 0;
+  uint total = a + b;
+  uint aNew = 0u;
+  uint bNew = 0u;
 
   if(a > b) {
-    aNew = (total + 1) / 2;
+    aNew = (total + 1u) / 2u;
     bNew = total - aNew;
   }
   else {
-    bNew = (total + 1) / 2;
+    bNew = (total + 1u) / 2u;
     aNew = total - bNew;
   }
 

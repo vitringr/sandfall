@@ -1,4 +1,4 @@
-int getInteraction(int aType, int bType) {
+uint getInteraction(uint aType, uint bType) {
   if(aType == EMPTY) {
     return INTERACTION_NONE;
   }
@@ -57,7 +57,7 @@ void sandAndSand(inout Cell a, inout Cell b) {
 void waterAndWater(inout Cell a, inout Cell b) { }
 
 void applyInteraction(inout Cell one, inout Cell two) {
-  int interaction = getInteraction(one.type, two.type);
+  uint interaction = getInteraction(one.type, two.type);
 
   if(interaction == INTERACTION_NONE) return;
 
