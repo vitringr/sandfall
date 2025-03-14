@@ -13,9 +13,6 @@ Cell spawnCell(ivec2 grid) {
 
   int type = u_inputKey;
 
-  // TEST
-  if(u_inputKey == 4) type = SAND;
-
   resetCell(cell);
   cell.type = type;
 

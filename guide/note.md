@@ -2,13 +2,17 @@
 
 Experiment with separate function for every cell? Idk.
 
-# Generator
-
-Experiment with unsigned numbers.
-
-I don't seem to need any negative values anyways.
-
 # Temperature
+
+| Degrees | Checkpoint    |
+| ------- | ------------- |
+| `0`     | absolute zero |
+| `2700`  | water freeze  |
+| `3000`  | normal        |
+| `3700`  | water boil    |
+| `8000`  | wood burn     |
+| `15000` | metal melt    |
+| `30000` | maximum       |
 
 If water heat is high increase the spread.
 
@@ -37,13 +41,15 @@ Change pixel color every frame
 # Gas Gravity
 
 Thinking of ways to make different spread:
+
 - Randomize to sometimes change the velocity of heavy spread particles like fire?
 - Remove the cardinal velocity limit and sometimes add multiple velocities to them.
 - Function that sometimes randomizes the velocity of said particles. Maybe somehow revert it back later.
 
 # Soak Integer Logic
+
 The higher the integer, the more it equalizes with others due to entropy.
-(3,  0) => (2,  1)
+(3, 0) => (2, 1)
 (30, 0) => (15, 15)
 
 # Spawner
