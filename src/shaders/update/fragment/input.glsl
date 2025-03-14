@@ -21,7 +21,6 @@ Cell spawnCell(ivec2 grid) {
   if(type == SAND || type == WATER) cell.velocity = DOWN;
   if(type == FIRE || type == STEAM) cell.velocity = UP;
 
-  if(type == BLOCK) cell.temperature = 10000;
   if(type == ICE)   cell.temperature = 2000;
 
   return cell;

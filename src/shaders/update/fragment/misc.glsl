@@ -5,8 +5,8 @@ void resetCell(inout Cell cell) {
   cell.empty0      = 0;
   cell.empty1      = 0;
 
-  cell.type        = EMPTY;
-  cell.temperature = 0;
+  cell.type        = DEBUG;
+  cell.temperature = TEMPERATURE_NORMAL;
   cell.velocity    = 0;
   cell.isMoved     = 0;
 

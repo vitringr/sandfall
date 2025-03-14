@@ -1,4 +1,6 @@
 void changeBlock(inout Block block) {
+  applyBlockTemperatureTransform(block);
+
   if(block.bl.type <= block.tl.type) applyInteraction(block.bl, block.tl);
   else                               applyInteraction(block.tl, block.bl);
 
@@ -30,6 +32,4 @@ void changeBlock(inout Block block) {
   else                  applyBlockTemperatureDiffusion(block, ivec4(2, 3, 0, 1));
 
   block.bl.isMoved = block.tl.isMoved = block.tr.isMoved = block.br.isMoved = 0;
-
-  applyBlockTemperatureTransform(block);
 }

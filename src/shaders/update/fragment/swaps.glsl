@@ -12,6 +12,7 @@ void swapCells(inout Cell a, inout Cell b) {
 }
 
 void applySwapsToBL(inout Block block) {
+  if(block.bl.type == DEBUG) return;
   if(block.bl.isMoved == 1) return;
   if(block.bl.velocity == 0) return;
 

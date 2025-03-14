@@ -29,7 +29,7 @@ export class Generator {
   generate1() {
     const state: number[] = [];
     for (let i = 0; i < totalCells; i++) {
-      const r = Config.walls && this.isWall(i) ? 1 : 0;
+      const r = Config.walls && this.isWall(i) ? 2 : 1;
       const g = 3000;
       const b = 0;
       const a = 0;

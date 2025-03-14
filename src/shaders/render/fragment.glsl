@@ -14,15 +14,16 @@ uniform isampler2D u_outputTexture2;
 uniform int u_maxSoakedCells;
 uniform int u_soakPerAbsorb;
 
-const int EMPTY = 0;
-const int BLOCK = 1;
-const int SAND  = 2;
-const int WATER = 3;
-const int ICE   = 4;
-const int STEAM = 5;
-const int FIRE  = 6;
+const int DEBUG = 0;
+const int EMPTY = 1;
+const int BLOCK = 2;
+const int SAND  = 3;
+const int WATER = 4;
+const int ICE   = 5;
+const int STEAM = 6;
+const int FIRE  = 7;
 
-const vec3 COLOR_DEBUG = vec3(1.0,  0.0,  1.0);
+const vec3 COLOR_DEBUG = vec3(0.8,  0.0,  0.8);
 
 const vec3 COLOR_EMPTY = vec3(0.1,  0.1,  0.1);
 
@@ -64,7 +65,8 @@ const vec3 COLORS_FIRE[3] = vec3[3](
 );
 
 const vec3 TEMPERATURE_COLOR = vec3(1.0, 0.0, 0.0);
-const int TEMPERATURE_COLOR_FROM[7] = int[7](
+const int TEMPERATURE_COLOR_FROM[8] = int[8](
+  -1,     // DEBUG
   -1,     // Empty
    15000, // Block
    3000,     // Sand
@@ -73,7 +75,8 @@ const int TEMPERATURE_COLOR_FROM[7] = int[7](
   -1,     // Steam
   -1      // Fire
 );
-const int TEMPERATURE_COLOR_TO[7] = int[7](
+const int TEMPERATURE_COLOR_TO[8] = int[8](
+  -1,     // DEBUG
   -1,     // Empty
    30000, // Block
    19000, // Sand
@@ -82,10 +85,9 @@ const int TEMPERATURE_COLOR_TO[7] = int[7](
   -1,     // Steam
   -1      // Fire
 );
-const float TEMPERATURE_COLOR_FACTOR[7] = float[7](
+const float TEMPERATURE_COLOR_FACTOR[8] = float[8](
+  -1.0, // DEBUG
   -1.0, // Empty
-   // 0.6, // block
-   // 0.2, // sand
    1.0, // block
    1.0, // sand
   -1.0, // Water
@@ -142,6 +144,10 @@ Cell getCell(ivec2 grid) {
 
 vec3 applyElementColor(vec3 color, Cell cell) {
   int mod3RNG = cell.rng % 3;
+
+  if(cell.type == DEBUG) {
+    return COLOR_DEBUG;
+  }
 
   if(cell.type == EMPTY) {
     return COLOR_EMPTY;

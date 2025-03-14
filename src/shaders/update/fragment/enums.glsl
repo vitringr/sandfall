@@ -1,17 +1,16 @@
-const int EMPTY = 0;
-const int BLOCK = 1;
-const int SAND  = 2;
-const int WATER = 3;
-const int ICE   = 4;
-const int STEAM = 5;
-const int FIRE  = 6;
+const int DEBUG = 0;
+const int EMPTY = 1;
+const int BLOCK = 2;
+const int SAND  = 3;
+const int WATER = 4;
+const int ICE   = 5;
+const int STEAM = 6;
+const int FIRE  = 7;
 
 const int LEFT  = 1;
 const int DOWN  = 2;
 const int RIGHT = 3;
 const int UP    = 4;
-
-const int GRAVITY = DOWN;
 
 const int SPREAD_NONE = 0;
 const int SPREAD_LOW  = 1;

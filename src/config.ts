@@ -15,23 +15,25 @@ export namespace Config {
   export const soakPerAbsorb: number = 10;
 
   export enum Elements {
-    EMPTY = 0,
-    BLOCK = 1,
-    SAND = 2,
-    WATER = 3,
-    ICE = 4,
-    STEAM = 5,
-    FIRE = 6,
+    DEBUG = 0,
+    EMPTY = 1,
+    BLOCK = 2,
+    SAND = 3,
+    WATER = 4,
+    ICE = 5,
+    STEAM = 6,
+    FIRE = 7,
   }
 
   export enum SpawnKeys {
     NONE = -1,
-    Q = Elements.EMPTY,
+    NUM_0 = Elements.DEBUG,
     NUM_1 = Elements.BLOCK,
-    NUM_2 = Elements.SAND,
-    NUM_3 = Elements.WATER,
-    NUM_4 = Elements.ICE,
-    NUM_5 = Elements.STEAM,
-    NUM_6 = Elements.FIRE,
+    NUM_2 = Elements.BLOCK,
+    NUM_3 = Elements.SAND,
+    NUM_4 = Elements.WATER,
+    NUM_5 = Elements.ICE,
+    NUM_6 = Elements.STEAM,
+    NUM_7 = Elements.FIRE,
   }
 }

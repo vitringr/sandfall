@@ -1,3 +1,11 @@
+# AIR
+
+Have air element as Empty.
+
+Have DEBUG element as default.
+
+Will help long term.
+
 # Main
 
 Experiment with separate function for every cell? Idk.

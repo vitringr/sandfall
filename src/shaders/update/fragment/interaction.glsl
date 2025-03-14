@@ -1,4 +1,8 @@
 int getInteraction(int aType, int bType) {
+  if(aType == DEBUG) {
+    return INTERACTION_NONE;
+  }
+
   if(aType == EMPTY) {
     return INTERACTION_NONE;
   }
@@ -48,6 +52,7 @@ void sandAndWater(inout Cell sand, inout Cell water) {
     sand.state0 += u_soakPerAbsorb;
 
     resetCell(water);
+    water.type = EMPTY;
 
     return;
   }

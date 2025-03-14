@@ -1,4 +1,5 @@
 void diffuseTemperature(inout Cell a, inout Cell b) {
+  if(a.type == DEBUG || b.type == DEBUG) return;
   if (abs(a.temperature - b.temperature) < 2) return;
 
   int rateLimit = min(
@@ -37,6 +38,10 @@ void transformCellByTemperature(inout Cell cell) {
   int type = cell.type;
   int temperature = cell.temperature;
 
+  if(type == DEBUG) {
+    return;
+  }
+
   if(type == EMPTY) {
     return;
   }
@@ -67,7 +72,7 @@ void transformCellByTemperature(inout Cell cell) {
       resetCell(cell);
       cell.type = WATER;
       cell.temperature = temperature;
-      cell.velocity = GRAVITY;
+      cell.velocity = DOWN;
       return;
     }
     return;
