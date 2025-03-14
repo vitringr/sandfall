@@ -32,3 +32,45 @@ void applyBlockTemperatureDiffusion(inout Block block, ivec4 applicationOrder) {
   diffuseTemperature(block.br, block.tl);
   diffuseTemperature(block.bl, block.tr);
 }
+
+void transformCellByTemperature(inout Cell cell) {
+  int type = cell.type;
+  int temperature = cell.temperature;
+
+  if(type == EMPTY) {
+    // Fire stuff
+  }
+
+  else if(type == BLOCK) { }
+
+  else if(type == SAND) {
+    if(temperature >= TEMPERATURE_SAND_MELT) {
+      // Glass
+    }
+  }
+
+  else if(type == WATER) {
+    if(temperature <= TEMPERATURE_WATER_FREEZE) {
+      // Ice
+    }
+
+    else if(temperature >= TEMPERATURE_WATER_BOIL) {
+      // Boil
+    }
+  }
+
+  else if(type == FIRE) { }
+
+  else if(type == STEAM) {
+    if(temperature <= TEMPERATURE_WATER_BOIL) {
+      // Water
+    }
+  }
+}
+
+void applyBlockTemperatureTransform(inout Block block) {
+  transformCellByTemperature(block.bl);
+  transformCellByTemperature(block.tl);
+  transformCellByTemperature(block.tr);
+  transformCellByTemperature(block.bl);
+}

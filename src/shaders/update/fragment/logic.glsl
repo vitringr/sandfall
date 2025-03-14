@@ -30,4 +30,6 @@ void changeBlock(inout Block block) {
   else                  applyBlockTemperatureDiffusion(block, ivec4(2, 3, 0, 1));
 
   block.bl.isMoved = block.tl.isMoved = block.tr.isMoved = block.br.isMoved = 0;
+
+  applyBlockTemperatureTransform(block);
 }

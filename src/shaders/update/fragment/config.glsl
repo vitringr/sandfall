@@ -1,11 +1,11 @@
-const int DENSITY[6] = int[6](
-  0, // Empty
-  5, // Block
-  4, // Sand
-  3, // Water
-  1, // Fire
-  2  // Steam
-);
+const int TEMPERATURE_ABSOLUTE_ZERO = 0;
+const int TEMPERATURE_WATER_FREEZE  = 2700;
+const int TEMPERATURE_NORMAL        = 3000;
+const int TEMPERATURE_WATER_BOIL    = 3700;
+const int TEMPERATURE_WOOD_BURN     = 8000;
+const int TEMPERATURE_METAL_MELT    = 15000;
+const int TEMPERATURE_SAND_MELT     = 19000;
+const int TEMPERATURE_MAXIMUM       = 30000;
 
 const int MAX_TEMPERATURE_TRANSFER[6] = int[6](
   0,  // Empty
@@ -14,6 +14,15 @@ const int MAX_TEMPERATURE_TRANSFER[6] = int[6](
   50, // Water
   0,  // Fire
   0   // Steam
+);
+
+const int DENSITY[6] = int[6](
+  0, // Empty
+  5, // Block
+  4, // Sand
+  3, // Water
+  1, // Fire
+  2  // Steam
 );
 
 const int SPREAD[6] = int[6](
