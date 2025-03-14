@@ -1,8 +1,7 @@
 Cell getCell(ivec2 grid) {
-  // TODO: WIP
-  uvec4 data0 = uvec4(texelFetch(u_inputTexture0, grid, 0));
-  uvec4 data1 = uvec4(texelFetch(u_inputTexture1, grid, 0));
-  uvec4 data2 = uvec4(texelFetch(u_inputTexture2, grid, 0));
+  ivec4 data0 = texelFetch(u_inputTexture0, grid, 0);
+  ivec4 data1 = texelFetch(u_inputTexture1, grid, 0);
+  ivec4 data2 = texelFetch(u_inputTexture2, grid, 0);
 
   Cell cell;
 
@@ -25,16 +24,16 @@ Cell getCell(ivec2 grid) {
 }
 
 ivec2 getPartition() {
-  uint modTime = u_time % 8u;
+  int modTime = u_time % 8;
 
-  if(modTime == 0u) return ivec2( 0,  0);
-  if(modTime == 1u) return ivec2( 1,  1);
-  if(modTime == 2u) return ivec2( 0,  0);
-  if(modTime == 3u) return ivec2( 1, -1);
-  if(modTime == 4u) return ivec2( 0,  0);
-  if(modTime == 5u) return ivec2(-1, -1);
-  if(modTime == 6u) return ivec2( 0,  0);
-                    return ivec2(-1,  1);
+  if(modTime == 0) return ivec2( 0,  0);
+  if(modTime == 1) return ivec2( 1,  1);
+  if(modTime == 2) return ivec2( 0,  0);
+  if(modTime == 3) return ivec2( 1, -1);
+  if(modTime == 4) return ivec2( 0,  0);
+  if(modTime == 5) return ivec2(-1, -1);
+  if(modTime == 6) return ivec2( 0,  0);
+                   return ivec2(-1,  1);
 }
 
 ivec2 getBlockOrigin(ivec2 grid) {

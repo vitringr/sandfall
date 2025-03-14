@@ -1,5 +1,4 @@
 bool canSwap(Cell a, Cell b) {
-  // if(a.type == DEBUG || b.type == DEBUG) return false;
   return DENSITY[a.type] > DENSITY[b.type];
 }
 
@@ -8,15 +7,15 @@ void swapCells(inout Cell a, inout Cell b) {
   a = b;
   b = temp;
 
-  a.isMoved = 1u;
-  b.isMoved = 1u;
+  a.isMoved = 1;
+  b.isMoved = 1;
 }
 
 void applySwapsToBL(inout Block block) {
-  if(block.bl.isMoved >= 1u) return;
-  if(block.bl.velocity == 0u) return;
+  if(block.bl.isMoved == 1) return;
+  if(block.bl.velocity == 0) return;
 
-  uint spread = SPREAD[block.bl.type];
+  int spread = SPREAD[block.bl.type];
 
   // TODO: should those be if or else-if?
 

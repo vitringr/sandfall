@@ -1,5 +1,5 @@
 bool isClicked() {
-  if(u_inputKey == 0u) return false;
+  if(u_inputKey < 0) return false;
   return distance(u_pointerPosition, v_coordinates) < u_spawnerSize;
 }
 
@@ -11,10 +11,10 @@ Cell spawnCell(ivec2 grid) {
 
   Cell cell = getCell(grid);
 
-  uint type = uint(u_inputKey);
+  int type = u_inputKey;
 
-  // // TEST
-  // if(type == 4u) type = SAND;
+  // TEST
+  if(u_inputKey == 4) type = SAND;
 
   resetCell(cell);
   cell.type = type;
@@ -22,10 +22,10 @@ Cell spawnCell(ivec2 grid) {
   if(type == SAND || type == WATER) cell.velocity = DOWN;
   if(type == FIRE || type == STEAM) cell.velocity = UP;
 
-  if(type == SAND) cell.temperature = 0u;
+  if(type == SAND) cell.temperature = 0;
 
-  // // TEST
-  // if(type == 4u) cell.temperature = 2000u;
+  // TEST
+  if(u_inputKey == 4) cell.temperature = 2000;
 
   return cell;
 }

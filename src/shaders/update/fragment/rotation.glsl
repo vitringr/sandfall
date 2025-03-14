@@ -1,13 +1,13 @@
-uint rotateVelocity(uint velocity) {
-  if(velocity == 0u) return 0u;
+int rotateVelocity(int velocity) {
+  if(velocity == 0) return 0;
   if(velocity >= UP) return LEFT;
-  return velocity + 1u;
+  return velocity + 1;
 }
 
-uint reverseRotateVelocity(uint velocity) {
-  if(velocity == 0u) return 0u;
+int reverseRotateVelocity(int velocity) {
+  if(velocity == 0) return 0;
   if(velocity == LEFT) return UP;
-  return velocity - 1u;
+  return velocity - 1;
 }
 
 void rotateBlock(inout Block block) {

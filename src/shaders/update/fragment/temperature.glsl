@@ -1,25 +1,21 @@
 void diffuseTemperature(inout Cell a, inout Cell b) {
-  // TODO: diff needed?
-  // uint at = a.temperature;
-  // uint bt = b.temperature;
-  // uint diff = (at > bt) ? (at - bt) : (bt - at);
-  // if (diff < 2u) return;
+  if (abs(a.temperature - b.temperature) < 2) return;
 
-  uint rateLimit = min(
+  int rateLimit = min(
     MAX_TEMPERATURE_TRANSFER[a.type],
     MAX_TEMPERATURE_TRANSFER[b.type]
   );
 
   if (a.temperature > b.temperature) {
-    uint diff = a.temperature - b.temperature;
-    uint idealTransfer = diff / 2u;
-    uint transfer = min(idealTransfer, rateLimit);
+    int diff = a.temperature - b.temperature;
+    int idealTransfer = diff / 2;
+    int transfer = min(idealTransfer, rateLimit);
     a.temperature -= transfer;
     b.temperature += transfer;
   } else {
-    uint diff = b.temperature - a.temperature;
-    uint idealTransfer = diff / 2u;
-    uint transfer = min(idealTransfer, rateLimit);
+    int diff = b.temperature - a.temperature;
+    int idealTransfer = diff / 2;
+    int transfer = min(idealTransfer, rateLimit);
     b.temperature -= transfer;
     a.temperature += transfer;
   }

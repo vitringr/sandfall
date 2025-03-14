@@ -1,18 +1,18 @@
 struct Cell {
-  uint rng;
-  uint clock;
-  uint empty0;
-  uint empty1;
+  int rng;
+  int clock;
+  int empty0;
+  int empty1;
 
-  uint type;
-  uint temperature;
-  uint velocity;
-  uint isMoved;
+  int type;
+  int temperature;
+  int velocity;
+  int isMoved;
 
-  uint state0;
-  uint state1;
-  uint state2;
-  uint state3;
+  int state0;
+  int state1;
+  int state2;
+  int state3;
 };
 
 struct Block {

@@ -1,9 +1,3 @@
-# Percision
-
-Integers seem to always be default 32-bit in WebGL2 GLSL, so I should stick to `percision highp int` I guess.
-
-But for the textures, if I'm using only 16-bit unsigned integers, I can do `precision mediump usampler2D`.
-
 # Main
 
 Experiment with separate function for every cell? Idk.

@@ -1,19 +1,19 @@
-void writeCellFragment(Cell cell, out uvec4 output0, out uvec4 output1, out uvec4 output2) {
-  output0 = uvec4(
+void writeCellFragment(Cell cell, out ivec4 output0, out ivec4 output1, out ivec4 output2) {
+  output0 = ivec4(
     cell.rng,
     cell.clock,
     cell.empty0,
     cell.empty1
   );
 
-  output1 = uvec4(
+  output1 = ivec4(
     cell.type,
     cell.temperature,
     cell.velocity,
     cell.isMoved
   );
 
-  output2 = uvec4(
+  output2 = ivec4(
     cell.state0,
     cell.state1,
     cell.state2,

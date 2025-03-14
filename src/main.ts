@@ -103,9 +103,9 @@ export class Main {
     };
 
     const data = {
-      state0: new Uint16Array(this.generator.generate0()),
-      state1: new Uint16Array(this.generator.generate1()),
-      state2: new Uint16Array(this.generator.generate2()),
+      state0: new Int16Array(this.generator.generate0()),
+      state1: new Int16Array(this.generator.generate1()),
+      state2: new Int16Array(this.generator.generate2()),
       canvasVertices: new Float32Array(WebGL.Points.rectangle(0, 0, 1, 1)),
     };
 
@@ -135,27 +135,27 @@ export class Main {
     gl.vertexAttribPointer(locations.update.aCanvasVertices, 2, gl.FLOAT, false, 0, 0);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.main0);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16UI, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.UNSIGNED_SHORT, data.state0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state0);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.aux0);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16UI, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.UNSIGNED_SHORT, data.state0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state0);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.main1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16UI, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.UNSIGNED_SHORT, data.state1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state1);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.aux1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16UI, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.UNSIGNED_SHORT, data.state1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state1);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.main2);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16UI, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.UNSIGNED_SHORT, data.state2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state2);
     WebGL.Texture.applyClampAndNearest(gl);
 
     gl.bindTexture(gl.TEXTURE_2D, textures.aux2);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16UI, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.UNSIGNED_SHORT, data.state2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16I, Config.columns, Config.columns, 0, gl.RGBA_INTEGER, gl.SHORT, data.state2);
     WebGL.Texture.applyClampAndNearest(gl);
 
     return { locations, vertexArrayObjects, textures, framebuffers };
@@ -196,10 +196,10 @@ export class Main {
       gl.uniform1i(locations.update.uInputTexture1, 1);
       gl.uniform1i(locations.update.uInputTexture2, 2);
       gl.uniform1i(locations.update.uIsPointerDown, Number(this.input.getIsPointerDown()));
-      gl.uniform1ui(locations.update.uTime, time);
-      gl.uniform1ui(locations.update.uInputKey, this.input.getSpawnKey());
-      gl.uniform1ui(locations.update.uMaxSoakedCells, Config.maxSoakedCells);
-      gl.uniform1ui(locations.update.uSoakPerAbsorb, Config.soakPerAbsorb);
+      gl.uniform1i(locations.update.uTime, time);
+      gl.uniform1i(locations.update.uInputKey, this.input.getSpawnKey());
+      gl.uniform1i(locations.update.uMaxSoakedCells, Config.maxSoakedCells);
+      gl.uniform1i(locations.update.uSoakPerAbsorb, Config.soakPerAbsorb);
       gl.uniform1f(locations.update.uSpawnerSize, Config.spawnerSize);
       const pointerCoordinates = this.input.getPointerCoordinates();
       gl.uniform2f(locations.update.uPointerPosition, pointerCoordinates.x, pointerCoordinates.y);
@@ -226,8 +226,8 @@ export class Main {
       gl.uniform1i(locations.render.uOutputTexture0, 0);
       gl.uniform1i(locations.render.uOutputTexture1, 1);
       gl.uniform1i(locations.render.uOutputTexture2, 2);
-      gl.uniform1ui(locations.render.uMaxSoakedCells, Config.maxSoakedCells);
-      gl.uniform1ui(locations.render.uSoakPerAbsorb, Config.soakPerAbsorb);
+      gl.uniform1i(locations.render.uMaxSoakedCells, Config.maxSoakedCells);
+      gl.uniform1i(locations.render.uSoakPerAbsorb, Config.soakPerAbsorb);
       gl.uniform1f(locations.render.uCanvas, this.canvas.width);
       gl.uniform1f(locations.render.uColumns, Config.columns);
       gl.uniform1f(locations.render.uBorderSize, Config.borderSize);

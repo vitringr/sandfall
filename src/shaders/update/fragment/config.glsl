@@ -1,27 +1,24 @@
-const uint DENSITY[7] = uint[7](
-  UINT16_MAX, // DEBUG
-  0u,         // Empty
-  5u,         // Block
-  4u,         // Sand
-  3u,         // Water
-  1u,         // Fire
-  2u          // Steam
+const int DENSITY[6] = int[6](
+  0, // Empty
+  5, // Block
+  4, // Sand
+  3, // Water
+  1, // Fire
+  2  // Steam
 );
 
-const uint MAX_TEMPERATURE_TRANSFER[7] = uint[7](
-  0u,  // DEBUG
-  0u,  // Empty
-  10u, // Block
-  50u, // Sand
-  50u, // Water
-  0u,  // Fire
-  0u   // Steam
+const int MAX_TEMPERATURE_TRANSFER[6] = int[6](
+  0,  // Empty
+  10, // Block
+  50, // Sand
+  50, // Water
+  0,  // Fire
+  0   // Steam
 );
 
-const uint SPREAD[7] = uint[7](
-  SPREAD_NONE, // DEBUG
-  SPREAD_NONE, // Empty
-  SPREAD_NONE, // Block
+const int SPREAD[6] = int[6](
+  -1,          // Empty
+  -1,          // Block
   SPREAD_LOW,  // Sand
   SPREAD_MID,  // Water
   SPREAD_HIGH, // Fire
