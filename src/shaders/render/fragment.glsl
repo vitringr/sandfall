@@ -65,27 +65,29 @@ const vec3 COLORS_FIRE[3] = vec3[3](
 
 const vec3 TEMPERATURE_COLOR = vec3(1.0, 0.0, 0.0);
 const int TEMPERATURE_COLOR_FROM[7] = int[7](
-  -1, // Empty
-  -1, // Block
-  -1, // Sand
-  -1, // Water
-  -1, // Ice
-  -1, // Steam
-  -1  // Fire
+  -1,     // Empty
+   15000, // Block
+   3000,     // Sand
+  -1,     // Water
+  -1,     // Ice
+  -1,     // Steam
+  -1      // Fire
 );
 const int TEMPERATURE_COLOR_TO[7] = int[7](
-  -1,    // Empty
-   2000, // Block
-   2000, // Sand
-  -1,    // Water
-  -1,    // Ice
-  -1,    // Steam
-  -1     // Fire
+  -1,     // Empty
+   30000, // Block
+   19000, // Sand
+  -1,     // Water
+  -1,     // Ice
+  -1,     // Steam
+  -1      // Fire
 );
 const float TEMPERATURE_COLOR_FACTOR[7] = float[7](
   -1.0, // Empty
-   0.6, // Block
-   0.2, // Sand
+   // 0.6, // block
+   // 0.2, // sand
+   1.0, // block
+   1.0, // sand
   -1.0, // Water
   -1.0, // Ice
   -1.0, // Steam

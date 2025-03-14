@@ -8,13 +8,13 @@ const int TEMPERATURE_SAND_MELT     = 19000;
 const int TEMPERATURE_MAXIMUM       = 30000;
 
 const int MAX_THERMAL_TRANSFER[7] = int[7](
-  0,  // Empty
-  10, // Block
-  50, // Sand
-  50, // Water
-  0,  // Ice
-  0,  // Steam
-  0   // Fire
+  1000, // Empty
+  1000, // Block
+  1000,  // Sand
+  1000, // Water
+  1000,  // Ice
+  1000, // Steam
+  1000  // Fire
 );
 
 const int DENSITY[7] = int[7](

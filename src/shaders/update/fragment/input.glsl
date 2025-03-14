@@ -16,10 +16,13 @@ Cell spawnCell(ivec2 grid) {
   resetCell(cell);
   cell.type = type;
 
+  cell.temperature = 3000;
+
   if(type == SAND || type == WATER) cell.velocity = DOWN;
   if(type == FIRE || type == STEAM) cell.velocity = UP;
 
-  if(type == SAND) cell.temperature = 0;
+  if(type == BLOCK) cell.temperature = 10000;
+  if(type == ICE)   cell.temperature = 2000;
 
   return cell;
 }

@@ -38,33 +38,50 @@ void transformCellByTemperature(inout Cell cell) {
   int temperature = cell.temperature;
 
   if(type == EMPTY) {
-    // Fire stuff
+    return;
   }
 
-  else if(type == BLOCK) { }
+  if(type == BLOCK) {
+    return;
+  }
 
-  else if(type == SAND) {
+  if(type == SAND) {
     if(temperature >= TEMPERATURE_SAND_MELT) {
-      // Glass
+      return;
     }
   }
 
-  else if(type == WATER) {
+  if(type == WATER) {
     if(temperature <= TEMPERATURE_WATER_FREEZE) {
-      // Ice
+      resetCell(cell);
+      cell.type = ICE;
+      cell.temperature = temperature;
+      cell.velocity = 0;
+      return;
     }
-
-    else if(temperature >= TEMPERATURE_WATER_BOIL) {
-      // Boil
-    }
+    return;
   }
 
-  else if(type == FIRE) { }
-
-  else if(type == STEAM) {
-    if(temperature <= TEMPERATURE_WATER_BOIL) {
-      // Water
+  if(type == ICE) {
+    if(temperature > TEMPERATURE_WATER_FREEZE) {
+      resetCell(cell);
+      cell.type = WATER;
+      cell.temperature = temperature;
+      cell.velocity = GRAVITY;
+      return;
     }
+    return;
+  }
+
+  if(type == STEAM) {
+    if(temperature <= TEMPERATURE_WATER_BOIL) {
+      return;
+    }
+    return;
+  }
+
+  if(type == FIRE) {
+    return;
   }
 }
 

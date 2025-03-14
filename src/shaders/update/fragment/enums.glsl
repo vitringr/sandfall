@@ -11,6 +11,8 @@ const int DOWN  = 2;
 const int RIGHT = 3;
 const int UP    = 4;
 
+const int GRAVITY = DOWN;
+
 const int SPREAD_NONE = 0;
 const int SPREAD_LOW  = 1;
 const int SPREAD_MID  = 2;
