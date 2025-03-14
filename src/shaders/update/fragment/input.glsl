@@ -21,8 +21,5 @@ Cell spawnCell(ivec2 grid) {
 
   if(type == SAND) cell.temperature = 0;
 
-  // TEST
-  if(u_inputKey == 4) cell.temperature = 2000;
-
   return cell;
 }

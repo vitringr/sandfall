@@ -2,8 +2,9 @@ const int EMPTY = 0;
 const int BLOCK = 1;
 const int SAND  = 2;
 const int WATER = 3;
-const int FIRE  = 4;
+const int ICE   = 4;
 const int STEAM = 5;
+const int FIRE  = 6;
 
 const int LEFT  = 1;
 const int DOWN  = 2;

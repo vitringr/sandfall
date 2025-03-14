@@ -1,9 +1,3 @@
-
-
-
-
-// DATA
-
 in vec2 v_coordinates;
 
 layout(location = 0) out ivec4 output0;

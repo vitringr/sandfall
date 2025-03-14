@@ -7,29 +7,32 @@ const int TEMPERATURE_METAL_MELT    = 15000;
 const int TEMPERATURE_SAND_MELT     = 19000;
 const int TEMPERATURE_MAXIMUM       = 30000;
 
-const int MAX_TEMPERATURE_TRANSFER[6] = int[6](
+const int MAX_THERMAL_TRANSFER[7] = int[7](
   0,  // Empty
   10, // Block
   50, // Sand
   50, // Water
-  0,  // Fire
-  0   // Steam
+  0,  // Ice
+  0,  // Steam
+  0   // Fire
 );
 
-const int DENSITY[6] = int[6](
+const int DENSITY[7] = int[7](
   0, // Empty
   5, // Block
   4, // Sand
   3, // Water
-  1, // Fire
-  2  // Steam
+  5, // Ice
+  2, // Steam
+  1  // Fire
 );
 
-const int SPREAD[6] = int[6](
+const int SPREAD[7] = int[7](
   -1,          // Empty
   -1,          // Block
   SPREAD_LOW,  // Sand
   SPREAD_MID,  // Water
-  SPREAD_HIGH, // Fire
-  SPREAD_HIGH  // Steam
+  SPREAD_NONE, // Ice
+  SPREAD_HIGH, // Steam
+  SPREAD_HIGH  // Fire
 );

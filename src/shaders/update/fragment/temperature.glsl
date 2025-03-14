@@ -2,8 +2,8 @@ void diffuseTemperature(inout Cell a, inout Cell b) {
   if (abs(a.temperature - b.temperature) < 2) return;
 
   int rateLimit = min(
-    MAX_TEMPERATURE_TRANSFER[a.type],
-    MAX_TEMPERATURE_TRANSFER[b.type]
+    MAX_THERMAL_TRANSFER[a.type],
+    MAX_THERMAL_TRANSFER[b.type]
   );
 
   if (a.temperature > b.temperature) {

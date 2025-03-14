@@ -17,15 +17,18 @@ int getInteraction(int aType, int bType) {
   }
 
   if(aType == WATER) {
-    if(bType == WATER) return INTERACTION_WATER_AND_WATER;
     return INTERACTION_NONE;
   }
 
-  if(aType == FIRE) {
+  if(aType == ICE) {
     return INTERACTION_NONE;
   }
 
   if(aType == STEAM) {
+    return INTERACTION_NONE;
+  }
+
+  if(aType == FIRE) {
     return INTERACTION_NONE;
   }
 
@@ -54,8 +57,6 @@ void sandAndSand(inout Cell a, inout Cell b) {
   balanceValues(a.state0, b.state0);
 }
 
-void waterAndWater(inout Cell a, inout Cell b) { }
-
 void applyInteraction(inout Cell one, inout Cell two) {
   int interaction = getInteraction(one.type, two.type);
 
@@ -83,11 +84,6 @@ void applyInteraction(inout Cell one, inout Cell two) {
 
   if(interaction == INTERACTION_SAND_AND_SAND) {
     sandAndSand(one, two);
-    return;
-  }
-
-  if(interaction == INTERACTION_WATER_AND_WATER) {
-    waterAndWater(one, two);
     return;
   }
 }
