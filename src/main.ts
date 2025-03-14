@@ -8,7 +8,7 @@ import updateFragmentConfig from "./shaders/update/fragment/config.glsl";
 import updateFragmentData from "./shaders/update/fragment/data.glsl";
 import updateFragmentEnums from "./shaders/update/fragment/enums.glsl";
 import updateFragmentFetch from "./shaders/update/fragment/fetch.glsl";
-import updateFragmentInput from "./shaders/update/fragment/input.glsl";
+import updateFragmentSpawn from "./shaders/update/fragment/spawn.glsl";
 import updateFragmentInteraction from "./shaders/update/fragment/interaction.glsl";
 import updateFragmentLogic from "./shaders/update/fragment/logic.glsl";
 import updateFragmentMain from "./shaders/update/fragment/main.glsl";
@@ -57,7 +57,7 @@ export class Main {
       updateFragmentSwaps +
       updateFragmentTemperature +
       updateFragmentLogic +
-      updateFragmentInput +
+      updateFragmentSpawn +
       updateFragmentOutput;
 
     const updateVS = WebGL.Setup.compileShader(gl, "vertex", updateVertex);
