@@ -23,8 +23,11 @@ const int STEAM = 5;
 const int FIRE  = 6;
 
 const vec3 COLOR_DEBUG = vec3(1.0,  0.0,  1.0);
+
 const vec3 COLOR_EMPTY = vec3(0.1,  0.1,  0.1);
+
 const vec3 COLOR_BLOCK = vec3(0.4,  0.3,  0.2);
+
 const vec3 COLORS_SAND[3] = vec3[3](
   vec3(0.75,  0.65,  0.0),
   vec3(0.70,  0.60,  0.0),
@@ -35,20 +38,29 @@ const vec3 COLORS_WET_SAND[3] = vec3[3](
   vec3(0.29,  0.24,  0.24),
   vec3(0.26,  0.21,  0.21)
 );
+
 const vec3 COLORS_WATER[3] = vec3[3](
   vec3(0.32,  0.76,  1.0),
   vec3(0.29,  0.72,  1.0),
   vec3(0.26,  0.69,  1.0)
 );
-const vec3 COLORS_FIRE[3] = vec3[3](
-  vec3(1.0,  0.9,  0.0),
-  vec3(1.0,  0.6,  0.0),
-  vec3(1.0,  0.2,  0.0)
+
+const vec3 COLORS_ICE[3] = vec3[3](
+  vec3(0.52,  0.96,  1.0),
+  vec3(0.50,  0.94,  1.0),
+  vec3(0.48,  0.92,  1.0)
 );
+
 const vec3 COLORS_STEAM[3] = vec3[3](
   vec3(0.4,  0.4,  0.4),
   vec3(0.5,  0.5,  0.5),
   vec3(0.3,  0.3,  0.3)
+);
+
+const vec3 COLORS_FIRE[3] = vec3[3](
+  vec3(1.0,  0.9,  0.0),
+  vec3(1.0,  0.6,  0.0),
+  vec3(1.0,  0.2,  0.0)
 );
 
 const vec3 TEMPERATURE_COLOR = vec3(1.0, 0.0, 0.0);
@@ -156,12 +168,16 @@ vec3 applyElementColor(vec3 color, Cell cell) {
     return COLORS_WATER[mod3RNG];
   }
 
-  if(cell.type == FIRE)  {
-    return COLORS_FIRE[mod3RNG];
+  if(cell.type == ICE) {
+    return COLORS_ICE[mod3RNG];
   }
 
   if(cell.type == STEAM) {
     return COLORS_STEAM[mod3RNG];
+  }
+
+  if(cell.type == FIRE)  {
+    return COLORS_FIRE[mod3RNG];
   }
 }
 

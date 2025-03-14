@@ -59,6 +59,9 @@ export class Input {
         case "5":
           this.spawnKey = Config.SpawnKeys.NUM_5;
           break;
+        case "6":
+          this.spawnKey = Config.SpawnKeys.NUM_6;
+          break;
         case "r":
           window.location.reload();
           break;

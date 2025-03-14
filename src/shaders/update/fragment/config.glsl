@@ -19,10 +19,10 @@ const int MAX_THERMAL_TRANSFER[7] = int[7](
 
 const int DENSITY[7] = int[7](
   0, // Empty
-  5, // Block
+  9, // Block
   4, // Sand
   3, // Water
-  5, // Ice
+  9, // Ice
   2, // Steam
   1  // Fire
 );
