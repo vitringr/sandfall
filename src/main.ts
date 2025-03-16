@@ -1,4 +1,4 @@
-import { WebGL } from "./utilities/utilities";
+import { Random, WebGL } from "./utilities/utilities";
 import { Generator } from "./generator";
 import { Config } from "./config";
 import { Input } from "./input";
@@ -80,8 +80,10 @@ export class Main {
         uInputTexture1: gl.getUniformLocation(programs.update, "u_inputTexture1"),
         uInputTexture2: gl.getUniformLocation(programs.update, "u_inputTexture2"),
 
+        uPartition: gl.getUniformLocation(programs.update, "u_partition"),
         uIsPointerDown: gl.getUniformLocation(programs.update, "u_isPointerDown"),
         uTime: gl.getUniformLocation(programs.update, "u_time"),
+        uRandom: gl.getUniformLocation(programs.update, "u_random"),
         uInputKey: gl.getUniformLocation(programs.update, "u_inputKey"),
         uMaxSoakedCells: gl.getUniformLocation(programs.update, "u_maxSoakedCells"),
         uSoakPerAbsorb: gl.getUniformLocation(programs.update, "u_soakPerAbsorb"),
@@ -197,6 +199,7 @@ export class Main {
       gl.uniform1i(locations.update.uInputTexture2, 2);
       gl.uniform1i(locations.update.uIsPointerDown, Number(this.input.getIsPointerDown()));
       gl.uniform1i(locations.update.uTime, time);
+      gl.uniform1i(locations.update.uRandom, Random.rangeInt(0, 65000));
       gl.uniform1i(locations.update.uInputKey, this.input.getSpawnKey());
       gl.uniform1i(locations.update.uMaxSoakedCells, Config.maxSoakedCells);
       gl.uniform1i(locations.update.uSoakPerAbsorb, Config.soakPerAbsorb);

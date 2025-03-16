@@ -1,4 +1,9 @@
 bool canSwap(Cell a, Cell b) {
+  if(a.type == b.type) {
+    if(a.type == WATER || a.type == STEAM || a.type == FIRE)
+      return DENSITY[a.type] >= DENSITY[b.type];
+  }
+
   return DENSITY[a.type] > DENSITY[b.type];
 }
 
@@ -21,70 +26,40 @@ void applySwapsToBL(inout Block block) {
   // TODO: should those be if or else-if?
 
   if(block.bl.velocity == LEFT) {
-    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) 
       swapCells(block.bl, block.tl);
-      return;
-    }
-    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
+    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr))
       swapCells(block.bl, block.tr);
-      return;
-    }
-    if(spread >= SPREAD_FULL && canSwap(block.bl, block.br)) {
+    if(spread >= SPREAD_FULL && canSwap(block.bl, block.br))
       swapCells(block.bl, block.br);
-      return;
-    }
-    return;
   }
 
   if(block.bl.velocity == DOWN) {
-    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) 
       swapCells(block.bl, block.br);
-      return;
-    }
-    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) {
+    if(spread >= SPREAD_HIGH && canSwap(block.bl, block.tr)) 
       swapCells(block.bl, block.tr);
-      return;
-    }
-    if(spread >= SPREAD_FULL && canSwap(block.bl, block.tl)) {
+    if(spread >= SPREAD_FULL && canSwap(block.bl, block.tl)) 
       swapCells(block.bl, block.tl);
-      return;
-    }
-    return;
   }
 
   if(block.bl.velocity == RIGHT) {
-    if(canSwap(block.bl, block.br)) {
+    if(canSwap(block.bl, block.br)) 
       swapCells(block.bl, block.br);
-      return;
-    }
-    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
+    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) 
       swapCells(block.bl, block.tr);
-      return;
-    }
-    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.tl)) 
       swapCells(block.bl, block.tl);
-      return;
-    }
-    return;
   }
 
   if(block.bl.velocity == UP) {
-    if(canSwap(block.bl, block.tl)) {
+    if(canSwap(block.bl, block.tl)) 
       swapCells(block.bl, block.tl);
-      return;
-    }
-    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) {
+    if(spread >= SPREAD_LOW && canSwap(block.bl, block.tr)) 
       swapCells(block.bl, block.tr);
-      return;
-    }
-    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) {
+    if(spread >= SPREAD_MID && canSwap(block.bl, block.br)) 
       swapCells(block.bl, block.br);
-      return;
-    }
-    return;
   }
-
-  return;
 }
 
 void applySwapsToIndex(inout Block block, int blockIndex) {

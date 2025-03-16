@@ -1,3 +1,14 @@
+const ivec4 APPLICATION_PATTERNS[4] = ivec4[4] (
+  ivec4(2, 0, 1, 3),
+  ivec4(1, 3, 2, 0),
+  ivec4(0, 1, 3, 2),
+  ivec4(2, 3, 0, 1)
+);
+
+ivec4 getRandomApplicationPattern() {
+  return APPLICATION_PATTERNS[u_random % 4];
+}
+
 void changeBlock(inout Block block) {
   applyBlockTemperatureTransform(block);
 
@@ -19,17 +30,10 @@ void changeBlock(inout Block block) {
   if(block.tl.type <= block.br.type) applyInteraction(block.tl, block.br);
   else                               applyInteraction(block.br, block.tl);
 
-  int modTime = u_time % 4;
-
-  if     (modTime == 0) applyBlockSwaps(block, ivec4(2, 0, 1, 3));
-  else if(modTime == 1) applyBlockSwaps(block, ivec4(1, 3, 2, 0));
-  else if(modTime == 2) applyBlockSwaps(block, ivec4(0, 1, 3, 2));
-  else                  applyBlockSwaps(block, ivec4(2, 3, 0, 1));
-
-  if     (modTime == 0) applyBlockTemperatureDiffusion(block, ivec4(2, 0, 1, 3));
-  else if(modTime == 1) applyBlockTemperatureDiffusion(block, ivec4(1, 3, 2, 0));
-  else if(modTime == 2) applyBlockTemperatureDiffusion(block, ivec4(0, 1, 3, 2));
-  else                  applyBlockTemperatureDiffusion(block, ivec4(2, 3, 0, 1));
+  ivec4 randomApplicationPattern = getRandomApplicationPattern();
+  applyBlockSwaps(block, randomApplicationPattern);
 
   block.bl.isMoved = block.tl.isMoved = block.tr.isMoved = block.br.isMoved = 0;
+
+  applyBlockTemperatureDiffusion(block, randomApplicationPattern);
 }

@@ -34,8 +34,8 @@ const int SPREAD[8] = int[8](
   -1,          // Empty
   -1,          // Block
   SPREAD_LOW,  // Sand
-  SPREAD_MID,  // Water
+  SPREAD_HIGH,  // Water
   SPREAD_NONE, // Ice
-  SPREAD_HIGH, // Steam
-  SPREAD_HIGH  // Fire
+  SPREAD_FULL, // Steam
+  SPREAD_FULL  // Fire
 );

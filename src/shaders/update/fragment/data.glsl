@@ -10,6 +10,7 @@ uniform isampler2D u_inputTexture2;
 
 uniform bool u_isPointerDown;
 uniform int u_time;
+uniform int u_random;
 uniform int u_inputKey;
 uniform int u_maxSoakedCells;
 uniform int u_soakPerAbsorb;
